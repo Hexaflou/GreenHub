@@ -1,2 +1,15 @@
+Pour déployer un programme via la BaseStation sur les deux clients que l'on a :
+(commandes shell à tapper dans le directory du projet Netbeans du code que l'on veut déployer)
+
 ant -DremoteId=0014.4F01.0000.5620 deploy
 ant -DremoteId=0014.4F01.0000.2175 deploy
+
+Lancer le programme :
+
+ant -DremoteId=0014.4F01.0000.5620 run
+ant -DremoteId=0014.4F01.0000.2175 run
+
+
+Astuces :
+
+Les SunSpots plantent souvent. Un appui court sur le bouton (control) provoque un reset (led verte cligne 3 fois très rapidement), mais ce n'est pas toujours suffisant, parfois il faut les arrêter (appui long, la led cligne rouge) et les reseter.

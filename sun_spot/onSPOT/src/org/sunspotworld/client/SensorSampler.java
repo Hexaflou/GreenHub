@@ -30,11 +30,64 @@ import com.sun.spot.io.j2me.radiogram.*;
 import com.sun.spot.resources.Resources;
 import com.sun.spot.resources.transducers.ITriColorLED;
 import com.sun.spot.resources.transducers.ILightSensor;
-import com.sun.spot.sensorboard.peripheral.ITemperatureInput;
+import com.sun.spot.resources.transducers.ITemperatureInput;
 import com.sun.spot.util.Utils;
 import javax.microedition.io.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
+
+/*
+
+
+        
+        while (true) {
+            try {
+
+
+
+                System.out.println("Light value = " + brightness);
+                
+
+                Utils.sleep(SAMPLE_PERIOD - (System.currentTimeMillis() - now));
+            } catch (Exception e) {
+                System.err.println("Caught " + e + " while collecting/sending sensor sample.");
+            }
+        }
+    }
+    
+    protected void pauseApp() {
+        // Commentaire d'origine : This will never be called by the Squawk VM
+    }
+    
+    protected void destroyApp(boolean arg0) throws MIDletStateChangeException {
+        // Commentaire d'origine : Only called if startApp throws any exception other than MIDletStateChangeException
+    }
+}
+*/
+
+/*
+ * SensorSampler.java
+ *
+ * Copyright (c) 2008-2010 Sun Microsystems, Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
 
 /*
  * Application tournant sur le SunSPOT
@@ -43,20 +96,19 @@ import javax.microedition.midlet.MIDletStateChangeException;
 public class SensorSampler extends MIDlet {
 
     private static final int HOST_PORT = 67;
-    private static final int SAMPLE_PERIOD = 2 * 1000;  // 10 secondes, que l'on passe en millisecondes
+    private static final int SAMPLE_PERIOD = 60 * 1000; // 60 secondes, que l'on passe en millisecondes
     
     protected void startApp() throws MIDletStateChangeException {
         RadiogramConnection rCon = null;
         Datagram dg = null;
-        
         String ourAddress = System.getProperty("IEEE_ADDRESS");
-        
+
         // on accède aux ressources matérielles
         ILightSensor lightSensor = (ILightSensor)Resources.lookup(ILightSensor.class);
-        ITemperatureInput tempSensor = (ITemperatureInput) Resources.lookup( ITemperatureInput.class );
+        ITemperatureInput tempSensor = (ITemperatureInput) Resources.lookup(ITemperatureInput.class);
         ITriColorLED led = (ITriColorLED)Resources.lookup(ITriColorLED.class, "LED0");
         
-        System.out.println("Starting sensor sampler application on " + ourAddress + " ...");
+        System.out.println("Starting new sensor sampler (brightness and temperature) application on " + ourAddress + " ...");
 
 	// Commentaire d'origine : Listen for downloads/commands over USB connection
 	new com.sun.spot.service.BootloaderListenerService().getInstance().start();
@@ -77,12 +129,6 @@ public class SensorSampler extends MIDlet {
                 long now = System.currentTimeMillis();
                 int brightness = lightSensor.getValue();
                 double temperature = tempSensor.getCelsius(); // rajouté : température
-                
-                // Commentaire d'origine : Flash an LED to indicate a sampling event
-                led.setRGB(255, 255, 255);
-                led.setOn();
-                Utils.sleep(50);
-                led.setOff();
 
                 // Commentaire d'origine : Package the time and sensor reading into a radio datagram and send it.
                 dg.reset();
@@ -91,9 +137,10 @@ public class SensorSampler extends MIDlet {
                 dg.writeDouble(temperature);
                 rCon.send(dg);
 
-                System.out.println("Light value = " + brightness + "; Temperature = " + temperature);
+                System.out.print("Light value = " + brightness);
+                System.out.println(" - Temperature = " + temperature);
                 
-                // Commentaire d'origine : : Go to sleep to conserve battery
+                // Commentaire d'origine : Go to sleep to conserve battery
                 Utils.sleep(SAMPLE_PERIOD - (System.currentTimeMillis() - now));
             } catch (Exception e) {
                 System.err.println("Caught " + e + " while collecting/sending sensor sample.");

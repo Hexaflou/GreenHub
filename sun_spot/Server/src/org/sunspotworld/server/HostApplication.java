@@ -35,15 +35,12 @@ import javax.microedition.io.*;
 
 
 /**
- * This application is the 'on Desktop' portion of the SendDataDemo. 
- * This host application collects sensor samples sent by the 'on SPOT'
- * portion running on neighboring SPOTs and just prints them out. 
- *   
- * @author: Vipul Gupta
- * modified: Ron Goldman
+ * Application serveur
+ * Ecoute ce que lui envoie les clients SunSpot via radio,
+ * le retransmets via réseau
  */
 public class HostApplication {
-    // Broadcast port on which we listen for sensor samples
+    // Commentaire d'origine : Broadcast port on which we listen for sensor samples
     private static final int HOST_PORT = 67;
         
     private void run() throws Exception {
@@ -52,7 +49,7 @@ public class HostApplication {
         DateFormat fmt = DateFormat.getTimeInstance();
          
         try {
-            // Open up a server-side broadcast radiogram connection
+            // Commentaire d'origine : Open up a server-side broadcast radiogram connection
             // to listen for sensor readings being sent by different SPOTs
             rCon = (RadiogramConnection) Connector.open("radiogram://:" + HOST_PORT);
             dg = rCon.newDatagram(rCon.getMaximumLength());
@@ -61,15 +58,17 @@ public class HostApplication {
              throw e;
         }
 
-        // Main data collection loop
+        // Commentaire d'origine : Main data collection loop
         while (true) {
             try {
-                // Read sensor sample received over the radio
+                // Commentaire d'origine : Read sensor sample received over the radio
                 rCon.receive(dg);
+                
                 String addr = dg.getAddress();  // read sender's Id
                 long time = dg.readLong();      // read time of the reading
                 int val = dg.readInt();         // read the sensor value
-                double val2 = dg.readDouble();
+                double val2 = dg.readDouble();  // rajouté : température
+                
                 System.out.println(fmt.format(new Date(time)) + "  from: " + addr + "   value = " + val + "   value2 = " + val2);
             } catch (Exception e) {
                 System.err.println("Caught " + e +  " while reading sensor samples.");
@@ -78,16 +77,17 @@ public class HostApplication {
         }
     }
     
-    /**
-     * Start up the host application.
+    /*
+     * Lance l'appli
      *
      * @param args any command line arguments
      */
     public static void main(String[] args) throws Exception {
-        // register the application's name with the OTA Command server & start OTA running
-        OTACommandServer.start("SendDataDemo");
+        // Commentaire d'origine : register the application's name with the OTA Command server & start OTA running
+        OTACommandServer.start("Server");
 
         HostApplication app = new HostApplication();
+        
         app.run();
     }
 }

@@ -1,5 +1,7 @@
 /*
  * SendDataDemoHostApplication.java
+ * Modified by Romaric Drigon as 11/01/2012
+ * Based on SendDataDemo by Syn Microsystems, Inc. original Copyright retained
  *
  * Copyright (c) 2008-2009 Sun Microsystems, Inc.
  *
@@ -22,7 +24,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package org.sunspotworld.demo;
+package org.sunspotworld.server;
 
 import com.sun.spot.io.j2me.radiogram.*;
 
@@ -40,7 +42,7 @@ import javax.microedition.io.*;
  * @author: Vipul Gupta
  * modified: Ron Goldman
  */
-public class SendDataDemoHostApplication {
+public class HostApplication {
     // Broadcast port on which we listen for sensor samples
     private static final int HOST_PORT = 67;
         
@@ -67,7 +69,8 @@ public class SendDataDemoHostApplication {
                 String addr = dg.getAddress();  // read sender's Id
                 long time = dg.readLong();      // read time of the reading
                 int val = dg.readInt();         // read the sensor value
-                System.out.println(fmt.format(new Date(time)) + "  from: " + addr + "   value = " + val);
+                double val2 = dg.readDouble();
+                System.out.println(fmt.format(new Date(time)) + "  from: " + addr + "   value = " + val + "   value2 = " + val2);
             } catch (Exception e) {
                 System.err.println("Caught " + e +  " while reading sensor samples.");
                 throw e;
@@ -84,7 +87,7 @@ public class SendDataDemoHostApplication {
         // register the application's name with the OTA Command server & start OTA running
         OTACommandServer.start("SendDataDemo");
 
-        SendDataDemoHostApplication app = new SendDataDemoHostApplication();
+        HostApplication app = new HostApplication();
         app.run();
     }
 }

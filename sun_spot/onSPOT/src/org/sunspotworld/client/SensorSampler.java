@@ -96,7 +96,7 @@ import javax.microedition.midlet.MIDletStateChangeException;
 public class SensorSampler extends MIDlet {
 
     private static final int HOST_PORT = 67;
-    private static final int SAMPLE_PERIOD = 60 * 1000; // 60 secondes, que l'on passe en millisecondes
+    private static final int SAMPLE_PERIOD = 3 * 1000; // 60 secondes, que l'on passe en millisecondes
     
     protected void startApp() throws MIDletStateChangeException {
         RadiogramConnection rCon = null;
@@ -106,7 +106,7 @@ public class SensorSampler extends MIDlet {
         // on accède aux ressources matérielles
         ILightSensor lightSensor = (ILightSensor)Resources.lookup(ILightSensor.class);
         ITemperatureInput tempSensor = (ITemperatureInput) Resources.lookup(ITemperatureInput.class);
-        ITriColorLED led = (ITriColorLED)Resources.lookup(ITriColorLED.class, "LED0");
+        ITriColorLED led = (ITriColorLED)Resources.lookup(ITriColorLED.class, "LED7");
         
         System.out.println("Starting new sensor sampler (brightness and temperature) application on " + ourAddress + " ...");
 

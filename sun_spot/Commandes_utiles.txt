@@ -1,0 +1,2 @@
+ant -DremoteId=0014.4F01.0000.5620 deploy
+ant -DremoteId=0014.4F01.0000.2175 deploy

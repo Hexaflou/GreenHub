@@ -37,66 +37,13 @@ import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
 /*
-
-
-        
-        while (true) {
-            try {
-
-
-
-                System.out.println("Light value = " + brightness);
-                
-
-                Utils.sleep(SAMPLE_PERIOD - (System.currentTimeMillis() - now));
-            } catch (Exception e) {
-                System.err.println("Caught " + e + " while collecting/sending sensor sample.");
-            }
-        }
-    }
-    
-    protected void pauseApp() {
-        // Commentaire d'origine : This will never be called by the Squawk VM
-    }
-    
-    protected void destroyApp(boolean arg0) throws MIDletStateChangeException {
-        // Commentaire d'origine : Only called if startApp throws any exception other than MIDletStateChangeException
-    }
-}
-*/
-
-/*
- * SensorSampler.java
- *
- * Copyright (c) 2008-2010 Sun Microsystems, Inc.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
-
-/*
  * Application tournant sur le SunSPOT
  * Retourne toutes les 10 secondes la luminosité ambiante et la température
  */
 public class SensorSampler extends MIDlet {
 
     private static final int HOST_PORT = 67;
-    private static final int SAMPLE_PERIOD = 3 * 1000; // 60 secondes, que l'on passe en millisecondes
+    private static final int SAMPLE_PERIOD = 10 * 1000; // 60 secondes, que l'on passe en millisecondes
     
     protected void startApp() throws MIDletStateChangeException {
         RadiogramConnection rCon = null;

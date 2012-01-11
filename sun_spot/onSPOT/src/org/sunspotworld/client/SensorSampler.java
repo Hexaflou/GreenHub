@@ -129,6 +129,12 @@ public class SensorSampler extends MIDlet {
                 long now = System.currentTimeMillis();
                 int brightness = lightSensor.getValue();
                 double temperature = tempSensor.getCelsius(); // rajouté : température
+                
+                // Commentaire d'origine : Flash an LED to indicate a sampling event
+                led.setRGB(255, 255, 255);
+                led.setOn();
+                Utils.sleep(50);
+                led.setOff();
 
                 // Commentaire d'origine : Package the time and sensor reading into a radio datagram and send it.
                 dg.reset();

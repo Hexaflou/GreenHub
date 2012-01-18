@@ -53,3 +53,14 @@ class Score(models.Model):
         Retourne une représentation de debug du score.
         """
         return "<Score: user=%s value=%s date=%s>" % (self.user, self.value, self.date)
+
+class Message(models.Model):
+    user = models.ForeignKey(User)
+
+    code = models.CharField('Code', max_length=30)
+    data = models.CharField('Données', max_length=1000, blank=True)
+
+    emitted_at = models.DateTimeField('Date de création', auto_now_add=True)
+
+    def __unicode__(self):
+        return u"%s : %s" % (self.user, self.code)

@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.template import loader
 from django.template.context import Context
-from greenhub.models import Sensor, Score
+from greenhub.models import Sensor, Score, Message
 
 def index(request):
     t = loader.get_template('index.html')
@@ -16,6 +16,13 @@ def home(request):
 
     last_score = Score.objects.filter(user=request.user).order_by('date').reverse()[0]
     sensors = Sensor.objects.filter(user=request.user).all()
+    messages = Message.objects.filter(user=request.user).order_by('emitted_at').reverse().all()
+    scores = Score.objects.filter(user=request.user).order_by('date').reverse().all()
 
-    c = Context({'login_name': request.user.first_name, 'sensors': sensors, 'last_score': last_score})
+    c = Context({
+        'login_name': request.user.first_name,
+        'sensors': sensors,
+        'messages': messages,
+        'last_score': last_score,
+        'scores': scores})
     return HttpResponse(t.render(c))

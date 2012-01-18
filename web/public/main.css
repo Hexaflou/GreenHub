@@ -82,7 +82,9 @@ section h3 {
 .messages { padding: 0; }
 .messages li {
     list-style: none;
-    padding: 10px 5px;
+    padding: 10px 5px 5px;
+    border-bottom: 1px dotted rgba(0,0,0,0.4);
+    font-size: 9pt;
 }
 .messages li em a {
     display: block;
@@ -93,6 +95,14 @@ section h3 {
     text-align: right;
     margin-left: 20px;
     font-size: 9pt;
+}
+.messages li time {
+     display: block;
+     text-align: right;
+     font-size: 10pt;
+     font-style: italic;
+     color: rgb(117, 153, 113);
+     color: rgba(0,0,0,0.4);
 }
 h1 {
     float: left;
@@ -111,3 +121,12 @@ h1 a:link {
 }
 h1 span { display: none; }
 
+.list-score, .list-score td, .list-score th {
+    border: 1px solid #078048;
+    border-collapse: collapse;
+    padding: 3px 5px;
+}
+.list-score th {
+    background-color: #078048;
+    color: white;
+}

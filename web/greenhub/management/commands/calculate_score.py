@@ -1,7 +1,7 @@
 import datetime
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
-from greenhub.models import Score
+from greenhub.models import Score, Message
 from greenhub import rules
 
 MALUS = 5
@@ -24,8 +24,10 @@ class Command(BaseCommand):
             except IndexError:
                 previous = score_value = 0
 
-            for is_rule_transgressed in rules.all_rules:
-                if is_rule_transgressed(user):
+            for rule in rules.all_rules:
+                if rule(user):
+                    msg = Message(user=user, code=rule.code)
+                    msg.save()
                     score_value -= MALUS
 
             if datetime.datetime.now().hour == REFUND_HOUR:

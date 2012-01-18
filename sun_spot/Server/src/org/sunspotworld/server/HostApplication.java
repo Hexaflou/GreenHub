@@ -29,8 +29,11 @@ package org.sunspotworld.server;
 import com.sun.spot.io.j2me.radiogram.*;
 
 import com.sun.spot.peripheral.ota.OTACommandServer;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Arrays;
 import javax.microedition.io.*;
 
 
@@ -60,6 +63,8 @@ public class HostApplication {
         
         try {
             // Ouvre un socket Unix sur lequel on va renvoyer nos messages
+            // port 1337
+            DatagramSocket serverSocket = new DatagramSocket(1337);
         } catch (Exception e) {
              System.err.println("Erreur lors de la création du socket Unix : " + e.getMessage());
              throw e; // arrête le programme
@@ -82,12 +87,22 @@ public class HostApplication {
                 /*dg.writeUTF("LED");
                 rCon.send(dg);*/
                 
-                // prépare le datagramme à envoyer
-                // 4 premiers octets : A55A
-                // 2 octets pour la taille
-                // 2 pour le type (réservés, 5, 6, 7)
+                // On va renvoyer les données sur un socket.
+                // on commence par préparer le message
+                         
+                // données
+                String contentData = address + String.valueOf(time) + String.valueOf(brightness) + String.valueOf(temperature);
+                                
+                // on construit le message, rajoute l'entête
+                    // 4 premiers octets : A55A
+                    // 2 octets pour la taille (de tout ce qu'il y a après)
+                    // 2 pour le type (réservés, 5, 6, 7) - on choisir abitrairement 3, met un zéro devant
+                String messageData = "A55A" + (contentData.length()+2) + "03" + contentData;
+                
+                // maintenant on renvoie tout ceci vers notre socket
+                DatagramPacket sendPacket = new DatagramPacket(messageData.getBytes(), messageData.getBytes().length);
             } catch (Exception e) {
-                System.err.println("Caught " + e +  " while reading sensor samples.");
+                System.err.println("Erreur lors de la lecture des capteurs : " + e);
                 throw e;
             }
         }

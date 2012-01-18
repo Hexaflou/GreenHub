@@ -29,8 +29,12 @@ package org.sunspotworld.server;
 import com.sun.spot.io.j2me.radiogram.*;
 
 import com.sun.spot.peripheral.ota.OTACommandServer;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Arrays;
 import javax.microedition.io.*;
 
 
@@ -44,9 +48,12 @@ public class HostApplication {
     private static final int HOST_PORT = 67;
         
     private void run() throws Exception {
+        // il nous faut tout déclarer ici que les variables soient accessibles
         RadiogramConnection rCon;
         Datagram dg;
         DateFormat fmt = DateFormat.getTimeInstance();
+        DatagramSocket serverSocket;
+        InetAddress IPAddress = InetAddress.getByName("localhost");
          
         try {
             // Commentaire d'origine : Open up a server-side broadcast radiogram connection
@@ -54,8 +61,17 @@ public class HostApplication {
             rCon = (RadiogramConnection) Connector.open("radiogram://:" + HOST_PORT);
             dg = rCon.newDatagram(rCon.getMaximumLength());
         } catch (Exception e) {
-             System.err.println("setUp caught " + e.getMessage());
-             throw e;
+             System.err.println("Erreur lors de la création du serveur SunSPOT BaseStation : " + e.getMessage());
+             throw e; // arrête le programme
+        }
+        
+        try {
+            // Ouvre un socket Unix sur lequel on va renvoyer nos messages
+            // port 1337
+            serverSocket = new DatagramSocket();
+        } catch (Exception e) {
+             System.err.println("Erreur lors de la création du socket Unix : " + e.getMessage());
+             throw e; // arrête le programme
         }
 
         // Commentaire d'origine : Main data collection loop
@@ -64,14 +80,34 @@ public class HostApplication {
                 // Commentaire d'origine : Read sensor sample received over the radio
                 rCon.receive(dg);
                 
-                String addr = dg.getAddress();  // read sender's Id
-                long time = dg.readLong();      // read time of the reading
-                int val = dg.readInt();         // read the sensor value
-                double val2 = dg.readDouble();  // rajouté : température
+                String address = dg.getAddress();       // read sender's Id
+                long time = dg.readLong();              // read time of the reading
+                int brightness = dg.readInt();          // read the brightness sensor value
+                double temperature = dg.readDouble();   // rajouté : température
                 
-                System.out.println(fmt.format(new Date(time)) + "  from: " + addr + "   value = " + val + "   value2 = " + val2);
+                System.out.println(fmt.format(new Date(time)) + " from: " + address + " brightness: " + brightness + " temperature: " + temperature);
+                
+                // envoi une commande pour allumer la LED
+                /*dg.writeUTF("LED");
+                rCon.send(dg);*/
+                
+                // On va renvoyer les données sur un socket.
+                // on commence par préparer le message
+                         
+                // données
+                String contentData = address + String.valueOf(time) + String.valueOf(brightness) + String.valueOf(temperature);
+                                
+                // on construit le message, rajoute l'entête
+                    // 4 premiers octets : A55A
+                    // 2 octets pour la taille (de tout ce qu'il y a après)
+                    // 2 pour le type (réservés, 5, 6, 7) - on choisir abitrairement 3, met un zéro devant
+                String messageData = "A55A" + (contentData.length()+2) + "03" + contentData;
+                
+                // maintenant on renvoie tout ceci vers notre socket
+                DatagramPacket sendPacket = new DatagramPacket(messageData.getBytes(), messageData.getBytes().length, IPAddress, 1337);
+                serverSocket.send(sendPacket);
             } catch (Exception e) {
-                System.err.println("Caught " + e +  " while reading sensor samples.");
+                System.err.println("Erreur lors de la lecture des capteurs : " + e);
                 throw e;
             }
         }

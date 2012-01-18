@@ -19,7 +19,7 @@ int try(struct ctx_s *pctx, func_t *f, void * args)
 		 "movl %%ebp, %3;" "\n\t"
 		: "=r"(pctx->ebx),"=r"(pctx->esi),"=r"(pctx->edi),
 		  "=r"(pctx->ebp),"=r"(pctx->PC),
-		  "=r"(pctx->SP) /* variables de sortie */
+		  "=r"(pctx->esp) /* variables de sortie */
 		: /* pas de variables d'entrée*/
 		: );
 	
@@ -31,22 +31,20 @@ int try(struct ctx_s *pctx, func_t *f, void * args)
 
 void throw(struct ctx_s *pctx, int r)
 {
-	asm("movl %0, %%eax;" "\n\t"/* Second argument is return value.  */
-		/* Save the return address now.  */
-		"movl %5, %%ecx;" "\n\t"
-		/* Restore registers.  */
-		"movl %1, %%ebx;" "\n\t"
-		"movl %2, %%esi;" "\n\t"
-		"movl %3, %%edi;" "\n\t"
-		"movl %4, %%ebp;" "\n\t"
-		"movl %6, %%esp;" "\n\t"
-		/* Jump to saved PC.  */
-		"jmp *%%ecx;"
+	asm ("movl %0, %%eax;" "\n\t"/* sauvegarde de la variable de retour*/
+		"movl %1, %%ecx;" "\n\t"/* pointer vers le struct de contexte*/
+		/* sauvegarde de l'adresse de retour */
+		"movl ("CTX_PC"*4)(%%ecx), %%edx;" "\n\t"
+		/* Restore registers. */
+		"movl ("CTX_BX"*4)(%%ecx), %%ebx;" "\n\t"
+		"movl ("CTX_SI"*4)(%%ecx), %%esi;" "\n\t"
+		"movl ("CTX_DI"*4)(%%ecx), %%edi;" "\n\t"
+		"movl ("CTX_BP"*4)(%%ecx), %%ebp;" "\n\t"
+		"movl ("CTX_SP"*4)(%%ecx), %%esp;" "\n\t"
+		"jmpl *%%edx;"
 		:
-		: "r"(r),"r"(pctx->ebx),"r"(pctx->esi),
-		  "r"(pctx->edi),"r"(pctx->ebp),"r"(pctx->PC),
-		  "r"(pctx->SP) /* variables d'entree */
-		: );
+		: "r"(r),"r"(pctx)/* variables d'entree */
+		: "%eax","%ecx","%edx");
 }
 
 

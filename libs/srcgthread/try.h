@@ -19,11 +19,19 @@ struct ctx_s
 	long int   edi;
 	long int * esp;/* esp */	
 	long int * ebp;/*for setjump, caller frame pointer*/
-	long int * SP;
 	long int * PC;/* next instruction to execute*/
 
 	int retValue;
 };
+
+/* for correct use in asm code*/
+# define CTX_BX    "0"
+# define CTX_SI    "1"
+# define CTX_DI    "2"
+# define CTX_SP    "3"
+# define CTX_BP    "4"
+# define CTX_PC    "5"
+# define CTX_SIZE 26
 
 
 int try(struct ctx_s *pctx, func_t *f, void * args);

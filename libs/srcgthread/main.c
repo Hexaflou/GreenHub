@@ -19,8 +19,9 @@ void test(void * i)
 	}
 	else
 	{
-		printf("un trow\n");
+		printf("un throw\n");
 		throw(&pctx,* (int *)i);
+		printf("le throw a pas marche\n");
 	}
 }
 

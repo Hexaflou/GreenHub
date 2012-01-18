@@ -31,6 +31,7 @@ import com.sun.spot.io.j2me.radiogram.*;
 import com.sun.spot.peripheral.ota.OTACommandServer;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Arrays;
@@ -47,9 +48,12 @@ public class HostApplication {
     private static final int HOST_PORT = 67;
         
     private void run() throws Exception {
+        // il nous faut tout déclarer ici que les variables soient accessibles
         RadiogramConnection rCon;
         Datagram dg;
         DateFormat fmt = DateFormat.getTimeInstance();
+        DatagramSocket serverSocket;
+        InetAddress IPAddress = InetAddress.getByName("localhost");
          
         try {
             // Commentaire d'origine : Open up a server-side broadcast radiogram connection
@@ -64,7 +68,7 @@ public class HostApplication {
         try {
             // Ouvre un socket Unix sur lequel on va renvoyer nos messages
             // port 1337
-            DatagramSocket serverSocket = new DatagramSocket(1337);
+            serverSocket = new DatagramSocket();
         } catch (Exception e) {
              System.err.println("Erreur lors de la création du socket Unix : " + e.getMessage());
              throw e; // arrête le programme
@@ -100,7 +104,8 @@ public class HostApplication {
                 String messageData = "A55A" + (contentData.length()+2) + "03" + contentData;
                 
                 // maintenant on renvoie tout ceci vers notre socket
-                DatagramPacket sendPacket = new DatagramPacket(messageData.getBytes(), messageData.getBytes().length);
+                DatagramPacket sendPacket = new DatagramPacket(messageData.getBytes(), messageData.getBytes().length, IPAddress, 1337);
+                serverSocket.send(sendPacket);
             } catch (Exception e) {
                 System.err.println("Erreur lors de la lecture des capteurs : " + e);
                 throw e;

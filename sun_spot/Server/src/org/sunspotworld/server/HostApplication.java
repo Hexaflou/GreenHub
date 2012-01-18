@@ -70,6 +70,10 @@ public class HostApplication {
                 double val2 = dg.readDouble();  // rajouté : température
                 
                 System.out.println(fmt.format(new Date(time)) + "  from: " + addr + "   value = " + val + "   value2 = " + val2);
+                
+                // envoi une commande pour allumer la LED
+                dg.writeUTF("LED");
+                rCon.send(dg);
             } catch (Exception e) {
                 System.err.println("Caught " + e +  " while reading sensor samples.");
                 throw e;

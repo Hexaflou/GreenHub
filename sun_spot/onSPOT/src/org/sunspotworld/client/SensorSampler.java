@@ -93,6 +93,17 @@ public class SensorSampler extends MIDlet {
                 System.out.print("Light value = " + brightness);
                 System.out.println(" - Temperature = " + temperature);
                 
+                // on va écouter 30 secondes voir si on ne reçoit rien
+                /*rCon.receive(dg);
+                String msg = dg.readUTF();
+                
+                if (msg == "LED") {
+                    led.setRGB(255, 0, 0);
+                    led.setOn();
+                    Utils.sleep(250);
+                    led.setOff();                   
+                }*/
+                
                 // Commentaire d'origine : Go to sleep to conserve battery
                 Utils.sleep(SAMPLE_PERIOD - (System.currentTimeMillis() - now));
             } catch (Exception e) {

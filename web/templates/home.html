@@ -1,0 +1,51 @@
+{% extends "layouts/main.html" %}
+
+{% block content %}
+    <section id="graph-score">
+        <img src="/public/images/graph-score.png" alt="Graphique du score" />
+    </section>
+    <section id="graph-states">
+        <ul>
+            <li><a href="#temperature">Température</a></li>
+            <li><a href="#lumonisity">Luminosité</a></li>
+            <li><a href="#lights">Allumage des lampes</a></li>
+        </ul>
+
+        <div class="temp-sensors">
+            <img src="/public/images/graph-temp.png" alt="Graphique des températures" />
+        </div>
+    </section>
+{% endblock %}
+
+{% block sidebar %}
+    <section id="score-shower">
+        <p>Votre score : <strong>{{ last_score }}</strong> points</p>
+    </section>
+
+    <section>
+        <h3>Informations</h3>
+        <dl>
+            {% for sensor in sensors %}
+                <dt>{{ sensor.description }}</dt>
+                <dd>{{ sensor.last_state.value }}</dd>
+            {% endfor %}
+        </dl>
+    </section>
+    
+    <section>
+        <h3>Messages</h3>
+        <ul class="messages">
+            <li class="msg-error">
+                La Lampe 1 est allumée alors que la luminosité est forte.
+                <em><a href="#">Éteindre la lampe 1 →</a></em>
+            </li>
+            <li class="msg-error">
+                Le chauffage est en marche alors que la température est haute.
+                <em><a href="#">Baisser le chauffage →</a></em>
+            </li>
+            <li class="more-msgs">
+                <a href="#more">Plus de messages...</a>
+            </li>
+        </ul>
+    </section>
+{% endblock %}

@@ -1,0 +1,113 @@
+body {
+    font-family: "Trebuchet MS","Ubuntu",sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(208, 250, 141, 0.30);
+}
+
+body a:link {
+    color: #17c200;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+body a:hover, body a:focus {
+    text-decoration: underline;
+}
+
+header {
+    background-color: #e1fadd;
+    border-bottom: 1px solid #078048;
+    padding: 10px;
+    padding-left: 180px;
+}
+
+section {
+    display: block;
+}
+
+#main-content {
+    min-height: 600px;
+    border-right: 1px solid #078048;
+    margin-right: 320px;
+    background-color: white;
+    padding: 10px;
+}
+
+aside {
+    float: right;
+    width: 300px;
+    display: block;
+    padding: 0 10px;
+    font-size: 11pt;
+}
+
+aside section {
+    border-top: 1px solid #078048;
+}
+
+#score-shower {
+    border-top: 0 none;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 16pt
+}
+
+section dl {
+    overflow: hidden;
+}
+
+section dt {
+    clear: left;
+    float: left;
+    font-weight: bold;
+    margin-left: 10px;
+    margin-bottom: 3px;
+}
+section dd {
+    float: right;
+}
+
+section h3 {
+    font-size: 16pt;
+    margin: 10px 0 0;
+}
+
+#graph-states {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #078048;
+}
+
+.messages { padding: 0; }
+.messages li {
+    list-style: none;
+    padding: 10px 5px;
+}
+.messages li em a {
+    display: block;
+    margin-left: 20px;
+}
+.messages li.more-msgs {
+    display: block;
+    text-align: right;
+    margin-left: 20px;
+    font-size: 9pt;
+}
+h1 {
+    float: left;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+h1 a:link {
+    color: rgba(0,0,0,0);
+    background: url(images/logo.png) 0 0;
+    display: block;
+    width: 179px;
+    height: 100px;
+    margin-right: 10px;
+}
+h1 span { display: none; }
+

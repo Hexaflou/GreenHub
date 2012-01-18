@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <link href="/public/main.css" rel="stylesheet" media="screen" />
+
+    <title>GreenHub - Bienvenue</title>
+</head>
+<body>
+<header>
+    <h1><a href="/home"><span>GreenHub</span></a></h1>
+    <h2>Bonjour, {{ login_name }} !</h2>
+</header>
+<aside>
+    {% block sidebar %}{% endblock %}
+</aside>
+<section id="main-content">
+    {% block content %}{% endblock %}
+</section>
+</body>
+</html>

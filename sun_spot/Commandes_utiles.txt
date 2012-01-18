@@ -9,9 +9,17 @@ Lancer le programme :
 ant -DremoteId=0014.4F01.0000.5620 run
 ant -DremoteId=0014.4F01.0000.2175 run
 
+(le programme CLI ne se quitte pas, il affiche les éventuels messages, faire Ctrl+C, l'appui continuera à tourner sur les spots)
+
 Pour faire tourner un programme sur la BasteStation connectée en USB :
 ant host-run
 
 Astuces :
 
 Les SunSpots plantent souvent. Un appui court sur le bouton (control) provoque un reset (led verte cligne 3 fois très rapidement), mais ce n'est pas toujours suffisant, parfois il faut les arrêter (appui long, la led cligne rouge) et les reseter.
+
+Resetter, réessayer, parfois les deploy se passent mieux avec un seul SunSPOT !
+
+Clé publique :
+
+Chaque SDK a sa clef publique, si les SunSPOTS sont utilisés avec un autre SDK alors il faut les connecter en USB, et faire 'and setpublickey'

@@ -1,0 +1,3 @@
+Mesure de la luminosité avec le capot semi-opaque en place
+
+Température en °C

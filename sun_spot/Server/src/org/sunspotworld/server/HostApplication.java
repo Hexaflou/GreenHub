@@ -54,8 +54,15 @@ public class HostApplication {
             rCon = (RadiogramConnection) Connector.open("radiogram://:" + HOST_PORT);
             dg = rCon.newDatagram(rCon.getMaximumLength());
         } catch (Exception e) {
-             System.err.println("setUp caught " + e.getMessage());
-             throw e;
+             System.err.println("Erreur lors de la création du serveur SunSPOT BaseStation : " + e.getMessage());
+             throw e; // arrête le programme
+        }
+        
+        try {
+            // Ouvre un socket Unix sur lequel on va renvoyer nos messages
+        } catch (Exception e) {
+             System.err.println("Erreur lors de la création du socket Unix : " + e.getMessage());
+             throw e; // arrête le programme
         }
 
         // Commentaire d'origine : Main data collection loop
@@ -64,16 +71,21 @@ public class HostApplication {
                 // Commentaire d'origine : Read sensor sample received over the radio
                 rCon.receive(dg);
                 
-                String addr = dg.getAddress();  // read sender's Id
-                long time = dg.readLong();      // read time of the reading
-                int val = dg.readInt();         // read the sensor value
-                double val2 = dg.readDouble();  // rajouté : température
+                String address = dg.getAddress();       // read sender's Id
+                long time = dg.readLong();              // read time of the reading
+                int brightness = dg.readInt();          // read the brightness sensor value
+                double temperature = dg.readDouble();   // rajouté : température
                 
-                System.out.println(fmt.format(new Date(time)) + "  from: " + addr + "   value = " + val + "   value2 = " + val2);
+                System.out.println(fmt.format(new Date(time)) + " from: " + address + " brightness: " + brightness + " temperature: " + temperature);
                 
                 // envoi une commande pour allumer la LED
-                dg.writeUTF("LED");
-                rCon.send(dg);
+                /*dg.writeUTF("LED");
+                rCon.send(dg);*/
+                
+                // prépare le datagramme à envoyer
+                // 4 premiers octets : A55A
+                // 2 octets pour la taille
+                // 2 pour le type (réservés, 5, 6, 7)
             } catch (Exception e) {
                 System.err.println("Caught " + e +  " while reading sensor samples.");
                 throw e;

@@ -9,6 +9,8 @@ Lancer le programme :
 ant -DremoteId=0014.4F01.0000.5620 run
 ant -DremoteId=0014.4F01.0000.2175 run
 
+(le programme CLI ne se quitte pas, il affiche les éventuels messages, faire Ctrl+C, l'appui continuera à tourner sur les spots)
+
 Pour faire tourner un programme sur la BasteStation connectée en USB :
 ant host-run
 

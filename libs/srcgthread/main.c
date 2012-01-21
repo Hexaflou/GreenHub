@@ -13,14 +13,15 @@ static struct ctx_s pctx;
 
 void test(void * i)
 {
-	if(* (int *)i==0)
+	int g = * (int *)i;
+	if(g==0)
 	{
 		printf("Pas de throw\n");
 	}
 	else
 	{
 		printf("un throw\n");
-		throw(&pctx,* (int *)i);
+		throw(&pctx,g);
 		printf("le throw a pas marche\n");
 	}
 }
@@ -28,7 +29,8 @@ void test(void * i)
 int main()
 {
 	int i = 0;
-	
+	pctx.ebp=0;
+	pctx.esp=0;
 	
 	scanf("%d",&i);
 	printf("Tu as rentre %d\n", try(&pctx,test,(void*)&i));

@@ -5,24 +5,13 @@
 
 int try(struct ctx_s *pctx, func_t *f, void * args)
 {
-	asm (/* Save registers. */
-		 "movl %%ebx, %0;" "\n\t"
-		 "movl %%esi, %1;" "\n\t"
-		 "movl %%edi, %2;" "\n\t"
-		 /* Save SP as it will be after we return. */
-		 "leal 4 (%%esp), %%ecx;" "\n\t"
-		 "movl %%ecx, %5;" "\n\t"
-		 /* Save PC we are returning to now. */
-		 "movl 0 (%%esp), %%ecx;" "\n\t"
-		 "movl %%ecx, %4;" "\n\t"
-		 /* Save caller's frame pointer. */
-		 "movl %%ebp, %3;" "\n\t"
-		: "=r"(pctx->ebx),"=r"(pctx->esi),"=r"(pctx->edi),
-		  "=r"(pctx->ebp),"=r"(pctx->PC),
-		  "=r"(pctx->esp) /* variables de sortie */
+	asm ("movl %%esp, %0;" "\n\t"
+		 "movl %%ebp, %1;" "\n\t"
+		: "=r"(pctx->esp),"=r"(pctx->ebp) /* variables de sortie */
 		: /* pas de variables d'entrée*/
 		: );
 	
+	/*printf("esp : %ld ebp : %ld\n",(long int)pctx->esp,(long int)pctx->ebp);*/
 	f(args);
 	
 	return 0;
@@ -31,20 +20,63 @@ int try(struct ctx_s *pctx, func_t *f, void * args)
 
 void throw(struct ctx_s *pctx, int r)
 {
-	asm ("movl %0, %%eax;" "\n\t"/* sauvegarde de la variable de retour*/
-		"movl %1, %%ecx;" "\n\t"/* pointer vers le struct de contexte*/
-		/* sauvegarde de l'adresse de retour */
-		"movl ("CTX_PC"*4)(%%ecx), %%edx;" "\n\t"
-		/* Restore registers. */
-		"movl ("CTX_BX"*4)(%%ecx), %%ebx;" "\n\t"
-		"movl ("CTX_SI"*4)(%%ecx), %%esi;" "\n\t"
-		"movl ("CTX_DI"*4)(%%ecx), %%edi;" "\n\t"
-		"movl ("CTX_BP"*4)(%%ecx), %%ebp;" "\n\t"
-		"movl ("CTX_SP"*4)(%%ecx), %%esp;" "\n\t"
-		"jmpl *%%edx;"
+	asm ("movl %0,%%esp ;" "\n\t"
+		 "movl %1,%%ebp ;" "\n\t"
+		 "movl %2,%%eax ;" "\n\t"
+		 "leave ;" "\n\t"
+		 "ret ;""\n\t"
 		:
-		: "r"(r),"r"(pctx)/* variables d'entree */
-		: "%eax","%ecx","%edx");
+		: "r"(pctx->esp),"r"(pctx->ebp),"r"(r)/* variables d'entree */
+		: "%eax");
+		
 }
 
 
+
+
+
+
+
+
+
+
+
+#ifdef sav
+
+int try(struct ctx_s *pctx, func_t *f, void * args)
+{
+	asm ("movl %%esp, %0;" "\n\t"
+		 "movl %%ebp, %1;" "\n\t"
+		 "movl %%ebx, %2;" "\n\t"
+		 "movl %%esi, %3;" "\n\t"
+		 "movl %%edi, %4;" "\n\t"
+		: "=r"(pctx->esp),"=r"(pctx->ebp),"=r"(pctx->ebx),
+			"=r"(pctx->esi),"=r"(pctx->edi) /* variables de sortie */
+		: /* pas de variables d'entrée*/
+		: );
+	
+	printf("esp : %ld ebp : %ld\n",(long int)pctx->esp,(long int)pctx->ebp);
+	f(args);
+	
+	return 0;
+}
+
+
+int throw(struct ctx_s *pctx, int r)
+{
+	ret = r;
+	asm ("movl %0,%%esp ;" "\n\t"
+		 "movl %1,%%ebp ;" "\n\t"
+		 "movl %2,%%ebx ;" "\n\t"
+		 "movl %3,%%esi ;" "\n\t"
+		 "movl %4,%%edi ;" "\n\t"
+		:
+		: "r"(pctx->esp),"r"(pctx->ebp),"r"(pctx->ebx),
+			"r"(pctx->esi),"r"(pctx->edi)/* variables d'entree */
+		: );
+	
+		printf("2 esp : %ld ebp : %ld\n",(long int)pctx->esp,(long int)pctx->ebp);
+		return ret;
+}
+
+#endif

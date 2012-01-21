@@ -4,47 +4,54 @@
 #include <assert.h>
 #include <unistd.h>
 
-#include "try.h"
+#include "gThread.h"
 
 #define RETURN_SUCCESS 0
 #define RETURN_FAILURE 1
 
-static struct ctx_s pctx;
+struct ctx_s ctx_ping;
+struct ctx_s ctx_pong;
+struct ctx_s ctx_paf;
 
-void test(void * i)
+void f_ping(void *arg);
+void f_pong(void *arg);
+void f_paf(void *arg);
+
+int main(int argc, char *argv[])
 {
-	int g = * (int *)i;
-	if(g==0)
-	{
-		printf("Pas de throw\n");
-	}
-	else
-	{
-		printf("un throw\n");
-		throw(&pctx,g);
-		printf("le throw a pas marche\n");
+	init_ctx(&ctx_ping, 16384, f_ping, NULL);
+	init_ctx(&ctx_pong, 16384, f_pong, NULL);
+	init_ctx(&ctx_paf, 16384, f_paf, NULL);
+	switch_to_ctx(&ctx_ping);
+	exit(EXIT_SUCCESS);
+}
+
+void f_ping(void *args)
+{
+	while(1) {
+		printf("A\n") ;
+		switch_to_ctx(&ctx_pong);
+		printf("B\n") ;
+		switch_to_ctx(&ctx_pong);
+		printf("C\n") ;
+		switch_to_ctx(&ctx_pong);
 	}
 }
 
-int main()
+void f_pong(void *args)
 {
-	int i = 0;
-	pctx.ebp=0;
-	pctx.esp=0;
-	
-	scanf("%d",&i);
-	printf("Tu as rentre %d\n", try(&pctx,test,(void*)&i));
-	
-	return 0;
+	while(1) {
+		printf("1\n") ;
+		switch_to_ctx(&ctx_paf);
+		printf("2\n") ;
+		switch_to_ctx(&ctx_paf);
+	}
 }
 
-
-/*int
-main(int argc, char *argv[])
+void f_paf(void *args)
 {
-    create_ctx(16384, f_pong, NULL);
-    create_ctx(16384, f_ping, NULL);
-    start_sched();
-    exit(EXIT_SUCCESS);
-}*/
-
+	while(1) {
+		printf("*\n") ;
+		switch_to_ctx(&ctx_ping);
+	}
+}

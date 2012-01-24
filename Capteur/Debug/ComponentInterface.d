@@ -1,5 +1,5 @@
-ComponentInterface.d: ../ComponentInterface.c ../ComponentInterface.h \
- ../Utility.h ../memoryGHome.h ../Component.h
+ComponentInterface.d ComponentInterface.o: ../ComponentInterface.c \
+  ../ComponentInterface.h ../Utility.h ../memoryGHome.h ../Component.h
 
 ../ComponentInterface.h:
 

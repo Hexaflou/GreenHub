@@ -1,4 +1,4 @@
-Component.d: ../Component.c ../Component.h ../Utility.h
+Component.d Component.o: ../Component.c ../Component.h ../Utility.h
 
 ../Component.h:
 

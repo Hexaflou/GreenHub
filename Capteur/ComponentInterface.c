@@ -115,8 +115,9 @@ void ManageMessage(char* message){
 	org = atoi(str_sub(message, 0,1));	// Extract from the message the type of sensor
 	teachIn = atoi(str_sub(message, 8, 9));	// Extract from the message the characters indicating the teach-in message
 
+	// Search of the sensor in the sensors' list
 	while (currentSensor != NULL){
-		if ( strcmp(currentSensor->id,str_sub(message,10, 17)) ){
+		if ( strcmp(currentSensor->id,str_sub(message,10, 17)) == 0 ){
 			printf("Détecteur présent dans la liste ! \n");
 			currentSensor->decodeMessage(message, *currentSensor);
 			break;
@@ -124,7 +125,10 @@ void ManageMessage(char* message){
 			currentSensor = currentSensor->next;
 		}
 	}
+
+	// If the sensor isn't in the sensors' list
 	if (currentSensor == NULL){
+		// If the message is a teach-in message
 		if ((teachIn & 80) == 80){
 		currentSensor = (Sensor*) malloc(sizeof(Sensor));
 		strcpy(currentSensor->id, str_sub(message, 10, 17));

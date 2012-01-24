@@ -39,37 +39,12 @@ typedef struct Switch_Data{
 
 typedef struct Sensor
 {
-	char id[8];
+	char id[9];
 	enum SENSOR_TYPE type;
 	void * data;
 	struct Sensor* next;
-	void (*decodeMessage)(char*, struct Sensor);
+	int (*decodeMessage)(char*, struct Sensor);
 }Sensor;
-
-typedef struct InputContactElement	// org 06, func 00, type 01
-{
-        char id[4];
-		int close;	//0 if opened, 1 if closed
-        char status;
-} InputContact;
-
-typedef struct TemperatureHumiditySensorElement	// org 07, func 04, type 01
-{
-        char id[4];
-		int humidity;	// from 0 to 100%
-		int temperature;	// from 0 to 40°C
-		int temperatureSensorAvailable; // 1 if temperature sensor available
-        char status;
-} TemperatureHumiditySensor;
-
-typedef struct LightOccupencySensorElement	// org 07, func 08
-{
-        char id[4];
-        int illumination;
-        int temperature;
-        int range;
-        char status;
-} LightOccupencySensor;
 
 
 int saveSensor(char* file);
@@ -77,14 +52,14 @@ int loadSensor(char* file);
 int addSensor(Sensor sensor);
 int removeSensor(char* id);
 
-void decodeMessageTemp(char* message, struct Sensor);
-void decodeMessageLightOccup(char* message, struct Sensor);
-void decodeMessageContact(char* message, struct Sensor);
-void decodeMessageSwitch(char* message, struct Sensor);
+int decodeMessageTemp(char* message, struct Sensor);
+int decodeMessageLightOccup(char* message, struct Sensor);
+int decodeMessageContact(char* message, struct Sensor);
+int decodeMessageSwitch(char* message, struct Sensor);
 
-int getTemp(char* message, struct Sensor);
-int getLight(char* message, struct Sensor);
-int getContact(char* message, struct Sensor);
-int getSwitch(char* message, struct Sensor);
+int getTempWithoutRange(char* message);
+int getLight(char* message);
+int getContact(char* message);
+int getSwitch(char* message);
 
 #endif /* COMPONENT_H_ */

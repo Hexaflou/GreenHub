@@ -1,3 +1,12 @@
+# Mac-specific
 .DS_Store
+
+# Windows thumbs of death
+Thumbs.db
+
+# Pythons-specific ?
 *.pyc
 .idea
+
+# Eclipse Project files
+.project

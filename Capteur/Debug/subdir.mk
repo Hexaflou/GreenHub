@@ -8,6 +8,7 @@ C_SRCS += \
 ../ComponentInterface.c \
 ../Test.c \
 ../Utility.c \
+../cJSON.c \
 ../main.c 
 
 OBJS += \
@@ -15,6 +16,7 @@ OBJS += \
 ./ComponentInterface.o \
 ./Test.o \
 ./Utility.o \
+./cJSON.o \
 ./main.o 
 
 C_DEPS += \
@@ -22,6 +24,7 @@ C_DEPS += \
 ./ComponentInterface.d \
 ./Test.d \
 ./Utility.d \
+./cJSON.d \
 ./main.d 
 
 

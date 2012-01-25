@@ -1,7 +1,7 @@
 #include "ComponentInterface.h"
 #include "Test.h"
 #include <stdio.h>
-#include <mqueue.h>
+//#include <mqueue.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 

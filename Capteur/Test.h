@@ -8,6 +8,6 @@
 #ifndef TEST_H_
 #define TEST_H_
 
-void initializeSensorList();
+void initializeSensorList(void);
 
 #endif /* TEST_H_ */

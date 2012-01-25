@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <time.h>
 #include <mysql/mysql.h>
+#include <pthread.h>
 
-#define MYSQL_SADDR 	"127.0.0.1" /*localhost for now*/
-#define MYSQL_SLOGIN	"login"
-#define MYSQL_SPWD  	"pwd"
-#define MYSQL_SBASE 	"base name"
+#define MYSQL_SADDR 	"134.214.223.14"
+#define MYSQL_SLOGIN	"greenhub"
+#define MYSQL_SPWD  	"greenhub-pass"
+#define MYSQL_SBASE 	"greenhub"
 #define MYSQL_SPORT	0 /* auto */
 
 #define DATETIME_LENGHT 20
@@ -57,7 +58,11 @@ int gLogsLog(char mac[40], double value)
     return -1;
 }
 
-void main()
+int main()
 {
-	printf("hello\n");
+    gLogsInit();
+    gLogsLog("28",42);
+    gLogsClose();
+    return 0;
 }
+

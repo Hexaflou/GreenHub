@@ -16,7 +16,11 @@
 
 struct Sensor* sensorList;
 
-int ComponentInterface();
+int ComponentInterface(void);
+
+void *ListenSunSpot(void *ptr);
+
+void *ListenEnOcean(void *ptr);
 
 void ManageMessage(char* message);
 

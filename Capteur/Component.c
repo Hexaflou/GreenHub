@@ -23,21 +23,7 @@ int decodeMessageTemp(char* message, struct Sensor sensor){
 }
 //int decodeMessageLightOccup(char* message, struct Sensor);
 //int decodeMessageContact(char* message, struct Sensor);
-int decodeMessageSwitch(char* message, struct Sensor sensor){
-	Switch_Data switch_data = getSwitch(message);
-	if ( (((Switch_Data*)sensor.data)->energy_bow != switch_data.energy_bow)
-			&& (((Switch_Data*)sensor.data)->switch_position != switch_data.switch_position)){
-		((Switch_Data*)sensor.data)->energy_bow = switch_data.energy_bow;
-		((Switch_Data*)sensor.data)->switch_position = switch_data.switch_position;
-		printf("Value change ! \n");
-		printf("Switch value : %i \n", ( (Switch_Data*)sensor.data )->switch_position);
-		printf("Energy bow value : %i \n", ( (Switch_Data*)sensor.data )->energy_bow);
-		return 1;
-	}else{
-		return 0;
-	}
-
-}
+//int decodeMessageSwitch(char* message, struct Sensor);
 //
 
 
@@ -49,52 +35,11 @@ int getTempWithoutRange(char* message){
 	temp = xtoi(str_sub(message,6,7));	// Extract from the message the temperature
 	return temp;
 }
-
-/* Return the illumination value from the message
- * The message must correspond to a message sent by a illumination sensor which recorded the value into 1 byte,
- * otherwise the result won't be pertinent.
- */
-int getLightLittleSensor(char* message){
-	int light;
-	light = xtoi(str_sub(message,4,5));	// Extract from the message the temperature
-	return light;
-}
-
-/* Return the illumination value from the message
- * The message must correspond to a message sent by a illumination sensor which recorded the value into 2 byte,
- * otherwise the result won't be pertinent.
- */
-int getLightBigSensor(char* message){
-	int light;
-	light = xtoi(str_sub(message,4,7));	// Extract from the message the temperature
-	return light;
-}
-
-/* Return the contact value from the message
- * The message must correspond to a message sent by a illumination sensor which recorded the value into 2 byte,
- * otherwise the result won't be pertinent.
- */
-Switch_Data getSwitch(char* message){
-	Switch_Data result;
-	int byte, status;
-	byte = xtoi(str_sub(message,2,3));	// Extract from the message the data byte
-	status = xtoi(str_sub(message,18,19));	// Extract from the message the status byte
-	if (status & (1u << 4) ){	// If the message is a N-message type
-		result.switch_position = ( (byte & 0xE0) >> 5 ); // Extract the 5 to 7 bit
-	}else{	// If the message is a U-message type
-		if ( ( (byte & 0xE0) >> 5 ) == 0){
-			result.switch_position = NO_BUTTON;
-		}else if ( ( (byte & 0xE0) >> 5 ) == 3){
-			result.switch_position = THREE_FOUR;
-		}
-	}
-	result.energy_bow = byte & (0x01 << 4);	// Extract the bit 4 from the byte
-	return result;
-}
-
-int getContact(char* message){
-	int close, byte;
-	byte = xtoi(str_sub(message,2,3));	// Extract from the message the contact byte
-	close = byte & (0x01 << 3);	// Extract the bit 3 from the byte
-	return close;
-}
+//
+//int getLightLittleSensor(char* message, struct Sensor){
+//	int light;
+//	light = xtoi(str_sub(message,4,5));
+//	light = light
+//}
+//int getContact(char* message, struct Sensor);
+//int getSwitch(char* message, struct Sensor);

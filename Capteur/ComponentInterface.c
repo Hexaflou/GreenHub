@@ -43,7 +43,7 @@ int ComponentInterface() {
 
 void *ListenSunSpot(void *ptr) {
 	int sFd;
-	char buffer[5], *message;
+	char buffer[46], *message; // on recevra le message en une seule fois
     long n;
 	int tailleTrame;
 	struct sockaddr_in serverAddr;
@@ -51,11 +51,11 @@ void *ListenSunSpot(void *ptr) {
     
 	/* Internet Protocol */
 	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // on assume que le serveur Java sera local
+	serverAddr.sin_addr.s_addr = INADDR_ANY; // écoute sur toutes les IPs locales
 	serverAddr.sin_port = htons(1337);
     
 	/* UDP, not TCP, Socket Creation */
-	if ((sFd = socket(AF_INET, SOCK_STREAM, 0)) == ERROR)
+	if ((sFd = socket(AF_INET, SOCK_DGRAM, 0)) == ERROR)
 	{
 		perror("[ListenSunSpot] SunSPOT UDP Socket Creation Error \n");
 		return ERROR;
@@ -68,7 +68,7 @@ void *ListenSunSpot(void *ptr) {
     // on est en UDP, pas de connect à faire, mais un bind
 	if (bind(sFd, (struct sockaddr*) &serverAddr, serverAddrLen) == -1)
     {
-		perror("[ListenSunSpot] Socket bond Error \n");
+		perror("[ListenSunSpot] Socket bind Error \n");
 		return SOCKET_ERROR;
 	}
     
@@ -82,9 +82,33 @@ void *ListenSunSpot(void *ptr) {
             printf("[ListenSunSpot] Waiting for a message debut...\n");
         #endif
         
-		while (strcmp (buffer, "A55A") != 0)
+        // fonctionnement un petit peu différent : on reçoit en une seule fois
+        n = recvfrom(sFd, buffer, sizeof(buffer), 0, (struct sockaddr*) &serverAddr, &serverAddrLen);
+        
+        if (n < 0)
         {
-			if((n = recv(sFd, buffer, sizeof (buffer - 1), 0)) < 0)
+            perror("[ListenSunSpot] Receive Error \n");
+            break;
+        }
+        
+        #if DEBUG > 0
+            printf("[ListenSunSpot] Message received : %s \n", buffer);
+        #endif
+        
+        // vérifie si le header est bon
+        if (strncmp(buffer, "A55Axx", 4) != 0)
+        {
+			printf("[ListenSunSpot] Invalid message received \n");
+			break;            
+        }
+        
+        #if DEBUG > 0
+            printf("[ListenSunSpot] Correct message received.\n");
+        #endif
+        
+		/*while (strcmp(buffer, "A55A") != 0)
+        {
+			if ((n = recvfrom(sFd, buffer, sizeof (buffer - 1), 0, (struct sockaddr*) &serverAddr, &serverAddrLen)) < 0)
 			{
 				perror("[ListenSunSpot] Receive Error \n");
 				break;
@@ -96,7 +120,7 @@ void *ListenSunSpot(void *ptr) {
             printf("[ListenSunSpot] Message received.\n");
         #endif
         
-		if ((n = recv(sFd, buffer, 2, 0)) < 0)
+		if ((n = recvfrom(sFd, buffer, 2, 0, (struct sockaddr*) &serverAddr, &serverAddrLen)) < 0)
 		{
 			perror("[ListenSunSpot] Data Reception Error \n");
 			break;
@@ -105,7 +129,7 @@ void *ListenSunSpot(void *ptr) {
         
         #if DEBUG > 0
             printf("[ListenSunSpot] Buffer length : %s \n", buffer);
-        #endif
+        #endif*/
         
 		// Convert array of char corresponding to hexadecimal number to int
 		tailleTrame = xtoi(buffer);
@@ -114,13 +138,18 @@ void *ListenSunSpot(void *ptr) {
 		message = (char*) malloc (tailleTrame * sizeof(char)*2 + 1);
         
 		// Reception of the message without the header
-		if ((n = recv(sFd, message, tailleTrame*2, 0)) < 0)
+		if ((n = recvfrom(sFd, buffer, tailleTrame*2, 0, (struct sockaddr*) &serverAddr, &serverAddrLen)) < 0)
 		{
 			perror("[ListenSunSpot] Data Reception Error \n");
 			break;
 		}
         
 		message[tailleTrame*2] = '\0';
+        
+        #if DEBUG > 0
+            printf("[ListenSunSpot] Data received : %s \n", message);
+        #endif
+        
 		ManageMessage(message);
 	}
     

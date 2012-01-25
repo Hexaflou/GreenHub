@@ -54,6 +54,7 @@ public class HostApplication {
         DateFormat fmt = DateFormat.getTimeInstance();
         DatagramSocket serverSocket;
         InetAddress IPAddress = InetAddress.getByName("localhost");
+        int portServer = 1337;
          
         try {
             // Commentaire d'origine : Open up a server-side broadcast radiogram connection
@@ -104,7 +105,7 @@ public class HostApplication {
                 String messageData = "A55A" + (contentData.length()+2) + "03" + contentData;
                 
                 // maintenant on renvoie tout ceci vers notre socket
-                DatagramPacket sendPacket = new DatagramPacket(messageData.getBytes(), messageData.getBytes().length, IPAddress, 1337);
+                DatagramPacket sendPacket = new DatagramPacket(messageData.getBytes(), messageData.getBytes().length, IPAddress, portServer);
                 serverSocket.send(sendPacket);
             } catch (Exception e) {
                 System.err.println("Erreur lors de la lecture des capteurs : " + e);

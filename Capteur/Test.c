@@ -12,13 +12,41 @@
 
 
 void initializeSensorList(){
+
+	struct Sensor* currentSensor;
+
+	currentSensor = sensorList;
+
+	// Temperature Sensor
 	sensorList = (Sensor*) malloc(sizeof(Sensor));
-	strcpy(sensorList->id, "00893378");
-	sensorList->type = TEMP;
-	sensorList->data = (Temp_Data*) malloc(sizeof(Temp_Data));
-	((Temp_Data*)sensorList->data)->rangeMin = 0;
-	((Temp_Data*)sensorList->data)->rangeMax = 40;
-	((Temp_Data*)sensorList->data)->temp = 0;
-	sensorList->decodeMessage = decodeMessageTemp;
-	sensorList->next = NULL;
+	currentSensor = sensorList;
+	strcpy(currentSensor->id, "00893378");
+	currentSensor->type = TEMP;
+	currentSensor->data = (Temp_Data*) malloc(sizeof(Temp_Data));
+	((Temp_Data*)currentSensor->data)->rangeMin = 0;
+	((Temp_Data*)currentSensor->data)->rangeMax = 40;
+	((Temp_Data*)currentSensor->data)->temp = 0;
+	currentSensor->decodeMessage = decodeMessageTemp;
+	currentSensor->next = (Sensor*) malloc(sizeof(Sensor));
+
+	currentSensor = currentSensor->next;
+
+	// Switch Sensor
+
+	strcpy(currentSensor->id, "0021CBE5");
+	currentSensor->type = SWITCH;
+	currentSensor->data = (Switch_Data*) malloc(sizeof(Switch_Data));
+	currentSensor->decodeMessage = decodeMessageSwitch;
+	currentSensor->next = (Sensor*) malloc(sizeof(Sensor));
+
+	currentSensor = currentSensor->next;
+
+	// Switch Sensor
+
+	strcpy(currentSensor->id, "0001B015");
+	currentSensor->type = CONTACT;
+	currentSensor->data = (Contact_Data*) malloc(sizeof(Contact_Data));
+	((Contact_Data*)currentSensor->data)->closed = 0;
+	currentSensor->decodeMessage = decodeMessageContact;
+	currentSensor->next = NULL;
 }

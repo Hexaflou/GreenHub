@@ -15,26 +15,34 @@ enum SENSOR_TYPE{
 	SWITCH
 };
 
-enum SWITCH_POSITION{
-	A0,
+enum SWITCH_BUTTON{
 	A1,
+	A0,
+	B1,
 	B0,
-	B1
-}SWITCH_POSITION;
+	NO_BUTTON,
+	THREE_FOUR
+}SWITCH_BUTTON;
+
+enum ENERGY_BOW{
+	RELEASED,
+	PRESSED
+}ENERGY_BOW;
 
 typedef struct Contact_Data{
-	int close;	//0 if opened, 1 if closed
+	int closed;	//0 if opened, 1 if closed
 }Contact_Data;
 
 typedef struct Temp_Data{
 	// Set the range of the measure (ex : from -40°C to 0°C, from -30°C to 10°C, ...)
-	int rangeMin;
-	int rangeMax;
-	int temp;
+	float rangeMin;
+	float rangeMax;
+	float temp;
 }Temp_Data;
 
 typedef struct Switch_Data{
-	enum SWITCH_POSITION switch_position;
+	enum SWITCH_BUTTON switch_position;
+	enum ENERGY_BOW energy_bow;
 }Switch_Data;
 
 typedef struct Sensor
@@ -44,6 +52,7 @@ typedef struct Sensor
 	void * data;
 	struct Sensor* next;
 	int (*decodeMessage)(char*, struct Sensor);
+	float (*getValue)(char, struct Sensor);
 }Sensor;
 
 
@@ -58,8 +67,9 @@ int decodeMessageContact(char* message, struct Sensor);
 int decodeMessageSwitch(char* message, struct Sensor);
 
 int getTempWithoutRange(char* message);
-int getLight(char* message);
+int getLightLittleSensor(char* message);
+int getLightBigSensor(char* message);
+Switch_Data getSwitch(char* message);
 int getContact(char* message);
-int getSwitch(char* message);
 
 #endif /* COMPONENT_H_ */

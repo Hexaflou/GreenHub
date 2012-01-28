@@ -1,4 +1,4 @@
-main.d: ../main.c ../ComponentInterface.h ../Utility.h ../Test.h
+main.d main.o: ../main.c ../ComponentInterface.h ../Utility.h ../Test.h
 
 ../ComponentInterface.h:
 

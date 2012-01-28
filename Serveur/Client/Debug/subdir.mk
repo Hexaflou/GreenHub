@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+<<<<<<< HEAD
 ../Component.c \
 ../ComponentInterface.c \
 ../Test.c \
@@ -26,6 +27,15 @@ C_DEPS += \
 ./Utility.d \
 ./cJSON.d \
 ./main.d 
+=======
+../client.c 
+
+OBJS += \
+./client.o 
+
+C_DEPS += \
+./client.d 
+>>>>>>> f75295c2279fa616f321d7fd4fbebfc118bc7f32
 
 
 # Each subdirectory must supply rules for building sources it contributes

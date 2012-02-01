@@ -7,6 +7,7 @@
 
 #include "Component.h"
 #include "Utility.h"
+#include "gLogs.h"
 
 int decodeMessageTemp(char* message, struct Sensor sensor)
 {
@@ -17,6 +18,7 @@ int decodeMessageTemp(char* message, struct Sensor sensor)
 	if (((Temp_Data*) sensor.data)->temp != temp)
 	{
 		((Temp_Data*) sensor.data)->temp = temp;
+		gLogsLog(sensor.id, ((Temp_Data*) sensor.data)->temp);
 		printf("Value change ! \n");
 		printf("Sensor value : %f \n", ((Temp_Data*) sensor.data)->temp);
 		return 1;
@@ -26,11 +28,12 @@ int decodeMessageTemp(char* message, struct Sensor sensor)
 		return 0;
 	}
 }
-//int decodeMessageLightOccup(char* message, struct Sensor);
+/*int decodeMessageLightOccup(char* message, struct Sensor);*/
 int decodeMessageContact(char* message, struct Sensor sensor)
 {
 	int closed;
 	closed = getContact(message);
+	printf("Valeur contact : %i \n", closed);
 	if (((Contact_Data*) sensor.data)->closed != closed)
 	{
 		( (Contact_Data*) sensor.data)->closed = getContact(message);
@@ -39,6 +42,7 @@ int decodeMessageContact(char* message, struct Sensor sensor)
 		}else{
 			printf("Contact opened. \n");
 		}
+		gLogsLog(sensor.id, ( (Contact_Data*) sensor.data)->closed);
 	}
 	return 1;
 }
@@ -52,7 +56,8 @@ int decodeMessageSwitch(char* message, struct Sensor sensor)
 		((Switch_Data*) sensor.data)->switch_position
 				= switch_data.switch_position;
 		printf("Switch value : %i \n",
-				((Switch_Data*) sensor.data)->switch_position);
+				((Switch_Data*) sensor.data)->switch_position);		
+		gLogsLog(sensor.id, ((Switch_Data*) sensor.data)->switch_position);
 		return 1;
 	}
 	else
@@ -60,7 +65,7 @@ int decodeMessageSwitch(char* message, struct Sensor sensor)
 		return 0;
 	}
 }
-//
+
 
 
 /* Return the temperature from the message
@@ -69,7 +74,7 @@ int decodeMessageSwitch(char* message, struct Sensor sensor)
 int getTempWithoutRange(char* message)
 {
 	int temp;
-	temp = xtoi(str_sub(message, 6, 7)); // Extract from the message the temperature
+	temp = xtoi(str_sub(message, 6, 7)); /* Extract from the message the temperature */
 	return temp;
 }
 
@@ -80,7 +85,7 @@ int getTempWithoutRange(char* message)
 int getLightLittleSensor(char* message)
 {
 	int light;
-	light = xtoi(str_sub(message, 4, 5)); // Extract from the message the temperature
+	light = xtoi(str_sub(message, 4, 5)); /* Extract from the message the temperature */
 	return light;
 }
 
@@ -91,7 +96,7 @@ int getLightLittleSensor(char* message)
 int getLightBigSensor(char* message)
 {
 	int light;
-	light = xtoi(str_sub(message, 4, 7)); // Extract from the message the temperature
+	light = xtoi(str_sub(message, 4, 7)); /* Extract from the message the temperature */
 	return light;
 }
 
@@ -103,14 +108,14 @@ Switch_Data getSwitch(char* message)
 {
 	Switch_Data result;
 	int byte, status;
-	byte = xtoi(str_sub(message, 2, 3)); // Extract from the message the data byte
-	status = xtoi(str_sub(message, 18, 19)); // Extract from the message the status byte
+	byte = xtoi(str_sub(message, 2, 3)); /* Extract from the message the data byte */
+	status = xtoi(str_sub(message, 18, 19)); /* Extract from the message the status byte */
 	if (status & (1u << 4))
-	{ // If the message is a N-message type
-		result.switch_position = ((byte & 0xE0) >> 5); // Extract the 5 to 7 bit
+	{ /* If the message is a N-message type */
+		result.switch_position = ((byte & 0xE0) >> 5); /* Extract the 5 to 7 bit */
 	}
 	else
-	{ // If the message is a U-message type
+	{ /* If the message is a U-message type */
 		if (((byte & 0xE0) >> 5) == 0)
 		{
 			result.switch_position = NO_BUTTON;
@@ -120,14 +125,26 @@ Switch_Data getSwitch(char* message)
 			result.switch_position = THREE_FOUR;
 		}
 	}
-	result.energy_bow = byte & (0x01 << 4); // Extract the bit 4 from the byte
+	result.energy_bow = byte & (0x01 << 4); /* Extract the bit 4 from the byte */
 	return result;
 }
 
 int getContact(char* message)
 {
 	int closed, byte;
-	byte = xtoi(str_sub(message, 2, 3)); // Extract from the message the contact byte
-	closed = byte & (0x01 << 3); // Extract the bit 3 from the byte
+	byte = xtoi(str_sub(message, 8, 9)); /* Extract from the message the contact byte */
+	closed = byte & 0x01; /* Extract the bit 0 from the byte */
 	return closed;
+}
+
+float getValueTemp(char c, struct Sensor *sensor){
+	return ( (Temp_Data*)sensor->data)->temp;
+}
+
+float getValueContact(char c, struct Sensor *sensor){
+	return ( (Contact_Data*)sensor->data)->closed;
+}
+
+float getValueSwitch(char c, struct Sensor *sensor){
+	return ((Switch_Data*)sensor->data)->switch_position;
 }

@@ -10,6 +10,7 @@
 #include "memoryGHome.h"
 #include "Utility.h"
 #include "Component.h"
+#include "Test.h"
 
 /* External Includes */
 
@@ -29,24 +30,30 @@ int ComponentInterface()
 	int iret1, iret2;
 	void* ptt;
 
+	/* Initialisation des capteurs */
+	initializeSensorList();
+
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
-
-	// on les créé, passe un argument on verra plus tard lequel exactement
+	/* on les créé, passe un argument on verra plus tard lequel exactement */
 	iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
-	//iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2);
+	iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
 
-	//ListenEnOcean(ptt);
+	gLogsInit();
 
-	// on les attend
+	/*ListenEnOcean(ptt); */
+
+	/* on les attend */
 	pthread_join(thread1, NULL);
-	//pthread_join(thread2, NULL);
+	pthread_join(thread2, NULL);
+
+	gLogsClose();
 
 	return 0;
 }
 
 void *ListenSunSpot(void *ptr) {
 	int sFd;
-	char buffer[46], *message; // on recevra le message en une seule fois
+	char buffer[46], *message; /* on recevra le message en une seule fois */
     long n;
 	int tailleTrame;
 	struct sockaddr_in serverAddr;
@@ -54,7 +61,7 @@ void *ListenSunSpot(void *ptr) {
     
 	/* Internet Protocol */
 	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // on assume que le serveur Java sera local
+	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); /* on assume que le serveur Java sera local */
 	serverAddr.sin_port = htons(1337);
 
 	/* UDP, not TCP, Socket Creation */
@@ -68,7 +75,7 @@ void *ListenSunSpot(void *ptr) {
         printf("[ListenSunSpot] Binding with server...\n");
     #endif
 
-	// on est en UDP, pas de connect à faire, mais un bind
+	/* on est en UDP, pas de connect à faire, mais un bind */
 	if (bind(sFd, (struct sockaddr*) &serverAddr, serverAddrLen) == SOCKET_ERROR)
 	{
 		perror("[ListenSunSpot] Socket bind Error \n");
@@ -125,13 +132,13 @@ void *ListenSunSpot(void *ptr) {
             printf("[ListenSunSpot] Buffer length : %s \n", buffer);
         #endif
 
-		// Convert array of char corresponding to hexadecimal number to int
+		/* Convert array of char corresponding to hexadecimal number to int */
 		tailleTrame = xtoi(buffer);
 
-		// One byte corresponds to 2 char
+		/* One byte corresponds to 2 char */
 		message = (char*) malloc(tailleTrame * sizeof(char) * 2 + 1);
 
-		// Reception of the message without the header
+		/* Reception of the message without the header */
 		if ((n = recv(sFd, message, tailleTrame * 2, 0)) < 0)
 		{
 			perror("[ListenSunSpot] Data Reception Error \n");
@@ -147,10 +154,11 @@ void *ListenSunSpot(void *ptr) {
 	return 0;
 }
 
-void *ListenEnOcean(void *ptr) {
+void *ListenEnOcean(void *ptr)
+{
 	int sFd;
 	char buffer[5], *message;
-    long n;
+	long n;
 	int tailleTrame;
 	struct sockaddr_in serverAddr;
 	socklen_t serverAddrLen = sizeof(serverAddr);
@@ -164,7 +172,6 @@ void *ListenEnOcean(void *ptr) {
 	if ((sFd = socket(AF_INET, SOCK_STREAM, 0)) == ERROR)
 	{
 		perror("[ListenEnOcean] TCP Socket Creation Error \n");
-
 		return (int*)ERROR;
 	}
 
@@ -188,28 +195,6 @@ void *ListenEnOcean(void *ptr) {
             printf("[ListenEnOcean] Waiting for a message debut...\n");
         #endif
 
-		return ERROR;
-	}
-
-	#if DEBUG > 0
-		printf("[ListenEnOcean] Connection with the server...\n");
-	#endif
-
-	if (connect(sFd,(struct sockaddr*)&serverAddr,serverAddrLen) == -1) {
-		perror("[ListenEnOcean] Socket connection Error \n");
-        
-		return SOCKET_ERROR;
-	}
-
-	#if DEBUG > 0
-		printf("[ListenEnOcean] Connection with the server OK\n");
-	#endif
-
-	while (1){
-		#if DEBUG > 0
-			printf("[ListenEnOcean] Waiting for a message debut...\n");
-		#endif
-
 		while (strcmp(buffer, "A55A") != 0)
 		{
 			if ((n = recv(sFd, buffer, sizeof(buffer - 1), 0)) < 0)
@@ -219,7 +204,7 @@ void *ListenEnOcean(void *ptr) {
 			}
 			buffer[4] = '\0';
 		}
-        
+
 		#if DEBUG > 0
 			printf("[ListenEnOcean] Message received.\n");
 		#endif
@@ -235,13 +220,13 @@ void *ListenEnOcean(void *ptr) {
 			printf("[ListenEnOcean] Buffer length : %s \n", buffer);
 		#endif
 
-		// Convert array of char corresponding to hexadecimal number to int
+		/* Convert array of char corresponding to hexadecimal number to int */
 		tailleTrame = xtoi(buffer);
 
-		// One byte corresponds to 2 char
+		/* One byte corresponds to 2 char */
 		message = (char*) malloc(tailleTrame * sizeof(char) * 2 + 1);
 
-		// Reception of the message without the header
+		/* Reception of the message without the header */
 		if ((n = recv(sFd, message, tailleTrame * 2, 0)) < 0)
 		{
 			perror("[ListenEnOcean] Data Reception Error \n");
@@ -259,21 +244,22 @@ void ManageMessage(char* message)
 	int org, teachIn;
 	Sensor* currentSensor;
 
+
 	currentSensor = sensorList;
 
 	#if DEBUG > 0
 		printf("Message : %s \n", message);
 	#endif
-    
-	org = atoi(str_sub(message, 0, 1)); // Extract from the message the type of sensor
-	teachIn = atoi(str_sub(message, 8, 9)); // Extract from the message the characters indicating the teach-in message
 
-	// Search of the sensor in the sensors' list
+	org = atoi(str_sub(message, 0, 1)); /* Extract from the message the type of sensor */
+	teachIn = atoi(str_sub(message, 8, 9)); /* Extract from the message the characters indicating the teach-in message */
+
+	/* Search of the sensor in the sensors' list */
 	while (currentSensor != NULL)
 	{
-		if (strcmp(currentSensor->id, str_sub(message, 10, 17)) == 0)
+		if (strcmp(str_sub(currentSensor->id, 1, 8), str_sub(message, 10, 17)) == 0)
 		{
-			printf("Détecteur présent dans la liste ! \n");
+		/*	printf("Détecteur présent dans la liste ! \n");*/
 			currentSensor->decodeMessage(message, *currentSensor);
 			break;
 		}
@@ -283,75 +269,7 @@ void ManageMessage(char* message)
 		}
 	}
 
-	// If the sensor isn't in the sensors' list
-	if (currentSensor == NULL)
-	{
-		// If the message is a teach-in message
-		/*if ((teachIn & 80) == 80)
-		{
-			currentSensor = (Sensor*) malloc(sizeof(Sensor));
-			strcpy(currentSensor->id, str_sub(message, 10, 17));
-			switch (org)
-			{
-<<<<<<< HEAD
-			case 5: // RPS Type sensor
-				// A GERER
-				break;
-			case 6: // 1BS Telegram
-				if ((atoi(str_sub(message, 2, 3)) >> 2) == 0)
-				{ // Func = 00
-					if (((atoi(str_sub(message, 2, 3)) & 0) == 3) && ((atoi(
-							str_sub(message, 4, 5)) >> 3) == 1))
-					{ // Type = 01
-						currentSensor->type = SWITCH;
-						currentSensor->data = (Switch_Data*) malloc(
-								sizeof(Switch_Data));
-						// currentSensor->decodeMessage = decodeMessageSwitch;
-=======
-				case 5:	// RPS Type sensor
-					// A GERER
-					break;
-				case 6:	// 1BS Telegram
-					if ( (atoi(str_sub(message,2, 3)) >>2 ) == 0){ // Func = 00
-						if ( ( (atoi(str_sub(message,2,3)) & 0) == 3)
-								&& ( (atoi(str_sub(message,4,5)) >>3 ) == 1)){	// Type = 01
-							currentSensor->type = SWITCH;
-							currentSensor->data = (Switch_Data*) malloc(sizeof(Switch_Data));
-							// currentSensor->decodeMessage = decodeMessageSwitch;
-							currentSensor->next = NULL;
-						}
-					}
-					break;
-				case 7:	// 4BS Type Sensor
-	//				printf("Test!!! %i \n", xtoi(str_sub(message,2,3)) >> 2);
-					if ( (xtoi(str_sub(message,2, 3)) >> 2 ) == 2 ) { // Func = 02, temperature sensor
-						currentSensor->type = TEMP;
-						currentSensor->data = (Temp_Data*) malloc(sizeof(Temp_Data));
->>>>>>> f75295c2279fa616f321d7fd4fbebfc118bc7f32
-						currentSensor->next = NULL;
-					}
-				}
-				break;
-			case 7: // 4BS Type Sensor
-				// printf("Test!!! %i \n", xtoi(str_sub(message,2,3)) >> 2);
-				if ((xtoi(str_sub(message, 2, 3)) >> 2) == 2)
-				{ // Func = 02, temperature sensor
-					currentSensor->type = TEMP;
-					currentSensor->data
-							= (Temp_Data*) malloc(sizeof(Temp_Data));
-					currentSensor->next = NULL;
-					// printf("Test 42!!! %i \n", xtoi(str_sub(message,2,3)) << 5);
-					// printf("Test 21!!! %i \n", xtoi(str_sub(message,4,5)) >> 3);
-					if (((xtoi(str_sub(message, 2, 3)) << 6) == 0) && ((xtoi(
-							str_sub(message, 4, 5)) >> 3) == 5))
-					{ // Type = 05
-						//currentSensor->decodeMessage = decodeMessageTemp;
-					}
-				}
-				break;
-			}
-		}*/
-	}
+	/* If the sensor isn't in the sensors' list */
 
 }
 
@@ -363,7 +281,7 @@ float getInfoFromSensor(char message[10]){
 
 	strcpy(id,str_sub(message, 0, 8));
 
-	// Search of the sensor in the sensors' list
+	/* Search of the sensor in the sensors' list */
 	while (currentSensor != NULL)
 	{
 		if (strcmp(currentSensor->id, id) == 0)

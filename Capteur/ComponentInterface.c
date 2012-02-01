@@ -32,13 +32,13 @@ int ComponentInterface()
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
 
 	// on les créé, passe un argument on verra plus tard lequel exactement
-	//iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
+	iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
 	//iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2);
 
-	ListenEnOcean(ptt);
+	//ListenEnOcean(ptt);
 
 	// on les attend
-	//pthread_join(thread1, NULL);
+	pthread_join(thread1, NULL);
 	//pthread_join(thread2, NULL);
 
 	return 0;
@@ -58,7 +58,7 @@ void *ListenSunSpot(void *ptr) {
 	serverAddr.sin_port = htons(1337);
 
 	/* UDP, not TCP, Socket Creation */
-	if ((sFd = socket(AF_INET, SOCK_STREAM, 0)) == ERROR)
+	if ((sFd = socket(AF_INET, SOCK_DGRAM, 0)) == ERROR)
 	{
 		perror("[ListenSunSpot] SunSPOT UDP Socket Creation Error \n");
 		return (int*)ERROR;
@@ -69,39 +69,54 @@ void *ListenSunSpot(void *ptr) {
     #endif
 
 	// on est en UDP, pas de connect à faire, mais un bind
-	if (bind(sFd, (struct sockaddr*) &serverAddr, serverAddrLen) == -1)
+	if (bind(sFd, (struct sockaddr*) &serverAddr, serverAddrLen) == SOCKET_ERROR)
 	{
-		perror("[ListenSunSpot] Socket bond Error \n");
-		return (int*)SOCKET_ERROR;
+		perror("[ListenSunSpot] Socket bind Error \n");
+		return (int*) SOCKET_ERROR;
 	}
     
     #if DEBUG > 0
-        printf("[ListenSunSpot] Bind with server OK\n");
+        printf("[ListenSunSpot] Bind with socket OK\n");
     #endif
 
 	while (1)
 	{
-    #if DEBUG > 0
+        #if DEBUG > 0
             printf("[ListenSunSpot] Waiting for a message debut...\n");
-    #endif
+        #endif
+        
+        //n = recvfrom(sFd, buffer, sizeof(buffer-1), 0, (struct sockaddr*) &serverAddr, &serverAddrLen);
+        
+        //printf((char*) buffer);
+        
+        /*if (n > 0)
+        {
+            printf("positif");
+        } else if (n == 0)
+        {
+            printf("null");
+        } else {
+            printf("négatif");
+        }*/
 
 		while (strcmp(buffer, "A55A") != 0)
 		{
-			if ((n = recv(sFd, buffer, sizeof(buffer - 1), 0)) < 0)
+			if ((n = recvfrom(sFd, buffer, 4, 0, (struct sockaddr*) &serverAddr, &serverAddrLen)) < 0)
 			{
 				perror("[ListenSunSpot] Receive Error \n");
+                
 				break;
 			}
 			buffer[4] = '\0';
 		}
         
         #if DEBUG > 0
-            printf("[ListenSunSpot] Message received.\n");
+            printf("[ListenSunSpot] Sensor message received.\n");
         #endif
 
-		if ((n = recv(sFd, buffer, 2, 0)) < 0)
+		if ((n = recvfrom(sFd, buffer, 2, 0, (struct sockaddr*) &serverAddr, &serverAddrLen)) < 0)
 		{
-			perror("[ListenSunSpot] Data Reception Error \n");
+			perror("[ListenSunSpot] Size Reception Error \n");
 			break;
 		}
 		buffer[2] = '\0';

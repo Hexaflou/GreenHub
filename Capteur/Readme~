@@ -1,7 +1,0 @@
-Afin de clairement définir les interfaces de communication dans notre application, une spécification de l'API de monitoring est nécessaire.
-Le module de monitoring s'occupe de la communication avec les capteurs (EnOcean et SunSpot) et rend compte des valeurs de ceux-ci à une base de données et au serveur C.
-Un capteur EnOcean et SunSpot envoie périodiquement une trame au récepteur EnOcean, qui retransmet le message au module de monitoring. Ce capteur est identifié par un ID unique, contenue dans la trame et étant constitué de 8 caractères. Il en est de même pour le SunSpot. Les ID des EnOcean et SunSpot étant construit différemment au départ, nous construisons un nouvel identifiant qui prend en compte cette différenciation.
-De plus étant donné qu'un capteur peut fournir différentes mesures (présence et luminescence par exemple) et que nous voulons ne consulter qu'un seul type de valeur à la fois, nous diviserons les capteurs de différentes mesures en capteur d'une mesure (le capteur de présence et luminescence sera représenté par deux capteurs : un de présence et un de luminescence). Ainsi donc l'identifiant final de notre capteur aura comme dernier caractère la mesure de celui-ci :
-	- L : Light <=> Correspondant à un capteur de luminescence.
-	- T : Temperature <=> Correspondant à un capteur de température
-	- C : Contact <=> Correspondant à un capteur de d

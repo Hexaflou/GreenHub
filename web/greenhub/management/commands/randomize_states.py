@@ -20,13 +20,13 @@ class Command(BaseCommand):
             for sensor in sensors:
                 previous = sensor.last_state()
                 if sensor.type == "temp":
-                    state = State(sensor=sensor, value=round(sensor.last_state().value + random.random()*6.0-3.0 ,2), date = datetime.datetime.now())
+                    state = State(sensor=sensor, value=round(sensor.last_state().value + random.random()*6.0-3.0 ,2), captured_at = datetime.datetime.now())
                 elif sensor.type == "lux":
-                    state = State(sensor=sensor, value=round(sensor.last_state().value + random.random()*20.0-10.0, 2), date = datetime.datetime.now())
+                    state = State(sensor=sensor, value=round(sensor.last_state().value + random.random()*20.0-10.0, 2), captured_at = datetime.datetime.now())
                 elif sensor.type in ("lamp", "heating"):
-                    state = State(sensor=sensor, value=round(random.random()), date = datetime.datetime.now())
+                    state = State(sensor=sensor, value=round(random.random()), captured_at = datetime.datetime.now())
                 else:
-                    state = State(sensor=sensor, value=sensor.last_state().value, date = datetime.datetime.now())
+                    state = State(sensor=sensor, value=sensor.last_state().value, captured_at = datetime.datetime.now())
 
                 print "%s's sensor %s changed from %s to %s" % (user, sensor.name, previous.value, state.value)
 

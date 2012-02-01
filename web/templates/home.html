@@ -3,18 +3,7 @@
 
 {% block content %}
     <section id="graph-score">
-        <!--<img src="/public/images/graph-score.png" alt="Graphique du score" />-->        
-        <table class="list-score">
-            <thead>
-                <tr><th>Date</th><th>Score</th></tr>
-            </thead>
-            {% for score in scores %}
-            <tr>
-                <td>{{ score.date|date:"d M Y H:i" }}</td>
-                <td>{{ score.value|floatformat }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+        <img src="/public/images/graph/score-{{ user.username }}.png" alt="Graphique du score" />
     </section>
     <section id="graph-states">
         <ul>

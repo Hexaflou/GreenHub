@@ -1,3 +1,5 @@
+-- Usage ---
+
 Pour déployer un programme via la BaseStation sur les deux clients que l'on a :
 (commandes shell à tapper dans le directory du projet Netbeans du code que l'on veut déployer)
 
@@ -14,7 +16,12 @@ ant -DremoteId=0014.4F01.0000.2175 run
 Pour faire tourner un programme sur la BasteStation connectée en USB :
 ant host-run
 
-Astuces :
+--- Reset ---
+
+En cas de gros bugs, on peut restaurer les SunSPOT via le programme SunSPOT Manager
+Après avoir resetté la BasteStation, il faut bien penser à refaire start BasteStation dessus
+
+--- Astuces ---
 
 Les SunSpots plantent souvent. Un appui court sur le bouton (control) provoque un reset (led verte cligne 3 fois très rapidement), mais ce n'est pas toujours suffisant, parfois il faut les arrêter (appui long, la led cligne rouge) et les reseter.
 

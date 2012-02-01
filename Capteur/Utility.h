@@ -8,7 +8,7 @@
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
-// External Includes
+/* External Includes */
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -16,8 +16,6 @@
 #include <sys/types.h>
 
 /* External Functions */
-unsigned int xtoi(const char* hexstr);	// Found
+unsigned int xtoi(const char* hexstr);
 char *str_sub (const char *s, unsigned int start, unsigned int end);
-
-
 #endif /* UTILITY_H_ */

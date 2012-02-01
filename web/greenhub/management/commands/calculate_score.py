@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
         for user in users:
             try:
-                previous = score_value = Score.objects.filter(user=user).order_by('date').reverse()[0].value
+                previous = score_value = Score.objects.filter(user=user).order_by('calculated_at').reverse()[0].value
             except IndexError:
                 previous = score_value = 0
 
@@ -33,7 +33,7 @@ class Command(BaseCommand):
             if datetime.datetime.now().hour == REFUND_HOUR:
                 score_value += REFUND_AMOUNT
 
-            score_obj = Score(user=user, date=datetime.datetime.now(), value=score_value)
+            score_obj = Score(user=user, calculated_at=datetime.datetime.now(), value=score_value)
             score_obj.save()
 
             self.stdout.write(u'%s goes from %s to %s\n' % (user, previous, score_value))

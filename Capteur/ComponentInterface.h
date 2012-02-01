@@ -1,8 +1,8 @@
 /*
  * InterfaceComposant.h
  *
- *  Created on: 4 janv. 2012
- *      Author: nphan
+ * Created on: 4 janv. 2012
+ * Author: nphan
  */
 
 #ifndef COMPONENTINTERFACE_H_
@@ -10,6 +10,7 @@
 
 #define SOCKET_ERROR -1
 #define ERROR -1
+#define DEBUG 0
 #define __DEBUG__ 0
 
 #include "Utility.h"
@@ -23,5 +24,7 @@ void *ListenSunSpot(void *ptr);
 void *ListenEnOcean(void *ptr);
 
 void ManageMessage(char* message);
+
+float getInfoFromSensor(char message[10]);
 
 #endif /* COMPONENTINTERFACE_H_ */

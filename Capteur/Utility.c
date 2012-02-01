@@ -55,7 +55,7 @@ unsigned int xtoi(const char* hexstr)
                                 r |= (hexstr[i] - 'A' + 10) << ((l - i - 1) * 4);
                                 break;
                         default:
-                                i = l;  // force loop exit
+                                i = l;  /* force loop exit */
                 }
         }
 

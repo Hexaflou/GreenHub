@@ -10,8 +10,8 @@
 
 #define SOCKET_ERROR -1
 #define ERROR -1
-#define DEBUG 0
-#define __DEBUG__ 0
+#define DEBUG 1
+#define __DEBUG__ 1
 
 #include "Utility.h"
 

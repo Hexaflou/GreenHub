@@ -96,13 +96,15 @@ public class HostApplication {
                 // on commence par préparer le message
                          
                 // données
-                String contentData = address + String.valueOf(time) + String.valueOf(brightness) + String.valueOf(temperature);
+                String contentData = address + ";" + String.valueOf(time)+ ";" + String.valueOf(brightness)+ ";" + String.valueOf(temperature);
                                 
                 // on construit le message, rajoute l'entête
                     // 4 premiers octets : A55A
-                    // 2 octets pour la taille (de tout ce qu'il y a après)
+                    // ;
                     // 2 pour le type (réservés, 5, 6, 7) - on choisir abitrairement 3, met un zéro devant
-                String messageData = "A55A" + (contentData.length()+2) + "03" + contentData;
+                    // ;
+                    // contenu
+                String messageData = "A55A\0;03\0;" + contentData;
                 
                 // maintenant on renvoie tout ceci vers notre socket
                 DatagramPacket sendPacket = new DatagramPacket(messageData.getBytes(), messageData.getBytes().length, IPAddress, portServer);

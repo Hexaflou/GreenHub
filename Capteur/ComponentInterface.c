@@ -36,7 +36,7 @@ int ComponentInterface()
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
 	/* on les créé, passe un argument on verra plus tard lequel exactement */
 	iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
-	iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
+	//iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
 
 	gLogsInit();
 
@@ -44,7 +44,7 @@ int ComponentInterface()
 
 	/* on les attend */
 	pthread_join(thread1, NULL);
-	pthread_join(thread2, NULL);
+	//pthread_join(thread2, NULL);
 
 	gLogsClose();
 
@@ -53,7 +53,7 @@ int ComponentInterface()
 
 void *ListenSunSpot(void *ptr) {
 	int sFd;
-	char buffer[46], *message; /* on recevra le message en une seule fois */
+	char buffer[47], *message; /* on recevra le message en une seule fois */
     long n;
 	int tailleTrame;
 	struct sockaddr_in serverAddr;
@@ -92,61 +92,42 @@ void *ListenSunSpot(void *ptr) {
             printf("[ListenSunSpot] Waiting for a message debut...\n");
         #endif
         
-        //n = recvfrom(sFd, buffer, sizeof(buffer-1), 0, (struct sockaddr*) &serverAddr, &serverAddrLen);
-        
-        //printf((char*) buffer);
-        
-        /*if (n > 0)
-        {
-            printf("positif");
-        } else if (n == 0)
-        {
-            printf("null");
-        } else {
-            printf("négatif");
-        }*/
-
-		while (strcmp(buffer, "A55A") != 0)
+        /* on reçoit le message en une seuel fois */
+		if ((n = recvfrom(sFd, buffer, sizeof(buffer)-1, 0, (struct sockaddr*) &serverAddr, &serverAddrLen)) < 0)
 		{
-			if ((n = recvfrom(sFd, buffer, 4, 0, (struct sockaddr*) &serverAddr, &serverAddrLen)) < 0)
-			{
-				perror("[ListenSunSpot] Receive Error \n");
-                
-				break;
-			}
-			buffer[4] = '\0';
-		}
+			perror("[ListenSunSpot] Receive Error \n");
+               
+			break;
+        }
         
         #if DEBUG > 0
             printf("[ListenSunSpot] Sensor message received.\n");
         #endif
 
-		if ((n = recvfrom(sFd, buffer, 2, 0, (struct sockaddr*) &serverAddr, &serverAddrLen)) < 0)
-		{
-			perror("[ListenSunSpot] Size Reception Error \n");
-			break;
-		}
-		buffer[2] = '\0';
+        /*
+            On va maintenant parser le message
+        */
+        message = (char*) buffer; /* on mets ça dans un char* */
         
-        #if DEBUG > 0
-            printf("[ListenSunSpot] Buffer length : %s \n", buffer);
-        #endif
-
-		/* Convert array of char corresponding to hexadecimal number to int */
-		tailleTrame = xtoi(buffer);
-
-		/* One byte corresponds to 2 char */
-		message = (char*) malloc(tailleTrame * sizeof(char) * 2 + 1);
-
-		/* Reception of the message without the header */
-		if ((n = recv(sFd, message, tailleTrame * 2, 0)) < 0)
-		{
-			perror("[ListenSunSpot] Data Reception Error \n");
-			break;
-		}
-
-		message[tailleTrame * 2] = '\0';
-		ManageMessage(message);
+        /* on regarde l'entête : A55A */
+		if (strcmp(strtok(message, ";"), "A55A") != 0)
+        {
+            printf("[ListenSunSpot] Wrong header.\n");
+        }
+        
+        /* on vérifie maintenant si on est bien sur un vrai capteur SunSpot : type 03 */
+		if (strcmp(strtok(NULL, ";"), "03") != 0)
+        {
+            printf("[ListenSunSpot] Good sensor type.\n");
+        }
+        
+        /*
+         Maintenant on a, séparés par des ; :
+         adresse du capteur (id)
+         date/time
+         luminosité
+         température
+        */
 	}
 
 	close(sFd);

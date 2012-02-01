@@ -1,5 +1,5 @@
-#ifndef H_GLOGS
-#define H_GLOGS
+#ifndef H_GTHREAD
+#define H_GTHREAD
 /***********************************************************************
  * 				Fonctions GreenHub de sauvegarde des données
  * 

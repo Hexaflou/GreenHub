@@ -1,3 +1,26 @@
+# Mac-specific
 .DS_Store
+*.swp
+
+# Windows thumbs of death
+Thumbs.db
+
+# Pythons-specific ?
 *.pyc
 .idea
+
+# Eclipse Project files
+.project
+.cproject
+Capteur/Debug
+
+# Compiled files
+*.o
+*.out
+*.jar
+*.java
+Capteur/Debug
+
+# SVN is bad
+.svn
+Capteur/.svn

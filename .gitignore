@@ -14,3 +14,7 @@ Thumbs.db
 .project
 .cproject
 Capteur/Debug
+
+# SVN is bad
+.svn
+Capteur/.svn

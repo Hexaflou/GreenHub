@@ -137,14 +137,17 @@ int getContact(char* message)
 	return closed;
 }
 
-float getValueTemp(char c, struct Sensor *sensor){
+float getValueTemp(char c, struct Sensor *sensor)
+{
 	return ( (Temp_Data*)sensor->data)->temp;
 }
 
-float getValueContact(char c, struct Sensor *sensor){
+float getValueContact(char c, struct Sensor *sensor)
+{
 	return ( (Contact_Data*)sensor->data)->closed;
 }
 
-float getValueSwitch(char c, struct Sensor *sensor){
+float getValueSwitch(char c, struct Sensor *sensor)
+{
 	return ((Switch_Data*)sensor->data)->switch_position;
 }

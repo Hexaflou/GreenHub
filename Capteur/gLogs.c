@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <mysql/mysql.h>
+//#include <mysql/mysql.h>
 
 #define MYSQL_SADDR 	"134.214.221.25" /*localhost for now*/
 #define MYSQL_SLOGIN	"greenhub"
@@ -11,7 +11,7 @@
 
 #define DATETIME_LENGHT 20
 
-static MYSQL mysql;
+//static MYSQL mysql;
 
 /* Put in the given char the time in Datetime format */
 static void getDateTime(char * return_date)
@@ -23,9 +23,9 @@ static void getDateTime(char * return_date)
 
 int gLogsInit()
 {
-	mysql_init(&mysql);
+	/*mysql_init(&mysql);
 	mysql_options(&mysql,MYSQL_READ_DEFAULT_GROUP,"option");
-	return 0;
+	return 0;*/
 }
 
 int gLogsClose()
@@ -36,7 +36,7 @@ int gLogsClose()
 int gLogsLog(char mac[40], double value)
 {
 	
-	char instruction[500];	
+	/*char instruction[500];	
 	if(mysql_real_connect(&mysql,MYSQL_SADDR,MYSQL_SLOGIN,
 								MYSQL_SPWD,MYSQL_SBASE,MYSQL_SPORT,NULL,0))
     {
@@ -55,7 +55,7 @@ int gLogsLog(char mac[40], double value)
     {
         printf("Une erreur s'est produite lors de la connexion à la BDD!");
     }
-    return -1;
+    return -1;*/
 }
 
 /*void main()

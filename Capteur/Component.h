@@ -72,4 +72,8 @@ int getLightBigSensor(char* message);
 Switch_Data getSwitch(char* message);
 int getContact(char* message);
 
+float getValueTemp(char c, struct Sensor *sensor);
+float getValueContact(char c, struct Sensor *sensor);
+float getValueSwitch(char c, struct Sensor *sensor);
+
 #endif /* COMPONENT_H_ */

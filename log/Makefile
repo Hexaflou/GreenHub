@@ -5,10 +5,10 @@ RMFLAGS	= -f
 SH	= @bash
 ECHO	= @echo
 CC	= gcc
-CCFLAGS	= -Wall -pedantic -m32 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -fasynchronous-unwind-tables -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -fno-strict-aliasing -fwrapv
+CCFLAGS	= -Wall -pedantic -m32 -g
 EDL	= gcc
-LDFLAGS	= -m32 -g -pipe -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4 -fasynchronous-unwind-tables -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -fno-strict-aliasing -fwrapv
-LIBS = -rdynamic -L/usr/lib/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib -lssl -lcrypto
+LDFLAGS	= -m32 -g
+LIBS = -lm -lpthread
 SRC	= $(wildcard *.c)
 OBJS	= $(SRC:.c=.o)
 EXE     = gLogs

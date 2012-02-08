@@ -3,7 +3,7 @@
  * Modified by Romaric Drigon as 11/01/2012
  * Based on SendDataDemo by Syn Microsystems, Inc. original Copyright retained
  *
- * Copyright (c) 2008-2010 Sun Microsystems, Inc.
+ * Original Copyright : Copyright (c) 2008-2010 Sun Microsystems, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -37,34 +37,37 @@ import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
 /*
- * Application tournant sur le SunSPOT
- * Retourne toutes les 10 secondes la luminosité ambiante et la température
+ * Application tournant sur les SunSPOTs (capteurs).
+ * Retourne toutes les 60 secondes la luminosité ambiante et la température.
+ * 
+ * On choisit 60 sec., la sonde de température étant sur la carte mère sinon 
+ *  elle est trop influencée par la chauffe du microprocesseur
  */
 public class SensorSampler extends MIDlet {
 
     private static final int HOST_PORT = 67;
-    private static final int SAMPLE_PERIOD = 10 * 1000; // 60 secondes, que l'on passe en millisecondes
+    private static final int SAMPLE_PERIOD = 60 * 1000; // 60 secondes, que l'on passe en millisecondes
     
     protected void startApp() throws MIDletStateChangeException {
         RadiogramConnection rCon = null;
         Datagram dg = null;
         String ourAddress = System.getProperty("IEEE_ADDRESS");
 
-        // on accède aux ressources matérielles
+        // On accède aux ressources matérielles (capteur de luminosité, de température, LED)
         ILightSensor lightSensor = (ILightSensor)Resources.lookup(ILightSensor.class);
         ITemperatureInput tempSensor = (ITemperatureInput) Resources.lookup(ITemperatureInput.class);
         ITriColorLED led = (ITriColorLED)Resources.lookup(ITriColorLED.class, "LED7");
         
         System.out.println("Starting new sensor sampler (brightness and temperature) application on " + ourAddress + " ...");
 
-	// Commentaire d'origine : Listen for downloads/commands over USB connection
+	// On écoute les éventuelles commandes qu'on pourrait recevoir par USB
+        // (si on se connecte directement par câble à l'ordi)
 	new com.sun.spot.service.BootloaderListenerService().getInstance().start();
 
         try {
-            // Commentaire d'origine : Open up a broadcast connection to the host port
-            // where the 'on Desktop' portion of this demo is listening
+            // On ouvre une connexion "broadcast" sur le port précédement défini
             rCon = (RadiogramConnection) Connector.open("radiogram://broadcast:" + HOST_PORT);
-            dg = rCon.newDatagram(50);  // Commentaire d'origine : only sending 12 bytes of data
+            dg = rCon.newDatagram(50);  // création du radiogramme
         } catch (Exception e) {
             System.err.println("Caught " + e + " in connection initialization.");
             notifyDestroyed();
@@ -72,39 +75,28 @@ public class SensorSampler extends MIDlet {
         
         while (true) {
             try {
-                // Commentaire d'origine : Get the current time and sensor reading
+                // On récupère les valeurs actuelles des captures
                 long now = System.currentTimeMillis();
                 int brightness = lightSensor.getValue();
                 double temperature = tempSensor.getCelsius(); // rajouté : température
                 
-                // Commentaire d'origine : Flash an LED to indicate a sampling event
-                led.setRGB(255, 255, 255);
+                // On fait clignoter un petit coup la LED
+                led.setRGB(255, 255, 255); // en blanc
                 led.setOn();
-                Utils.sleep(50);
+                Utils.sleep(50); // 50 ms
                 led.setOff();
 
-                // Commentaire d'origine : Package the time and sensor reading into a radio datagram and send it.
+                // On écrit toutes nos données dans le radio datagram
                 dg.reset();
                 dg.writeLong(now);
                 dg.writeInt(brightness);
                 dg.writeDouble(temperature);
+                // et l'envoie
                 rCon.send(dg);
 
-                System.out.print("Light value = " + brightness);
-                System.out.println(" - Temperature = " + temperature);
+                System.out.println("Time: " + now + " - Brightness: " + brightness +" - Temperature: " + temperature);
                 
-                // on va écouter 30 secondes voir si on ne reçoit rien
-                /*rCon.receive(dg);
-                String msg = dg.readUTF();
-                
-                if (msg == "LED") {
-                    led.setRGB(255, 0, 0);
-                    led.setOn();
-                    Utils.sleep(250);
-                    led.setOff();                   
-                }*/
-                
-                // Commentaire d'origine : Go to sleep to conserve battery
+                // On va en veille jusqu'au prochain relevé dans 60 secondes
                 Utils.sleep(SAMPLE_PERIOD - (System.currentTimeMillis() - now));
             } catch (Exception e) {
                 System.err.println("Caught " + e + " while collecting/sending sensor sample.");
@@ -113,10 +105,10 @@ public class SensorSampler extends MIDlet {
     }
     
     protected void pauseApp() {
-        // Commentaire d'origine : This will never be called by the Squawk VM
+        // On fait le squelette de la fonction, mais elle ne sera jamais appelée par  la VM Squawk
     }
     
     protected void destroyApp(boolean arg0) throws MIDletStateChangeException {
-        // Commentaire d'origine : Only called if startApp throws any exception other than MIDletStateChangeException
+        // Sera appelé si startApp lance une exception autre que MIDletStateChangeException
     }
 }

@@ -8,48 +8,47 @@
 #include "Test.h"
 #include "Component.h"
 #include "ComponentInterface.h"
+#include "EEP.h"
 
 
 
-void initializeSensorList(){
+void initializeSensorAndEEPList(Sensor ** pp_sensorList, EEP* EEPList){
 
-	struct Sensor* currentSensor;
+	char id[8]; 
+	char org[3];
+	char funct[3]; 
+	char type[3];
+	int result;
 
-	currentSensor = sensorList;
+	EEPList = (EEP*)malloc(sizeof(EEP));
+
+	initializeEEPList(EEPList);
+
 
 	/* Temperature Sensor */
-	sensorList = (Sensor*) malloc(sizeof(Sensor));
-	currentSensor = sensorList;
-	strcpy(currentSensor->id, "e00893378");
-	currentSensor->type = TEMP;
-	currentSensor->data = (Temp_Data*) malloc(sizeof(Temp_Data));
-	((Temp_Data*)currentSensor->data)->rangeMin = 0;
-	((Temp_Data*)currentSensor->data)->rangeMax = 40;
-	((Temp_Data*)currentSensor->data)->temp = 0;
-	currentSensor->decodeMessage = decodeMessageTemp;
-	currentSensor->getValue = getValueTemp;
-	currentSensor->next = (Sensor*) malloc(sizeof(Sensor));
+	strcpy(id, "00893378");
+	strcpy(org, "07\0");
+	strcpy(funct, "02\0");
+	strcpy(type, "05\0");	
 
-	currentSensor = currentSensor->next;
+	AddSensorByEEP(id, pp_sensorList, EEPList, org, funct, type);
 
 	/* Switch Sensor */
 
-	strcpy(currentSensor->id, "e0021CBE5");
-	currentSensor->type = SWITCH;
-	currentSensor->data = (Switch_Data*) malloc(sizeof(Switch_Data));
-	currentSensor->decodeMessage = decodeMessageSwitch;
-	currentSensor->getValue = getValueSwitch;
-	currentSensor->next = (Sensor*) malloc(sizeof(Sensor));
+	strcpy(id, "0021CBE5");
+	strcpy(org, "05");
+	strcpy(funct, "02");
+	strcpy(type, "01");
 
-	currentSensor = currentSensor->next;
+	AddSensorByEEP(id, pp_sensorList, EEPList, org, funct, type);
 
 	/* CONTACT Sensor */
 
-	strcpy(currentSensor->id, "e0001B015");
-	currentSensor->type = CONTACT;
-	currentSensor->data = (Contact_Data*) malloc(sizeof(Contact_Data));
-	((Contact_Data*)currentSensor->data)->closed = 0;
-	currentSensor->decodeMessage = decodeMessageContact;
-	currentSensor->getValue = getValueContact;
-	currentSensor->next = NULL;
+	strcpy(id, "0001B015");
+	strcpy(org, "06");
+	strcpy(funct, "00");
+	strcpy(type, "01");	
+
+	AddSensorByEEP(id, pp_sensorList, EEPList, org, funct, type);
+
 }

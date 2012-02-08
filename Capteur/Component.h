@@ -8,57 +8,38 @@
 #ifndef COMPONENT_H_
 #define COMPONENT_H_
 
-enum SENSOR_TYPE{
-	CONTACT,
-	LIGHT_OCCUP,
-	TEMP,
-	SWITCH
-};
 
-enum SWITCH_BUTTON{
-	A1,
-	A0,
-	B1,
-	B0,
-	NO_BUTTON,
-	THREE_FOUR
-}SWITCH_BUTTON;
+#define A1 0
+#define A0 1
+#define B1 2
+#define B0 3
+#define NO_BUTTON 4
+#define THREE_FOUR 5
 
-enum ENERGY_BOW{
-	RELEASED,
-	PRESSED
-}ENERGY_BOW;
-
-typedef struct Contact_Data{
-	int closed;	//0 if opened, 1 if closed
-}Contact_Data;
-
-typedef struct Temp_Data{
-	// Set the range of the measure (ex : from -40°C to 0°C, from -30°C to 10°C, ...)
+typedef struct Range{
+	/* Set the range of the measure (ex : from -40°C to 0°C, from -30°C to 10°C, ...) */
 	float rangeMin;
 	float rangeMax;
-	float temp;
-}Temp_Data;
-
-typedef struct Switch_Data{
-	enum SWITCH_BUTTON switch_position;
-	enum ENERGY_BOW energy_bow;
-}Switch_Data;
+}Range;
 
 typedef struct Sensor
 {
-	char id[9];
-	enum SENSOR_TYPE type;
-	void * data;
-	struct Sensor* next;
+	char id[10];
+	Range * rangeData;
+	float value;	
 	int (*decodeMessage)(char*, struct Sensor);
-	float (*getValue)(char, struct Sensor);
+	struct Sensor* next;
 }Sensor;
 
 
 int saveSensor(char* file);
 int loadSensor(char* file);
-int addSensor(Sensor sensor);
+
+/* Add sensor to the sensors' list. If the sensor can get several measures, the function creates as many sensors as measures. 
+** Returns 0 if the addition is successful, 1 if there's an error	
+*/
+int addSensors(char id[8], Sensor *sensorList);
+
 int removeSensor(char* id);
 
 int decodeMessageTemp(char* message, struct Sensor);
@@ -69,7 +50,8 @@ int decodeMessageSwitch(char* message, struct Sensor);
 int getTempWithoutRange(char* message);
 int getLightLittleSensor(char* message);
 int getLightBigSensor(char* message);
-Switch_Data getSwitch(char* message);
+
+int getSwitch(char* message);
 int getContact(char* message);
 
 float getValueTemp(char c, struct Sensor *sensor);

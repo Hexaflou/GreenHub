@@ -1,18 +1,15 @@
 from twisted.internet.protocol import Factory, Protocol
 from twisted.internet.endpoints import TCP4ServerEndpoint, UNIXServerEndpoint
 from twisted.internet import reactor
-import time
+import time, sys, os.path
+
+from django.core.management import setup_environ
+from . import settings
+
+setup_environ(settings)
+
 from greenhub.models import *
 import json
-
-from django.conf import settings
-settings.configure(
-    DATABASE_ENGINE = 'django.db.backends.mysql',
-    DATABASE_NAME = 'greenhub',
-    DATABASE_USER = 'greenhub',
-    DATABASE_PASSWORD = 'greenhub-pass',
-    DATABASE_HOST = 'localhost'
-)
 
 class GreenhubProtocol(Protocol):
     def __init__(self):

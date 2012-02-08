@@ -1,7 +1,11 @@
 # Django settings for GreenHub project.
 
+import os
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -11,13 +15,21 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/home/signez/PycharmProjects/GreenHub/database.db', # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'greenhub',              # Or path to database file if using sqlite3.
+        'USER': 'greenhub',              # Not used with sqlite3.
+        'PASSWORD': 'greenhub-pass',     # Not used with sqlite3.
+        'HOST': 'localhost',             # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+#        'NAME': PROJECT_ROOT + '/database.db',              # Or path to database file if using sqlite3.
+#        'USER': '',              # Not used with sqlite3.
+#        'PASSWORD': '',     # Not used with sqlite3.
+#        'HOST': '',             # Set to empty string for localhost. Not used with sqlite3.
+#        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+#    }
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -72,7 +84,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/home/signez/PycharmProjects/GreenHub/public",
+    PROJECT_ROOT + "/public",
 )
 
 # List of finder classes that know how to find static files in
@@ -101,9 +113,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'GreenHub.urls'
+ROOT_URLCONF = 'urls'
 
-TEMPLATE_DIRS = ('/home/signez/PycharmProjects/GreenHub/templates',)
+TEMPLATE_DIRS = (PROJECT_ROOT + '/templates',)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -116,7 +128,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'GreenHub.greenhub',
+    'greenhub',
     'south',
 )
 

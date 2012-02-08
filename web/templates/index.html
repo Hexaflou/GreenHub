@@ -1,9 +1,22 @@
-{% extends "layouts/simple.html" %}
+{% extends "layouts/main.html" %}
 {% load url from future %}
 
+{% block bodyname %}page-index{% endblock %}
+{% block breadcrumbs %}
+            <li class="home"><a href="/">Accueil</a></li>
+{% endblock %}
 {% block content %}
-
-    <p>GreenHub est un système formidable vous permettant de vous améliorer
-        progressivement dans la réduction de votre empreinte climatique.</p>
-
+    <article id="index-presentation">
+        <div class="abstract">
+            <p><strong>GreenHub</strong> est un système formidable vous permettant de vous améliorer
+               progressivement dans la réduction de votre empreinte climatique.</p>
+        </div>
+        <aside class="more-infos">
+            <p>Déjà membre ? Connectez-vous dès maintenant.</p>
+            <p style="text-align:center;"><a href="/login" class="big-button">Connexion</a></p>
+            <hr />
+            <p>Envie de rejoindre le mouvement ? Le service est en bêta privée.</p>
+            <p style="text-align:center;"><a href="" class="big-button" style="background-color: #666;">Tenez-moi au courant !</a></p>
+        </aside>
+    </article>
 {% endblock %}

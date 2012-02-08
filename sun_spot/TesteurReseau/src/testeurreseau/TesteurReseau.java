@@ -35,7 +35,7 @@ public class TesteurReseau {
 
         // Convert the contents to a string, and display them
         String msg = new String(buffer, 0, packet.getLength());
-        System.out.println("Recu de " + packet.getAddress().getHostName() + " : " + msg);
+        System.out.println("Recu de " + packet.getAddress().getHostName() + " : " + msg + "; taille : " + msg.getBytes().length);
 
         // Reset the length of the packet before reusing it.
         packet.setLength(buffer.length);

@@ -1,8 +1,41 @@
 {% extends "layouts/main.html" %}
+{% load greenhub_formatting %}
+
+{% block bodyname %}page-index{% endblock %}
+{% block breadcrumbs %}
+    <li class="home"><a href="/">Accueil</a></li>
+{% endblock %}
 
 {% block content %}
+    <aside class="sidebar">
+        <section id="score-shower">
+            <p>Votre score : <strong>{{ last_score|floatformat }}</strong> points</p>
+        </section>
+
+        <section>
+            <h3>Informations</h3>
+            <dl>
+                {% for sensor in sensors %}
+                    <dt>{{ sensor.description }}</dt>
+                    <dd>{{ sensor.last_state.value|format_state:sensor.type }}</dd>
+                {% endfor %}
+            </dl>
+        </section>
+
+        <section>
+            <h3>Messages</h3>
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.code }}">
+                        {{ message.code|format_msg:message.data }}
+                        <time>{{ message.emitted_at|date:"d M Y H:i" }}</time>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+    </aside>
     <section id="graph-score">
-        <img src="/public/images/graph-score.png" alt="Graphique du score" />
+        <img src="/public/images/graph/score-{{ user.username }}.png" alt="Graphique du score" />
     </section>
     <section id="graph-states">
         <ul>
@@ -14,38 +47,5 @@
         <div class="temp-sensors">
             <img src="/public/images/graph-temp.png" alt="Graphique des températures" />
         </div>
-    </section>
-{% endblock %}
-
-{% block sidebar %}
-    <section id="score-shower">
-        <p>Votre score : <strong>{{ last_score }}</strong> points</p>
-    </section>
-
-    <section>
-        <h3>Informations</h3>
-        <dl>
-            {% for sensor in sensors %}
-                <dt>{{ sensor.description }}</dt>
-                <dd>{{ sensor.last_state.value }}</dd>
-            {% endfor %}
-        </dl>
-    </section>
-    
-    <section>
-        <h3>Messages</h3>
-        <ul class="messages">
-            <li class="msg-error">
-                La Lampe 1 est allumée alors que la luminosité est forte.
-                <em><a href="#">Éteindre la lampe 1 →</a></em>
-            </li>
-            <li class="msg-error">
-                Le chauffage est en marche alors que la température est haute.
-                <em><a href="#">Baisser le chauffage →</a></em>
-            </li>
-            <li class="more-msgs">
-                <a href="#more">Plus de messages...</a>
-            </li>
-        </ul>
     </section>
 {% endblock %}

@@ -24,3 +24,6 @@ Capteur/Debug
 # SVN is bad
 .svn
 Capteur/.svn
+
+# Don't backup a backup
+*~

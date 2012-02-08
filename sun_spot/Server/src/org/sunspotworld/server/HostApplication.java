@@ -3,7 +3,7 @@
  * Modified by Romaric Drigon as 11/01/2012
  * Based on SendDataDemo by Syn Microsystems, Inc. original Copyright retained
  *
- * Copyright (c) 2008-2009 Sun Microsystems, Inc.
+ * Original Copyright : Copyright (c) 2008-2009 Sun Microsystems, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -40,15 +40,15 @@ import javax.microedition.io.*;
 
 /**
  * Application serveur
- * Ecoute ce que lui envoie les clients SunSpot via radio,
- * le retransmets via réseau
+ * Ecoute ce que lui envoie les clients SunSpot via ondes radio,
+ * et les retransmets sur le réseau (via un socket)
  */
 public class HostApplication {
-    // Commentaire d'origine : Broadcast port on which we listen for sensor samples
+    // Port sur lequel on écoutera via Broadcast
     private static final int HOST_PORT = 67;
         
     private void run() throws Exception {
-        // il nous faut tout déclarer ici que les variables soient accessibles
+        // Il nous faut tout déclarer ici (que les variables soient accessibles)
         RadiogramConnection rCon;
         Datagram dg;
         DateFormat fmt = DateFormat.getTimeInstance();
@@ -57,48 +57,42 @@ public class HostApplication {
         int portServer = 1337;
          
         try {
-            // Commentaire d'origine : Open up a server-side broadcast radiogram connection
-            // to listen for sensor readings being sent by different SPOTs
+            // Ouvre une connexion serveur, pour recevoir les données envoyées par les SunSPOTS
             rCon = (RadiogramConnection) Connector.open("radiogram://:" + HOST_PORT);
             dg = rCon.newDatagram(rCon.getMaximumLength());
         } catch (Exception e) {
-             System.err.println("Erreur lors de la création du serveur SunSPOT BaseStation : " + e.getMessage());
-             throw e; // arrête le programme
+             System.err.println("Error while creating SunSPOT server BaseStation: " + e.getMessage());
+             throw e; // Arrête le programme
         }
         
         try {
-            // Ouvre un socket Unix sur lequel on va renvoyer nos messages
-            // port 1337
+            // Ouvre un socket Unix sur lequel on va renvoyer nos messages, port 1337
             serverSocket = new DatagramSocket();
         } catch (Exception e) {
-             System.err.println("Erreur lors de la création du socket Unix : " + e.getMessage());
-             throw e; // arrête le programme
+             System.err.println("Error while creating Unix socket: " + e.getMessage());
+             throw e; // Arrête le programme
         }
 
-        // Commentaire d'origine : Main data collection loop
+        // Boucle infinie d'écoute
         while (true) {
             try {
-                // Commentaire d'origine : Read sensor sample received over the radio
+                // On reçoit les données
                 rCon.receive(dg);
                 
-                String address = dg.getAddress();       // read sender's Id
-                long time = dg.readLong();              // read time of the reading
-                int brightness = dg.readInt();          // read the brightness sensor value
-                double temperature = dg.readDouble();   // rajouté : température
+                String address = dg.getAddress();       // lecture de l'Id de l'émetteur
+                long time = dg.readLong();              // lecture de la date/heure
+                int brightness = dg.readInt();          // lecture de la luminosité
+                double temperature = dg.readDouble();   // lecture de la température
                 
                 System.out.println(fmt.format(new Date(time)) + " from: " + address + " brightness: " + brightness + " temperature: " + temperature);
                 
-                // envoi une commande pour allumer la LED
-                /*dg.writeUTF("LED");
-                rCon.send(dg);*/
-                
                 // On va renvoyer les données sur un socket.
-                // on commence par préparer le message
+                // On commence par construire le message
                          
-                // données
+                // Données
                 String contentData = address + ";" + String.valueOf(time)+ ";" + String.valueOf(brightness)+ ";" + String.valueOf(temperature);
                                 
-                // on construit le message, rajoute l'entête
+                // On construit le message, rajoute l'entête
                     // 4 premiers octets : A55A
                     // ;
                     // 2 pour le type (réservés, 5, 6, 7) - on choisir abitrairement 3, met un zéro devant
@@ -106,12 +100,12 @@ public class HostApplication {
                     // contenu
                 String messageData = "A55A\0;03\0;" + contentData;
                 
-                // maintenant on renvoie tout ceci vers notre socket
+                // Maintenant on renvoie tout ceci sur notre socket Unix
                 DatagramPacket sendPacket = new DatagramPacket(messageData.getBytes(), messageData.getBytes().length, IPAddress, portServer);
                 serverSocket.send(sendPacket);
             } catch (Exception e) {
                 System.err.println("Erreur lors de la lecture des capteurs : " + e);
-                throw e;
+                throw e; // Arrête le programme
             }
         }
     }
@@ -119,10 +113,10 @@ public class HostApplication {
     /*
      * Lance l'appli
      *
-     * @param args any command line arguments
+     * @param args : n'importe quoi
      */
     public static void main(String[] args) throws Exception {
-        // Commentaire d'origine : register the application's name with the OTA Command server & start OTA running
+        // enregistre le nom de l'application auprès du "OTA Command server" & le lance OTA
         OTACommandServer.start("Server");
 
         HostApplication app = new HostApplication();

@@ -45,6 +45,7 @@ int gCommunicationInit(int userId)
 	if (hostinfo == NULL) /* l'hôte n'existe pas */
 	{
 		fprintf (stderr, "Unknown host \n");
+		printf("Unknown host\n");
 		return SOCKET_ERROR;
 	}
 	
@@ -55,6 +56,7 @@ int gCommunicationInit(int userId)
 	if(connect(sock,(SOCKADDR *) &sin, sizeof(SOCKADDR)) == SOCKET_ERROR)
 	{
 		perror("connect()");
+		printf("erreur\n");
 		return SOCKET_ERROR;
 	}
 	
@@ -79,6 +81,10 @@ int gCommunicationSend(char * msg)
 		perror("send()");
 		return SOCKET_ERROR;
 	}
+	else
+	{
+		printf("send to server : \n %s \n\n",msg);
+	}
 	return 0;
 }
 
@@ -88,10 +94,11 @@ int gCommunicationClose()
 	return 0;
 }
 
-int gLogsLog(char mac[40], double value)
+int gCommunicationLogSend(char mac[40], double value)
 {
 	cJSON *data = cJSON_CreateObject();
 	char * msg = NULL;
+	int ret;
 	
 	cJSON_AddStringToObject(data,"msg_type","new_state");
 	cJSON_AddStringToObject(data,"mac_address",mac);
@@ -101,11 +108,12 @@ int gLogsLog(char mac[40], double value)
 	
 	msg = cJSON_Print(data);
 	
-	gCommunicationSend(msg);
+	ret = gCommunicationSend(msg);
 	
 	/* Clean data */
 	free(msg);
 	cJSON_Delete(data);
+	return ret;
 }
 
 int main ()

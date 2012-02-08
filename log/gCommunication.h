@@ -9,8 +9,8 @@
  * 														Hexanome H4212
  * ********************************************************************/
 
-#define SRV_IP "134.214.221.25"
-#define SRV_PORT 9999
+#define SRV_IP "greenhub.signez.fr"
+#define SRV_PORT 1863
 
 /* maybe will get a config filename in the future */
 int gCommunicationInit(int userId);

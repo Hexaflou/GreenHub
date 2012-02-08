@@ -1,7 +1,39 @@
 {% extends "layouts/main.html" %}
 {% load greenhub_formatting %}
 
+{% block bodyname %}page-index{% endblock %}
+{% block breadcrumbs %}
+    <li class="home"><a href="/">Accueil</a></li>
+{% endblock %}
+
 {% block content %}
+    <aside class="sidebar">
+        <section id="score-shower">
+            <p>Votre score : <strong>{{ last_score|floatformat }}</strong> points</p>
+        </section>
+
+        <section>
+            <h3>Informations</h3>
+            <dl>
+                {% for sensor in sensors %}
+                    <dt>{{ sensor.description }}</dt>
+                    <dd>{{ sensor.last_state.value|format_state:sensor.type }}</dd>
+                {% endfor %}
+            </dl>
+        </section>
+
+        <section>
+            <h3>Messages</h3>
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.code }}">
+                        {{ message.code|format_msg:message.data }}
+                        <time>{{ message.emitted_at|date:"d M Y H:i" }}</time>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+    </aside>
     <section id="graph-score">
         <img src="/public/images/graph/score-{{ user.username }}.png" alt="Graphique du score" />
     </section>
@@ -15,33 +47,5 @@
         <div class="temp-sensors">
             <img src="/public/images/graph-temp.png" alt="Graphique des températures" />
         </div>
-    </section>
-{% endblock %}
-
-{% block sidebar %}
-    <section id="score-shower">
-        <p>Votre score : <strong>{{ last_score|floatformat }}</strong> points</p>
-    </section>
-
-    <section>
-        <h3>Informations</h3>
-        <dl>
-            {% for sensor in sensors %}
-                <dt>{{ sensor.description }}</dt>
-                <dd>{{ sensor.last_state.value|format_state:sensor.type }}</dd>
-            {% endfor %}
-        </dl>
-    </section>
-    
-    <section>
-        <h3>Messages</h3>
-        <ul class="messages">
-            {% for message in messages %}
-            <li class="{{ message.code }}">
-               {{ message.code|format_msg:message.data }}
-                <time>{{ message.emitted_at|date:"d M Y H:i" }}</time>
-            </li>
-            {% endfor %}
-        </ul>
     </section>
 {% endblock %}

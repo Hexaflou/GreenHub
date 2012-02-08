@@ -1,8 +1,8 @@
 body {
-    font-family: "Trebuchet MS","Ubuntu",sans-serif;
+    font-family: "Open Sans","Trebuchet MS","Ubuntu",sans-serif;
     margin: 0;
     padding: 0;
-    background-color: rgba(208, 250, 141, 0.30);
+    background-color: white;
 }
 
 body a:link {
@@ -16,38 +16,103 @@ body a:hover, body a:focus {
 }
 
 header {
-    background-color: #e1fadd;
-    border-bottom: 1px solid #078048;
-    padding: 10px;
-    padding-left: 180px;
+    background: #3b7348; /* Old browsers */
+    background: -moz-linear-gradient(top,  #3b7348 0%, #2f5938 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#3b7348), color-stop(100%,#2f5938)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #3b7348 0%,#2f5938 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #3b7348 0%,#2f5938 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #3b7348 0%,#2f5938 100%); /* IE10+ */
+    background: linear-gradient(top,  #3b7348 0%,#2f5938 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3b7348', endColorstr='#2f5938',GradientType=0 ); /* IE6-9 */
+
+    border-bottom: 1px solid #2f5938;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.45);
+    z-index: 3;
+    position: relative;
 }
 
-section {
+h1 {
+    width: 960px;
+    margin: auto;
+    position: relative;
+}
+h1 a {
+    display: inline-block;
+    vertical-align: bottom;
+    height: 60px;
+    padding-left: 65px;
+    line-height: 1em;
+    background: url(images/logo-mini.png) 0 0 no-repeat;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+h1 a .main-title {
+    position: absolute;
+    top: 6px;
+    font-size: 16pt;
+}
+h1 a .tag-line {
+    position: absolute;
+    top: 26px;
+    padding-left: 1px;
+    font-size: 8pt;
+}
+
+
+#main-content {
     display: block;
+    width: 960px;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0 auto;
 }
 
 #main-content {
-    min-height: 600px;
-    border-right: 1px solid #078048;
-    margin-right: 320px;
-    background-color: white;
-    padding: 10px;
+    background-color: #ffffff;
+
+    min-height: 400px;
 }
 
-aside {
+nav.breadcrumbs {
+    border-bottom: 2px solid #CCCCCC;
+    margin-top: 20px;
+    font-size: 10pt;
+    overflow: hidden;
+}
+nav.breadcrumbs ul {
+    padding:0; margin: 0;
+}
+nav.breadcrumbs li a {
+    float: left;
+    padding-left: 20px;
+    line-height: 30px;
+    display: block;
+}
+
+nav.breadcrumbs .home a {
+    background: url(images/home.png) left center no-repeat;
+    color: #222222;
+}
+
+aside.sidebar {
     float: right;
     width: 300px;
     display: block;
-    padding: 0 10px;
+    padding: 10px 0px;
     font-size: 11pt;
 }
 
-aside section {
-    border-top: 1px solid #078048;
+aside.sidebar section {
+    background-color: #EEE;
+    border: 1px solid #CCC;
+    box-shadow: 2px 2px #CCC;
+    margin-right: 0;
+    margin-bottom: 10px;
+    padding: 10px 20px;
 }
 
 #score-shower {
-    border-top: 0 none;
     text-align: center;
     padding: 10px 0;
     font-size: 16pt
@@ -104,22 +169,6 @@ section h3 {
      color: rgb(117, 153, 113);
      color: rgba(0,0,0,0.4);
 }
-h1 {
-    float: left;
-    margin: 0;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-h1 a:link {
-    color: rgba(0,0,0,0);
-    background: url(images/logo.png) 0 0;
-    display: block;
-    width: 179px;
-    height: 100px;
-    margin-right: 10px;
-}
-h1 span { display: none; }
 
 .list-score, .list-score td, .list-score th {
     border: 1px solid #078048;
@@ -129,4 +178,93 @@ h1 span { display: none; }
 .list-score th {
     background-color: #078048;
     color: white;
+}
+
+.big-button {
+    display: inline-block;
+    background-color: #3b7348;
+    border-radius: 5px;
+    padding: 6px 20px 9px 20px;
+    color: white;
+    text-shadow: 0 -1px rgba(0,0,0,0.4);
+    box-shadow: inset 0 -4px rgba(0,0,0,0.2);
+    border: 0 none;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.more-infos hr {
+    height: 1px;
+    border: 0 none;
+    border-top: 1px solid #CCC;
+}
+
+/* Index big header */
+
+#page-index h1 a .main-title {
+    position: absolute;
+    top: 30px;
+    font-size: 24pt;
+}
+#page-index h1 a .tag-line {
+    position: absolute;
+    top: 60px;
+    font-size: 12pt;
+}
+#page-index header {
+    height: 115px;
+}
+#page-index h1 a {
+    background: url(images/logo.png) 0 0 no-repeat;
+    padding-left: 120px;
+    height: 115px;
+}
+
+/* ================ INDEX ================= */
+
+#index-presentation .abstract {
+    float: left;
+    max-width: 600px;
+    text-align: justify;
+    margin-left: 0;
+    margin-top: 45px;
+    font-size: 24pt;
+    font-style: italic;
+    font-family: "Lora",sans-serif;
+}
+#index-presentation .more-infos {
+    float: right;
+    width: 240px;
+    padding: 0 10px;
+    border: 2px solid #CCC;
+    background-color: #EEE;
+    margin-top: 30px;
+    font-size: 10pt;
+    text-align: justify;
+}
+#index-presentation .big-button {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+/* ====================== LOGIN ====================== */
+.login-form {
+    width: 400px;
+    padding: 25px;
+    margin: 75px auto;
+    border: 2px solid #CCC;
+}
+.login-form input[type=text], .login-form input[type=password] {
+    display: block;
+    font-size: inherit;
+    font-family: inherit;
+    line-height: 1em;
+    padding: 3px 6px;
+}
+.login-form dt, .login-form dd {
+    margin-left: 0;
+    line-height: 38px;
+}
+.login-form dt:after {
+    content: " :";
 }

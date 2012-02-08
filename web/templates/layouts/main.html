@@ -2,20 +2,30 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8" />
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800,400italic,600italic,700italic,800italic,300,300italic' rel='stylesheet' type='text/css'>
     <link href="/public/main.css" rel="stylesheet" media="screen" />
 
     <title>GreenHub - Bienvenue</title>
 </head>
-<body>
-<header>
-    <h1><a href="/home"><span>GreenHub</span></a></h1>
-    <h2>Bonjour, {{ login_name }} !</h2>
-</header>
-<aside>
-    {% block sidebar %}{% endblock %}
-</aside>
-<section id="main-content">
-    {% block content %}{% endblock %}
-</section>
-</body>
+    <body id="{% block bodyname %}generic{% endblock %}">
+        <header>
+            <h1>
+                <a href="{% if user.is_authenticated %}/home{% else %}/{% endif %}">
+                    <span class="main-title">GreenHub</span>
+                    <span class="tag-line">Greening the world, one house at a time</span>
+                </a>
+            </h1>
+        </header>
+        <section id="main-content">
+            <nav class="breadcrumbs">
+                <ul>
+                    {% block breadcrumbs %}
+                        <li class="home"><a href="{% if user.is_authenticated %}/home{% else %}/{% endif %}">Retour à l'accueil</a></li>
+                    {% endblock %}
+                </ul>
+            </nav>
+            {% block content %}{% endblock %}
+        </section>
+    </body>
 </html>

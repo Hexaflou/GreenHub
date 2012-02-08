@@ -136,6 +136,19 @@ void *ListenSunSpot(void *ptr) {
          
          TODO la fin !
         */
+        
+        /*
+         On traite l'id du capteur :
+            petite adaptation (tous les SunSPOTS ont un id commençant par 0014.4F01.0000., on raccourcit)
+            on regarde si les capteurs existe déjà (à chaque SunSPOT correspond une struct capteur de température, 
+                et une capteur de luminosité)
+            si oui, stocke ses valeurs
+            si non, créé les capteurs
+         */
+            
+        #if DEBUG > 0
+            printf(strtok(NULL, ";"));
+        #endif
 	}
 
 	close(sFd);

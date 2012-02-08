@@ -2,7 +2,7 @@
  * InterfaceComposant.h
  *
  * Created on: 4 janv. 2012
- * Author: nphan
+ * Author: Hexaflou
  */
 
 #ifndef COMPONENTINTERFACE_H_
@@ -14,8 +14,10 @@
 #define __DEBUG__ 1
 
 #include "Utility.h"
+#include "Component.h"
+#include "EEP.h"
 
-struct Sensor* sensorList;
+int initializeEEPList(EEP*);
 
 int ComponentInterface(void);
 
@@ -23,8 +25,9 @@ void *ListenSunSpot(void *ptr);
 
 void *ListenEnOcean(void *ptr);
 
-void ManageMessage(char* message);
+void ManageMessage(char* message, Sensor * p_sensorList);
 
-float getInfoFromSensor(char message[10]);
+float GetInfoFromSensor(char message[10], Sensor * p_sensorList);
+int AddSensor(char id[8], char org[2], char funct[2], char type[2]);
 
 #endif /* COMPONENTINTERFACE_H_ */

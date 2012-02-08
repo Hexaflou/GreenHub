@@ -46,12 +46,16 @@ int decodeMessageTemp(char* message, struct Sensor);
 int decodeMessageLightOccup(char* message, struct Sensor);
 int decodeMessageContact(char* message, struct Sensor);
 int decodeMessageSwitch(char* message, struct Sensor);
+int decodeMessageOccupancy(char * message, struct Sensor);
+int decodeMessageLight(char * message, struct Sensor);
+
 
 int getTempWithoutRange(char* message);
 int getLightLittleSensor(char* message);
 int getLightBigSensor(char* message);
 
 int getSwitch(char* message);
+int getOccupancy(char* message);
 int getContact(char* message);
 
 float getValueTemp(char c, struct Sensor *sensor);

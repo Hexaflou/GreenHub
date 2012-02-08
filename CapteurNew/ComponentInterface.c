@@ -154,6 +154,7 @@ void *ListenSunSpot(void *message1) {
 		ManageMessage(message);
 	}
 
+	free(message);
 	close(sFd);
 
 	return 0;
@@ -241,6 +242,7 @@ void *ListenEnOcean(void *message2)
 		ManageMessage(message);
 	}
 	close(sFd);
+	free(message);
 	return 0;
 }
 
@@ -250,7 +252,7 @@ void ManageMessage(char* message)
 	Sensor* currentSensor;
 
 
-#if DEBUG > 0
+#if DEBUG == 0
 	printf("Message : %s \n", message);
 #endif
 
@@ -263,8 +265,8 @@ void ManageMessage(char* message)
 		if (strcmp(str_sub(currentSensor->id, 0, 7), str_sub(message, 10, 17)) == 0)
 		{
 			/*printf("Détecteur présent dans la liste ! \n");*/
-			currentSensor->decodeMessage(message, *currentSensor);			
-			break;
+			currentSensor->decodeMessage(message, *currentSensor);
+			currentSensor = currentSensor->next;
 		}
 		else
 		{
@@ -272,9 +274,6 @@ void ManageMessage(char* message)
 		}
 	}
 	sem_post(&mutex_sensorList);
-	if (currentSensor != NULL){
-		GetInfoFromSensor(currentSensor->id);
-	}
 
 	/* If the sensor isn't in the sensors' list */
 

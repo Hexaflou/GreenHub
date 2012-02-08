@@ -29,6 +29,8 @@ int AddSensorByEEP(char id[8], Sensor * p_sensorList, EEP* p_EEPList, char org[3
 int AddSensorsContact(char id[8], Sensor ** pp_sensorList, float arg1, float arg2);
 int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, float arg1, float arg2);
 int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, float arg1, float arg2);
+int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float arg1, float arg2);
+
 
 #endif /* COMPONENTINTERFACE_H_ */
  

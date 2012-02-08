@@ -60,4 +60,13 @@ void initializeSensorAndEEPList(Sensor * p_sensorList, EEP* EEPList){
 
 	AddSensorByEEP(id, p_sensorList, EEPList, org, funct, type);
 
+	/* Light and Occupancy Sensor */
+
+	strcpy(id, "00054155");
+	strcpy(org, "07");
+	strcpy(funct, "08");
+	strcpy(type, "01");	
+
+	AddSensorByEEP(id, p_sensorList, EEPList, org, funct, type);
+
 }

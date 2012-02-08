@@ -9,20 +9,42 @@
 #include "Utility.h"
 #include "gLogs.h"
 
-int addSensorsTemp(char id[8], Sensor *sensorList){
-	struct Sensor *sensor;
-	sensor = (Sensor*) malloc (sizeof(Sensor));	
-	return 0;
+int decodeMessageLight(char * message, struct Sensor sensor){
+	float light;
+	light = (float) getLightLittleSensor(message);
+	light = light * (((Range*) sensor.rangeData)->rangeMax
+			- ((Range*) sensor.rangeData)->rangeMin) / 255; 
+	if (sensor.value != light)
+	{
+		sensor.value = light;
+		printf("Value change ! \n");
+		printf("Sensor value : %f \n", sensor.value);
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int decodeMessageOccupancy(char* message, struct Sensor sensor)
+{
+	int occupancy;	
+	sensor.value = getOccupancy(message);
+	if (occupancy == 1){
+		printf("Button released. \n");
+	}else{
+		printf("Button pressed. \n");
+	}
+	return 1;
 }
 
 int decodeMessageTemp(char* message, struct Sensor sensor)
 {
-	float temp,temp2;
-	temp2 = (float) getTempWithoutRange(message);
-	temp = temp2 * (((Range*) sensor.rangeData)->rangeMax
+	float temp;
+	temp = (float) getTempWithoutRange(message);
+	temp = temp * (((Range*) sensor.rangeData)->rangeMax
 			- ((Range*) sensor.rangeData)->rangeMin) / 255;
-	printf("Temperature : %f x (%f - %f)/255 \n",temp2,((Range*) sensor.rangeData)->rangeMax, ((Range*) sensor.rangeData)->rangeMin); 
-
 	if (sensor.value != temp)
 	{
 		sensor.value = temp;
@@ -98,6 +120,13 @@ int getLightBigSensor(char* message)
 	int light;
 	light = xtoi(str_sub(message, 4, 7)); /* Extract from the message the temperature */
 	return light;
+}
+
+int getOccupancy(char* message)
+{
+	int occupancy;
+	occupancy = xtoi(str_sub(message, 8, 9)); /* Extract from the message the temperature */
+	return occupancy;
 }
 
 /* Return the contact value from the message

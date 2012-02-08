@@ -350,9 +350,11 @@ int initializeEEPList(EEP* EEPList)
 	/* !!!!!! NOT SUPPORTED YET !!!!!! */
 	/* Insert EEP 07-08-01*/
 	strcpy(EEPCurrent->eep,"070801");
-	strcpy(EEPCurrent->name,"Capteur de lumière, température et présence [0-510lx][0-51°C]\0");
-	EEPCurrent->AddSensors = NULL;	
+	strcpy(EEPCurrent->name,"Capteur de lumière et présence [0-510lx]\0");
+	EEPCurrent->AddSensors = AddSensorsLightOccupancy;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
+	EEPCurrent->arg1 = 0;
+	EEPCurrent->arg2 = 510;
 	
 	EEPCurrent = EEPCurrent->next;
 
@@ -501,4 +503,38 @@ int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, float arg1, float arg2){
 	p_sensor->decodeMessage = decodeMessageTemp;
 	p_sensor->next = NULL;
 	return 0;	
+}
+
+int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float arg1, float arg2){
+	Sensor* p_sensor;
+	p_sensor = *pp_sensorList;
+	while ( (p_sensor != NULL) && (p_sensor->next != NULL) ){
+		p_sensor = p_sensor->next;
+	}
+	if (p_sensor != NULL){
+		p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
+		p_sensor = p_sensor->next;
+	}else{
+		p_sensor = (Sensor*)malloc(sizeof(Sensor));
+	}
+	strcpy(p_sensor->id,id);
+	p_sensor->id[9] = 'e';
+	p_sensor->id[10] = 'L';
+	p_sensor->value = 0;
+	p_sensor->rangeData = (Range*)malloc(sizeof(Range));
+	p_sensor->rangeData->rangeMax = arg2;
+	p_sensor->rangeData->rangeMin = arg1;	
+	p_sensor->decodeMessage = decodeMessageLight;
+
+	p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
+	p_sensor = p_sensor->next;
+
+	strcpy(p_sensor->id,id);
+	p_sensor->id[9] = 'e';
+	p_sensor->id[10] = 'O';
+	p_sensor->value = 0;	
+	p_sensor->decodeMessage = decodeMessageOccupancy;
+	p_sensor->next = NULL;
+
+	return 0;
 }

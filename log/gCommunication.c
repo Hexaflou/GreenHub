@@ -17,6 +17,7 @@ typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr SOCKADDR;
 typedef struct in_addr IN_ADDR;
 
+#include <time.h>
 
 #include "cJSON.h"
 
@@ -25,7 +26,7 @@ static SOCKET sock;
 static struct hostent *hostinfo;
 static SOCKADDR_IN sin  = { 0 };/* initialise la structure avec des 0 */
 
-int gCommunicationInit()
+int gCommunicationInit(int userId)
 {
 	cJSON *init = cJSON_CreateObject();
 	char * msg = NULL;
@@ -58,9 +59,8 @@ int gCommunicationInit()
 	}
 	
 	/* Envoi des informations de login */
-	/*TODO : remplacer ces infos par des données variables */
 	cJSON_AddStringToObject(init,"msg_type","login");
-	cJSON_AddNumberToObject(init,"user_id",1);
+	cJSON_AddNumberToObject(init,"user_id",userId);
 	msg = cJSON_Print(init);
 
 	gCommunicationSend(msg);
@@ -85,5 +85,36 @@ int gCommunicationSend(char * msg)
 int gCommunicationClose()
 {
 	closesocket(sock);
+	return 0;
+}
+
+int gLogsLog(char mac[40], double value)
+{
+	cJSON *data = cJSON_CreateObject();
+	char * msg = NULL;
+	
+	cJSON_AddStringToObject(data,"msg_type","new_state");
+	cJSON_AddStringToObject(data,"mac_address",mac);
+	cJSON_AddNumberToObject(data,"new_value",value);
+	cJSON_AddNumberToObject(data,"date",(int)time(NULL));
+	
+	
+	msg = cJSON_Print(data);
+	
+	gCommunicationSend(msg);
+	
+	/* Clean data */
+	free(msg);
+	cJSON_Delete(data);
+}
+
+int main ()
+{
+	int i = 0;
+	gCommunicationInit(1);
+	for (i = 0 ; i < 50 ; i++)
+		gLogsLog("42",i);
+	
+	gCommunicationClose();
 	return 0;
 }

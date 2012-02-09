@@ -22,23 +22,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: Client
+all: Comsend
 
 # Tool invocations
-Client: $(OBJS) $(USER_OBJS)
+Comsend: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-<<<<<<< HEAD
-	gcc  -o "Capteur" $(OBJS) $(USER_OBJS) $(LIBS)
-=======
-	gcc  -o"Client" $(OBJS) $(USER_OBJS) $(LIBS)
->>>>>>> f75295c2279fa616f321d7fd4fbebfc118bc7f32
+	gcc  -o"Comsend" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) Client
+	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) Comsend
 	-@echo ' '
 
 .PHONY: all clean dependents

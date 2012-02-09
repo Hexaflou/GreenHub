@@ -167,13 +167,13 @@ static const char *parse_string(cJSON *item,const char *str)
 				case 'u':	 /* transcode utf16 to utf8. */
 					sscanf(ptr+1,"%4x",&uc);ptr+=4;	/* get the unicode char. */
 
-					if ((uc>=0xDC00 && uc<=0xDFFF) || uc==0)	break;	/* check for invalid.*/
+					if ((uc>=0xDC00 && uc<=0xDFFF) || uc==0)	break;	// check for invalid.
 
-					if (uc>=0xD800 && uc<=0xDBFF)	/* UTF16 surrogate pairs.*/
+					if (uc>=0xD800 && uc<=0xDBFF)	// UTF16 surrogate pairs.
 					{
-						if (ptr[1]!='\\' || ptr[2]!='u')	break;	/* missing second-half of surrogate.*/
+						if (ptr[1]!='\\' || ptr[2]!='u')	break;	// missing second-half of surrogate.
 						sscanf(ptr+3,"%4x",&uc2);ptr+=6;
-						if (uc2<0xDC00 || uc2>0xDFFF)		break;	/* invalid second-half of surrogate.*/
+						if (uc2<0xDC00 || uc2>0xDFFF)		break;	// invalid second-half of surrogate.
 						uc=0x10000 | ((uc&0x3FF)<<10) | (uc2&0x3FF);
 					}
 

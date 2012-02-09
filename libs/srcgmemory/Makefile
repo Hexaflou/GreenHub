@@ -1,48 +1,42 @@
-# $Id: Makefile 95 2009-10-06 12:55:04Z simon_duquennoy $
-#------------------------------------------------------------
+ROOTDIR=../libhw
+LIBNAME=hw
+LIBFILE=$(ROOTDIR)/lib/lib$(LIBNAME).a
 
-CC = gcc
-AR = ar
-RANLIB = ranlib
-CFLAGS = -Wall -pedantic -m32 -g
-
-INSTALLDIR = ../libgmemory
-
-OBJECTS = gmemory.o
-
-HARDWARELIB = libgmemory.a
-
-all: $(HARDWARELIB)
+CC      = gcc
+CFLAGS  = -Wall -ansi -pedantic -g -m32
+LIBDIR  = $(ROOTDIR)/lib
+INCDIR  = -I$(ROOTDIR)/include
+LIBS    = -L$(LIBDIR) -l$(LIBNAME)
 
 ###------------------------------
-### Bibliotheque
+### Main targets 
 ###------------------------------------------------------------
-$(HARDWARELIB): $(OBJECTS)
-	$(AR) cr $(HARDWARELIB) $(OBJECTS)
-	$(RANLIB) $(HARDWARELIB)
+BINARIES= main
+
+all: $(BINARIES)
 
 ###------------------------------
-### Inclusions
+### Main rules 
 ###------------------------------------------------------------
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< $(INCDIR)
+
+%: %.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+
 Makefile.depends:
 	$(CC) -MM *.c $(INCDIR) > Makefile.depends
 
 include Makefile.depends
 
-###------------------------------
-### Tools
-###------------------------------------------------------------
-.PHONY: clean realclean 
-clean:
-	rm -f $(HARDWARELIB)
-	rm -f *.o
-	rm -f Makefile.depends
+main: main.o $(LIBFILE)
+
 
 ###------------------------------
-### Install
+### Misc.
 ###------------------------------------------------------------
-.PHONY: install
-install: $(HARDWARELIB)
-	mkdir -p $(INSTALLDIR)/lib $(INSTALLDIR)/include
-	install -m 644 $(HARDWARELIB) $(INSTALLDIR)/lib 
-	install -m 644 hw.h $(INSTALLDIR)/include
+.PHONY: clean
+clean:
+	$(RM) *.o $(BINARIES) Makefile.depends
+

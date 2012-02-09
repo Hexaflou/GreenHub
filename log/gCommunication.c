@@ -115,14 +115,3 @@ int gCommunicationLogSend(char mac[40], double value)
 	cJSON_Delete(data);
 	return ret;
 }
-
-int main ()
-{
-	int i = 0;
-	gCommunicationInit(1);
-	for (i = 0 ; i < 50 ; i++)
-		gLogsLog("42",i);
-	
-	gCommunicationClose();
-	return 0;
-}

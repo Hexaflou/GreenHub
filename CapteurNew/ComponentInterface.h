@@ -10,6 +10,7 @@
 
 #define SOCKET_ERROR -1
 #define ERROR -1
+#define OK 0
 #define DEBUG 0
 
 #include "Utility.h"
@@ -27,7 +28,7 @@ void *ListenEnOcean(void *ptr);
 
 void ManageMessage(char* message);
 
-float GetInfoFromSensor(char message[10]);
+int GetInfoFromSensor(char id[10], float * p_value);
 int AddSensor(char id[8], char org[2], char funct[2], char type[2]);
 
 Sensor * getSensorList();

@@ -1,4 +1,5 @@
 #include "Component.h" 
+#include "ComponentInterface.h"
 #include "EEP.h"
 #include "string.h"
 #include <stdlib.h>
@@ -84,8 +85,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre -40°C et 0°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = -40;
-	EEPCurrent->arg2 = 0;	
+	EEPCurrent->scaleMin = -40;
+	EEPCurrent->scaleMax = 0;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;	
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -94,8 +97,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre -30°C et 10°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = -30;
-	EEPCurrent->arg2 = 10;	
+	EEPCurrent->scaleMin = -30;
+	EEPCurrent->scaleMax = 10;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;
 	
 	EEPCurrent = EEPCurrent->next;
 
@@ -104,8 +109,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre -20°C et 20°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = -20;
-	EEPCurrent->arg2 = 20;		
+	EEPCurrent->scaleMin = -20;
+	EEPCurrent->scaleMax = 20;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;	
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -114,8 +121,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre -10°C et 30°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = -10;
-	EEPCurrent->arg2 = 30;		
+	EEPCurrent->scaleMin = -10;
+	EEPCurrent->scaleMax = 30;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;	
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -124,8 +133,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 0°C et 40°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 0;
-	EEPCurrent->arg2 = 40;
+	EEPCurrent->scaleMin = 0;
+	EEPCurrent->scaleMax = 40;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -134,8 +145,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 10°C et 50°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 10;
-	EEPCurrent->arg2 = 50;		
+	EEPCurrent->scaleMin = 10;
+	EEPCurrent->scaleMax = 50;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;	
 
 
 	EEPCurrent = EEPCurrent->next;
@@ -145,8 +158,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 20°C et 60°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 20;
-	EEPCurrent->arg2 = 60;		
+	EEPCurrent->scaleMin = 20;
+	EEPCurrent->scaleMax = 60;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;	
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -155,8 +170,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 30°C et 70°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 30;
-	EEPCurrent->arg2 = 70;		
+	EEPCurrent->scaleMin = 30;
+	EEPCurrent->scaleMax = 70;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;	
 
 
 	EEPCurrent = EEPCurrent->next;
@@ -166,8 +183,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 40°C et 80°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 40;
-	EEPCurrent->arg2 = 80;		
+	EEPCurrent->scaleMin = 40;
+	EEPCurrent->scaleMax = 80;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;	
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -176,8 +195,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 50°C et 90°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 50;
-	EEPCurrent->arg2 = 90;		
+	EEPCurrent->scaleMin = 50;
+	EEPCurrent->scaleMax = 90;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;	
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -186,8 +207,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 60°C et 100°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 60;
-	EEPCurrent->arg2 = 100;		
+	EEPCurrent->scaleMin = 60;
+	EEPCurrent->scaleMax = 100;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;	
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -196,8 +219,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre -60°C et 20°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = -60;
-	EEPCurrent->arg2 = 20;		
+	EEPCurrent->scaleMin = -60;
+	EEPCurrent->scaleMax = 20;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;	
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -206,8 +231,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre -50°C et 30°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = -50;
-	EEPCurrent->arg2 = 30;		
+	EEPCurrent->scaleMin = -50;
+	EEPCurrent->scaleMax = 30;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;	
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -216,8 +243,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre -40°C et 40°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = -40;
-	EEPCurrent->arg2 = 40;		
+	EEPCurrent->scaleMin = -40;
+	EEPCurrent->scaleMax = 40;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;		
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -226,8 +255,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre -30°C et 50°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = -30;
-	EEPCurrent->arg2 = 50;		
+	EEPCurrent->scaleMin = -30;
+	EEPCurrent->scaleMax = 50;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;		
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -236,8 +267,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre -20°C et 60°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = -20;
-	EEPCurrent->arg2 = 60;		
+	EEPCurrent->scaleMin = -20;
+	EEPCurrent->scaleMax = 60;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;		
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -246,8 +279,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre -10°C et 70°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = -10;
-	EEPCurrent->arg2 = 70;		
+	EEPCurrent->scaleMin = -10;
+	EEPCurrent->scaleMax = 70;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;		
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -256,8 +291,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 0°C et 80°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 0;
-	EEPCurrent->arg2 = 80;		
+	EEPCurrent->scaleMin = 0;
+	EEPCurrent->scaleMax = 80;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;		
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -266,8 +303,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 10°C et 90°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 10;
-	EEPCurrent->arg2 = 90;		
+	EEPCurrent->scaleMin = 10;
+	EEPCurrent->scaleMax = 90;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;		
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -276,8 +315,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 20°C et 100°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 20;
-	EEPCurrent->arg2 = 100;		
+	EEPCurrent->scaleMin = 20;
+	EEPCurrent->scaleMax = 100;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;		
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -286,8 +327,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 30°C et 110°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 30;
-	EEPCurrent->arg2 = 110;		
+	EEPCurrent->scaleMin = 30;
+	EEPCurrent->scaleMax = 110;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;		
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -296,8 +339,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 40°C et 120°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 40;
-	EEPCurrent->arg2 = 120;		
+	EEPCurrent->scaleMin = 40;
+	EEPCurrent->scaleMax = 120;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;		
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -306,8 +351,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de température, entre 50°C et 130°C\0");
 	EEPCurrent->AddSensors = AddSensorsTemp;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 50;
-	EEPCurrent->arg2 = 130;		
+	EEPCurrent->scaleMin = 50;
+	EEPCurrent->scaleMax = 130;
+	EEPCurrent->rangeMin = 255;
+	EEPCurrent->rangeMax = 0;		
 
 	EEPCurrent = EEPCurrent->next;
 
@@ -353,8 +400,10 @@ int initializeEEPList(EEP* EEPList)
 	strcpy(EEPCurrent->name,"Capteur de lumière et présence [0-510lx]\0");
 	EEPCurrent->AddSensors = AddSensorsLightOccupancy;	
 	EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
-	EEPCurrent->arg1 = 0;
-	EEPCurrent->arg2 = 510;
+	EEPCurrent->scaleMin = 0;
+	EEPCurrent->scaleMax = 510;
+	EEPCurrent->rangeMin = 0;
+	EEPCurrent->rangeMax = 255;
 	
 	EEPCurrent = EEPCurrent->next;
 
@@ -415,31 +464,66 @@ int initializeEEPList(EEP* EEPList)
 	return 0;
 }
 
+int destroyEEPList(EEP* p_EEPList){
+	char reponse;
+	int retour;
+	int ok = 0;
+	printf("Etes-vous sur de vouloir supprimer la liste d EEP? Ceux non sauvegardes dans le fichier de configuration ne pourront etre recupere (y/n) :\n");
+	while (!ok){
+	
+		retour = scanf("%c%*[^\n]", &reponse);
+		if (reponse!= 'y' && reponse != 'Y' && reponse !='n' && reponse != 'N' ){
+		/* erreur de saisie, on vide le flux */
+		int c;
+		while ( ((c = getchar()) != '\n') && c != EOF);
+		
+		printf("Saisie invalide.\n");
+		printf("Veuillez recommencer :\n");
+		}
+		else {
+		/* reussite de la saisie */
+		getchar(); /* on enleve le '\n' restant */
+		
+		printf("saisie acceptee\n");
+		break;  /* sort de la boucle */
+		}
+	}
+	if (reponse == 'y' || reponse == 'Y'){
+		printf("Suppression EEP\n");
+	}
+	return 0;
+}
+
+/* Fonction permettant d ajouter un capteur a la liste de capteurs a partir de son EEP 
+** L EEP est compose de 6 caracteres, provenant de org-funct-type.
+** Renvoie 0 si OK, -1 si l EEP n est pas supporte, et -2 si l EEP correspondant est introuvable.
+*/
 int AddSensorByEEP(char id[8], Sensor * p_sensorList, EEP* EEPList, char org[3], char funct[3], char type[3]){
 	char eep[6];
+
+	/* Concatenation de org, funct et type dans eep */
 	strcpy(eep,org);
 	strcat(eep,funct);
 	strcat(eep,type);
+
 	while (EEPList != NULL){
-		if (strcmp(EEPList->eep,eep) != 0)
+		if (strcmp(EEPList->eep,eep) != 0)	/* Si l EEP courant est different de l EEP du capteur */
 		{
 			EEPList = EEPList->next;
 		}else{
 			if (EEPList->AddSensors == NULL){
-				return -1;	/* EEP not supported yet */
+				return NOT_SUPPORTED;	/* L EEP n est pas encore supporte */
 			}
-			EEPList->AddSensors(id, &p_sensorList, EEPList->arg1, EEPList->arg2);
-			return 0;
+			EEPList->AddSensors(id, &p_sensorList, EEPList->scaleMin, EEPList->scaleMax, EEPList->rangeMin, EEPList->rangeMax);
+			return OK;
 		}
 	}
-	return -2;	/* EEP not found */
+	return NOT_FOUND;	/* EEP introuvable */
 }
 
-int destroyEEPList(EEP* p_EEPList){
-	return 0;
-}
 
-int AddSensorsContact(char id[8], Sensor ** pp_sensorList, float arg1, float arg2){	
+
+int AddSensorsContact(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax){	
 	Sensor* p_sensor;
 	p_sensor = *pp_sensorList;
 	while ( (p_sensor != NULL) && (p_sensor->next != NULL) ) {
@@ -460,7 +544,7 @@ int AddSensorsContact(char id[8], Sensor ** pp_sensorList, float arg1, float arg
 	return 0;
 }
 
-int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, float arg1, float arg2){
+int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax){
 	Sensor* p_sensor;
 	p_sensor = *pp_sensorList;
 	while ( (p_sensor != NULL) && (p_sensor->next != NULL) ){
@@ -481,7 +565,7 @@ int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, float arg1, float arg2
 	return 0;
 }
 
-int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, float arg1, float arg2){
+int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax){
 	Sensor* p_sensor;
 	p_sensor = *pp_sensorList;
 	while ( (p_sensor != NULL) && (p_sensor->next != NULL) ){
@@ -498,14 +582,16 @@ int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, float arg1, float arg2){
 	p_sensor->id[10] = 'T';
 	p_sensor->value = 0;
 	p_sensor->rangeData = (Range*)malloc(sizeof(Range));
-	p_sensor->rangeData->rangeMax = arg2;
-	p_sensor->rangeData->rangeMin = arg1;	
+	p_sensor->rangeData->scaleMax = scaleMax;
+	p_sensor->rangeData->scaleMin = scaleMin;
+	p_sensor->rangeData->rangeMax = rangeMax;
+	p_sensor->rangeData->rangeMin = rangeMin;	
 	p_sensor->decodeMessage = decodeMessageTemp;
 	p_sensor->next = NULL;
 	return 0;	
 }
 
-int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float arg1, float arg2){
+int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax){
 	Sensor* p_sensor;
 	p_sensor = *pp_sensorList;
 	while ( (p_sensor != NULL) && (p_sensor->next != NULL) ){
@@ -522,8 +608,10 @@ int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float arg1, fl
 	p_sensor->id[10] = 'L';
 	p_sensor->value = 0;
 	p_sensor->rangeData = (Range*)malloc(sizeof(Range));
-	p_sensor->rangeData->rangeMax = arg2;
-	p_sensor->rangeData->rangeMin = arg1;	
+	p_sensor->rangeData->scaleMax = scaleMax;
+	p_sensor->rangeData->scaleMin = scaleMin;
+	p_sensor->rangeData->rangeMax = rangeMax;
+	p_sensor->rangeData->rangeMin = rangeMin;
 	p_sensor->decodeMessage = decodeMessageLight;
 
 	p_sensor->next = (Sensor*)malloc(sizeof(Sensor));

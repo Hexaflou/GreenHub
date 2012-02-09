@@ -15,9 +15,13 @@
 #define B0 3
 #define NO_BUTTON 4
 #define THREE_FOUR 5
+#define VALUE_CHANGE 0
+#define NO_CHANGE 1
 
 typedef struct Range{
 	/* Set the range of the measure (ex : from -40°C to 0°C, from -30°C to 10°C, ...) */
+	float scaleMin;
+	float scaleMax;
 	float rangeMin;
 	float rangeMax;
 }Range;

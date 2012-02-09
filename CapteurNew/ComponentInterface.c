@@ -5,15 +5,16 @@
  * Author: H4212
  */
 
-/* Internal Includes */
+/* Inclusions internes */
 #include "ComponentInterface.h"
 #include "memoryGHome.h"
 #include "Utility.h"
 #include "Component.h"
 #include "Test.h"
 #include "gLogs.h"
+#include "EEP.h"
 
-/* External Includes */
+/* Inclusions externes */
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -24,10 +25,12 @@
 #include <pthread.h>
 #include <semaphore.h>
 
+/* Déclaration de variable */
 sem_t mutex_sensorList;
 Sensor* p_sensorList;
 EEP* p_EEPList;
 
+/* Fonction lançant les deux connections d'écoute avec les périphériques EnOcean et SunSpot */
 int ComponentInterface()
 {
 	pthread_t thread1, thread2;
@@ -38,7 +41,7 @@ int ComponentInterface()
 
 
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
-		perror("[ComponentInterface] sensorList's semaphor's initialization failed.\n");
+		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
 		return (int)ERROR;
 	}
 
@@ -61,30 +64,31 @@ int ComponentInterface()
 	/* iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);	*/
 	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
 
-	gLogsInit();
-	/*ListenEnOcean(ptt); */
-
 	/* on les attend
 	pthread_join(thread1, NULL);	*/
-	pthread_join(thread2, NULL);	
-	gLogsClose();
+	pthread_join(thread2, NULL);		
 	return 0;
 }
 
+
+/* Fonction permettant l'écoute de périphérique SunSpot.
+** Si un composant SunSpot non enregistré communique, il sera
+** automatiquement enregistré dans notre liste de capteurs.
+*/
 void *ListenSunSpot(void *message1) {
 	int sFd;
 	char buffer[46], *message; /* on recevra le message en une seule fois */
-    long n;
+    	long n;
 	int tailleTrame;
 	struct sockaddr_in serverAddr;
 	socklen_t serverAddrLen = sizeof(serverAddr);
     
-	/* Internet Protocol */
+	/* Protocole internet */
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); /* on assume que le serveur Java sera local */
 	serverAddr.sin_port = htons(1337);
 
-	/* UDP, not TCP, Socket Creation */
+	/* Création d'un socket UDP */
 	if ((sFd = socket(AF_INET, SOCK_STREAM, 0)) == ERROR)
 	{
 		perror("[ListenSunSpot] SunSPOT UDP Socket Creation Error \n");
@@ -137,13 +141,13 @@ void *ListenSunSpot(void *message1) {
             printf("[ListenSunSpot] Buffer length : %s \n", buffer);
         #endif
 
-		/* Convert array of char corresponding to hexadecimal number to int */
+		/* Convertit un tableau de caractère hexadecimal en entier */
 		tailleTrame = xtoi(buffer);
 
-		/* One byte corresponds to 2 char */
+		/* Un octet correspond à 2 caractères */
 		message = (char*) malloc(tailleTrame * sizeof(char) * 2 + 1);
 
-		/* Reception of the message without the header */
+		/* Reception du message sans le header */
 		if ((n = recv(sFd, message, tailleTrame * 2, 0)) < 0)
 		{
 			perror("[ListenSunSpot] Data Reception Error \n");
@@ -156,10 +160,13 @@ void *ListenSunSpot(void *message1) {
 
 	free(message);
 	close(sFd);
-
 	return 0;
 }
 
+/* Fonction permettant l'écoute de périphériques EnOcean.
+** Elle reçoit des messages du récepteur EnOcean, enlève
+** l'en-tête et appelle le traitement de celui-ci.
+*/
 void *ListenEnOcean(void *message2)
 {
 	int sFd;
@@ -169,70 +176,70 @@ void *ListenEnOcean(void *message2)
 	struct sockaddr_in serverAddr;
 	socklen_t serverAddrLen = sizeof(serverAddr);
 
-	/* Internet Protocol */
+	/* Protocole Internet */
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_addr.s_addr = inet_addr("134.214.105.28");
 	serverAddr.sin_port = htons(5000);
 
-	/* TCP Socket Creation */
+	/* Creation d un socket TCP */
 	if ((sFd = socket(AF_INET, SOCK_STREAM, 0)) == ERROR)
 	{
-		perror("[ListenEnOcean] TCP Socket Creation Error \n");
+		perror("[ListenEnOcean] Erreur dans la creation du socket TCP.\n");
 		return (int*)ERROR;
 	}
 
 #if DEBUG > 0
-	printf("[ListenEnOcean] Connection with the server...\n");
+	printf("[ListenEnOcean] Connection avec le serveur...\n");
 #endif
 
 	if (connect(sFd, (struct sockaddr*) &serverAddr, serverAddrLen) == -1)
 	{
-		perror("[ListenEnOcean] Socket connection Error \n");
+		perror("[ListenEnOcean] Erreur dans la connection du socket\n");
 		return (int*)SOCKET_ERROR;
 	}
 
 #if DEBUG > 0
-	printf("[ListenEnOcean] Connection with the server OK\n");
+	printf("[ListenEnOcean] Connection avec le serveur OK\n");
 #endif
 
 	while (1)
 	{
 #if DEBUG > 0
-		printf("[ListenEnOcean] Waiting for a message debut...\n");
+		printf("[ListenEnOcean] Attente d un debut de message...\n");
 #endif
 
 		while (strcmp(buffer, "A55A") != 0)
 		{
 			if ((n = recv(sFd, buffer, sizeof(buffer - 1), 0)) < 0)
 			{
-				perror("[ListenEnOcean] Receive Error \n");
+				perror("[ListenEnOcean] Erreur dans la reception du message \n");
 				break;
 			}
 			buffer[4] = '\0';
 		}
 
 #if DEBUG > 0
-		printf("[ListenEnOcean] Message received.\n");
+		printf("[ListenEnOcean] Message recu.\n");
 #endif
 
 		if ((n = recv(sFd, buffer, 2, 0)) < 0)
 		{
-			perror("[ListenEnOcean] Data Reception Error \n");
+			perror("[ListenEnOcean] Erreur dans la reception des donnees.\n");
 			break;
 		}
 		buffer[2] = '\0';
 
 #if DEBUG > 0
-		printf("[ListenEnOcean] Buffer length : %s \n", buffer);
+		printf("[ListenEnOcean] Taille du buffer : %s \n", buffer);
 #endif
 
-		/* Convert array of char corresponding to hexadecimal number to int */
+		/* Convertit un tableau de caractere en hexadecimal en nombre decimal */
 		tailleTrame = xtoi(buffer);
 
-		/* One byte corresponds to 2 char */
+		/* Un octet correspond a deux caracteres */
 		message = (char*) malloc(tailleTrame * sizeof(char) * 2 + 1);
 
-		/* Reception of the message without the header */
+		/* Reception du message sans le header */
 		if ((n = recv(sFd, message, tailleTrame * 2, 0)) < 0)
 		{
 			perror("[ListenEnOcean] Data Reception Error \n");
@@ -246,23 +253,27 @@ void *ListenEnOcean(void *message2)
 	return 0;
 }
 
+/* Fonction traitant les messages EnOcean.
+** Si le capteur emettant le message est enregistre dans notre configuration
+** son message sera traite. Si le message est un message de Teach-In ce capteur pourra
+** etre integre dynamiquement a notre configuration, seulement si son EEP est connu de
+** l'application.
+*/
 void ManageMessage(char* message)
 {
 	int org, teachIn;
 	Sensor* currentSensor;
-
-
-#if DEBUG == 0
-	printf("Message : %s \n", message);
-#endif
+	#if DEBUG > 0
+		printf("Message : %s \n", message);
+	#endif
 
 	sem_wait(&mutex_sensorList);
 	currentSensor = p_sensorList;
 
-	/* Search of the sensor in the sensors' list */
+	/* Recherche du capteur dans la liste de capteurs */
 	while (currentSensor != NULL)
 	{
-		if (strcmp(str_sub(currentSensor->id, 0, 7), str_sub(message, 10, 17)) == 0)
+		if (strcmp(str_sub(currentSensor->id, 0, 7), str_sub(message, 10, 17)) == 0) /* Détecteur présent dans la liste */
 		{
 			/*printf("Détecteur présent dans la liste ! \n");*/
 			currentSensor->decodeMessage(message, *currentSensor);
@@ -274,38 +285,54 @@ void ManageMessage(char* message)
 		}
 	}
 	sem_post(&mutex_sensorList);
+	destroyEEPList(p_EEPList);
 
 	/* If the sensor isn't in the sensors' list */
 
 }
 
-float GetInfoFromSensor(char id[10]){
+/* Fonction permettant de retirer la valeur d un capteur. 
+** Cette valeur est retiree par le pointeur p_value, qui doit etre initialise au prealable.
+** Renvoie -1 si erreur, 0 si OK.
+*/
+int GetInfoFromSensor(char id[10], float * p_value){
 	char realId[8];
 	Sensor* currentSensor;
-	strcpy(realId,str_sub(id, 0, 7));
+	strcpy(realId,str_sub(id, 0, 7));	/* L'ID reel d un peripherique est compose de 8 caracteres */
+
+	*p_value = 0;
 
 	sem_wait(&mutex_sensorList);
 	currentSensor = p_sensorList;
-	/* Search of the sensor in the sensors' list */
+
+	/* Recherche du capteur dans la liste de capteurs */
 	while (currentSensor != NULL)
 	{
 		if (strcmp(currentSensor->id, realId) == 0)
 		{
 			/*printf("Détecteur présent dans la liste ! \n");*/
 			sem_post(&mutex_sensorList);
-			return currentSensor->value;
+			*p_value = currentSensor->value;
+			return OK;
 		}
 		else
 		{
 			currentSensor = currentSensor->next;
 		}
 	}
-	sem_post(&mutex_sensorList);
-	return (float)0;
+	sem_post(&mutex_sensorList);	
+	return ERROR;
 }
 
 int AddSensor(char id[8], char org[2], char funct[2], char type[2])
 {
-	return 0;
+	return AddSensorByEEP(id, p_sensorList, p_EEPList, org, funct, type);	
 }
 
+Sensor * getSensorList(){
+	return p_sensorList;
+}
+
+sem_t getSemaphore(){
+	return mutex_sensorList;
+}

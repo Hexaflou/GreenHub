@@ -10,12 +10,12 @@
 
 #define SOCKET_ERROR -1
 #define ERROR -1
-#define DEBUG 1
-#define __DEBUG__ 1
+#define DEBUG 0
 
 #include "Utility.h"
 #include "Component.h"
 #include "EEP.h"
+#include "semaphore.h"
 
 int initializeEEPList(EEP*);
 
@@ -25,9 +25,12 @@ void *ListenSunSpot(void *ptr);
 
 void *ListenEnOcean(void *ptr);
 
-void ManageMessage(char* message, Sensor * p_sensorList);
+void ManageMessage(char* message);
 
-float GetInfoFromSensor(char message[10], Sensor * p_sensorList);
+float GetInfoFromSensor(char message[10]);
 int AddSensor(char id[8], char org[2], char funct[2], char type[2]);
+
+Sensor * getSensorList();
+sem_t getSemaphore();
 
 #endif /* COMPONENTINTERFACE_H_ */

@@ -11,6 +11,7 @@
 #include "Utility.h"
 #include "Component.h"
 #include "Test.h"
+#include "gLogs.h"
 
 /* External Includes */
 
@@ -29,11 +30,19 @@ int ComponentInterface()
 	char *message2 = "Thread EnOcean";
 	int iret1, iret2;
 	void* ptt;
+	Sensor** pp_sensorList;
+	EEP* p_EEPList;
 
-	/* Initialisation des capteurs */
-	initializeSensorList();
+	pp_sensorList = (Sensor**)malloc(sizeof(Sensor*));
+	p_EEPList = NULL;
+
+
+	/* Initialisation des capteurs et EEP */
+	initializeSensorAndEEPList(pp_sensorList, p_EEPList);
+
 
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
+
 	/* on les créé, passe un argument on verra plus tard lequel exactement */
 	iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
 	//iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
@@ -42,10 +51,9 @@ int ComponentInterface()
 
 	/*ListenEnOcean(ptt); */
 
-	/* on les attend */
-	pthread_join(thread1, NULL);
-	//pthread_join(thread2, NULL);
-
+	/* on les attend
+	pthread_join(thread1, NULL);	*/
+	pthread_join(thread2, NULL);	
 	gLogsClose();
 
 	return 0;
@@ -156,7 +164,7 @@ void *ListenSunSpot(void *ptr) {
 	return 0;
 }
 
-void *ListenEnOcean(void *ptr)
+void *ListenEnOcean(void *p_sensorList)
 {
 	int sFd;
 	char buffer[5], *message;
@@ -235,31 +243,31 @@ void *ListenEnOcean(void *ptr)
 			break;
 		}
 		message[tailleTrame * 2] = '\0';
-		ManageMessage(message);
+		ManageMessage(message, (Sensor * ) p_sensorList);
 	}
 	close(sFd);
 	return 0;
 }
 
-void ManageMessage(char* message)
+void ManageMessage(char* message, Sensor * p_sensorList)
 {
 	int org, teachIn;
 	Sensor* currentSensor;
 
 
-	currentSensor = sensorList;
+	currentSensor = p_sensorList;
 
 	#if DEBUG > 0
 		printf("Message : %s \n", message);
 	#endif
 
-	org = atoi(str_sub(message, 0, 1)); /* Extract from the message the type of sensor */
-	teachIn = atoi(str_sub(message, 8, 9)); /* Extract from the message the characters indicating the teach-in message */
+	/*org = atoi(str_sub(message, 0, 1));*/ /* Extract from the message the type of sensor */
+	/*teachIn = atoi(str_sub(message, 8, 9));*/ /* Extract from the message the characters indicating the teach-in message */
 
 	/* Search of the sensor in the sensors' list */
 	while (currentSensor != NULL)
 	{
-		if (strcmp(str_sub(currentSensor->id, 1, 8), str_sub(message, 10, 17)) == 0)
+		if (strcmp(str_sub(currentSensor->id, 0, 7), str_sub(message, 10, 17)) == 0)
 		{
 		/*	printf("Détecteur présent dans la liste ! \n");*/
 			currentSensor->decodeMessage(message, *currentSensor);
@@ -275,22 +283,21 @@ void ManageMessage(char* message)
 
 }
 
-float getInfoFromSensor(char message[10]){
+float GetInfoFromSensor(char message[10], Sensor * p_sensorList){
 	char id[8];
 	Sensor* currentSensor;
 
-	currentSensor = sensorList;
+	currentSensor = p_sensorList;
 
-	strcpy(id,str_sub(message, 0, 8));
+	strcpy(id,str_sub(message, 0, 7));
 
 	/* Search of the sensor in the sensors' list */
 	while (currentSensor != NULL)
 	{
 		if (strcmp(currentSensor->id, id) == 0)
 		{
-			printf("Détecteur présent dans la liste ! \n");
-			currentSensor->decodeMessage(message, *currentSensor);
-			break;
+			/*printf("Détecteur présent dans la liste ! \n");*/
+			return currentSensor->value;
 		}
 		else
 		{
@@ -300,3 +307,9 @@ float getInfoFromSensor(char message[10]){
 
 	return (float)0;
 }
+
+int AddSensor(char id[8], char org[2], char funct[2], char type[2])
+{
+	return 0;
+}
+

@@ -11,6 +11,6 @@
 #include "Component.h"
 #include "EEP.h"
 
-void initializeSensorAndEEPList(Sensor ** pp_sensorList, EEP* EEPList);
+void initializeSensorAndEEPList(Sensor * p_sensorList, EEP* EEPList);
 
 #endif /* TEST_H_ */

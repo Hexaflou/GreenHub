@@ -35,9 +35,9 @@ int gLogsLog (char mac[40], double value)
 	info.date = (int)time(NULL);
 	if(wLogFile !=NULL)
 	{
-		pthread_mutex_unlock( &mutex );
-		fwrite(&info,sizeof(GInformation),1,wLogFile);
 		pthread_mutex_lock( &mutex );
+		fwrite(&info,sizeof(GInformation),1,wLogFile);
+		pthread_mutex_unlock( &mutex );
 	}
 	else
 	{
@@ -58,7 +58,9 @@ int gLogThreadInit()
 		fread(&position,sizeof(int),1,stateFile);
 		fclose(stateFile);
 	}
+
 	stateFile = fopen(LOG_STATE_FILENAME,"wb");
+	fwrite(&position,sizeof(int),1,stateFile);
 	fseek(rLogFile,position,SEEK_SET);
 	return pthread_create( &gLogThread, NULL, gLogFunc, (void *) NULL);
 }
@@ -66,13 +68,13 @@ int gLogThreadInit()
 int gLogThreadClose()
 {
 	pthread_mutex_lock( &mutex );
-	pthread_kill(gLogThread,SIGTERM);
+	pthread_cancel(gLogThread);
 	fclose(rLogFile);
 	fclose(wLogFile);
 	fclose(stateFile);
 	wLogFile=NULL;
 	pthread_mutex_unlock( &mutex );
-	return pthread_join(gLogThread,NULL);
+	return 0;
 }
 
 /************************PRIVATE***************************************/
@@ -101,16 +103,19 @@ static int send(GInformation * info)
 static void * gLogFunc(void * attr)
 {
 	GInformation info;
+	
 	while(1)
 	{
 		pthread_mutex_lock( &mutex );
+
 		while (!feof(rLogFile))
 		{
-			fread(&info,sizeof(GInformation),1,rLogFile);
-			send(&info);
+			if(fread(&info,sizeof(GInformation),1,rLogFile)>0)
+				send(&info);
 		}
 		
 		position = ftell (rLogFile);
+		fseek(stateFile,0,SEEK_SET);
 		fwrite(&position,sizeof(int),1,stateFile);
 		pthread_mutex_unlock( &mutex );
 		
@@ -124,11 +129,14 @@ static void * gLogFunc(void * attr)
 int main ()
 {
 	int i = 0;
+	int tache;
 	gCommunicationInit(1);
-	gLogThreadInit();
+	tache = gLogThreadInit();
 	for (i = 0 ; i < 50 ; i++)
 		gLogsLog("42",i);
+	sleep(100);
 	gLogThreadClose();
 	gCommunicationClose();
 	return 0;
 }
+

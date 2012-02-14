@@ -13,7 +13,7 @@ def create_graph(user,type):
     if len(sensors) == 0:
         return
 
-    sizex = 600; sizey= 200; mydpi = 80
+    sizex = 500; sizey= 200; mydpi = 80
     fig = plot.figure(figsize=(sizex/mydpi, sizey/mydpi), dpi=mydpi)
 
     ax = fig.add_subplot(111)

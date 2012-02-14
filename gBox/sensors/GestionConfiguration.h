@@ -8,7 +8,7 @@
 #ifndef GESTIONCONFIGURATION_H_
 #define GESTIONCONFIGURATION_H_
 
-#include "cJSON.h"
+#include "../lib/cJSON.h"
 #include "Component.h"
 
 cJSON* createCSON(char* id, char* EEP);

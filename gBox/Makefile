@@ -9,9 +9,9 @@ CCFLAGS	= -Wall -pedantic -m32 -g
 EDL	= gcc
 LDFLAGS	= -m32 -g
 LIBS = -lm -lpthread -lrt
-SRC	= $(wildcard *.c)
+SRC	= $(wildcard *.c) $(wildcard gCommunication/*.c) $(wildcard lib/*.c) $(wildcard sensors/*.c)
 OBJS	= $(SRC:.c=.o)
-EXE     = gLogs
+EXE     = gBox
 
 
 

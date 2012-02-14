@@ -7,7 +7,7 @@
 
 #include "Component.h"
 #include "Utility.h"
-#include "gLogs.h"
+#include "../gLogs.h"
 
 
 /*
@@ -130,7 +130,6 @@ int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
 	int switch_button = getSwitch(message);	
 	if (switch_button != NO_BUTTON){
 		printf("Valeur de l interrupteur : %i \n", switch_button);
-		printf("Ancienne Valeur de l interrupteur : %i \n", p_sensor->value);
 		/* Si la nouvelle valeur est differente de l ancienne */
 		if (switch_button != p_sensor->value)
 		{		
@@ -143,6 +142,7 @@ int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
 			return NO_CHANGE;
 		}
 	}
+	return NO_BUTTON;
 }
 
 

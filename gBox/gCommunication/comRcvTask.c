@@ -5,8 +5,8 @@
 #include <assert.h>
 #include "comIncludes.h"
 #include "comRcvTask.h"
-#include "cJSON.h"
-#include "realtime.h"
+#include "../lib/cJSON.h"
+#include "../realtime.h"
 #include <errno.h>
 
 /****************************PRIVATE DECLARATION***********************/

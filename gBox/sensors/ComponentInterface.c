@@ -7,11 +7,9 @@
 
 /* Inclusions internes */
 #include "ComponentInterface.h"
-#include "memoryGHome.h"
 #include "Utility.h"
 #include "Component.h"
 #include "Test.h"
-#include "gLogs.h"
 #include "EEP.h"
 #include "SimulationSensor.h"
 
@@ -32,16 +30,13 @@ Sensor* p_sensorList;
 EEP* p_EEPList;
 
 /* Fonction lançant les deux connections d'écoute avec les périphériques EnOcean et SunSpot */
-int ComponentInterface()
+int ComponentInterface(void* attr)
 {
 	pthread_t thread1, thread2;
 	char *message1 = "Thread SunSPOT";
 	char *message2 = "Thread EnOcean";
 	int iret1, iret2;
 	void* ptt;	
-
-	gCommunicationInit(2); /* 2 pour SuperManon (A VIRER) */
-	gLogThreadInit();
 
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
@@ -69,11 +64,9 @@ int ComponentInterface()
 	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
 
 	/* on les attend
-	pthread_join(thread1, NULL);	*/
+	pthread_join(thread1, NULL);
 	pthread_join(thread2, NULL);	
 	/*StartSimulationSensor();*/
-	gLogThreadClose();
-	gCommunicationClose();
 	return 0;
 }
 
@@ -282,7 +275,7 @@ void ManageMessage(char* message)
 	{
 		if (strcmp(str_sub(currentSensor->id, 0, 7), str_sub(message, 10, 17)) == 0) /* Détecteur présent dans la liste */
 		{
-			/*printf("Détecteur présent dans la liste ! \n");*/
+			printf("Détecteur présent dans la liste ! \n");
 			currentSensor->decodeMessage(message, currentSensor);
 			currentSensor = currentSensor->next;
 		}

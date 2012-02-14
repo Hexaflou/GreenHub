@@ -7,7 +7,7 @@
 #include "Component.h"
 #include "ComponentInterface.h"
 #include "EEP.h"
-#include "cJSON.h"
+#include "../lib/cJSON.h"
 #include <stdio.h>
 
 /*

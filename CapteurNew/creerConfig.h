@@ -1,1 +1,0 @@
-/* * creerConfig.h * * Created on: 1 Fev. 2012 * Author: Hexaflou */#ifndef CREERCONFIG_H_#define CREERCONFIG_H_#include "cJSON.h"cJSON* createCSONFirst(char* id, char* EEP);void createConfigSensors();#endif /* CREERCONFIG_H_ */ 

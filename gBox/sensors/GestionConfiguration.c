@@ -8,7 +8,7 @@
 #include "Component.h"
 #include "ComponentInterface.h"
 #include "EEP.h"
-#include "cJSON.h"
+#include "../lib/cJSON.h"
 
 #define TAILLE_ID 8
 #define TAILLE_EEP 6

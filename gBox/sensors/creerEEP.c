@@ -2,7 +2,7 @@
 #include "EEP.h"
 #include "string.h"
 #include <stdlib.h>
-#include "cJSON.h"
+#include "../lib/cJSON.h"
 #include <stdio.h>
 
 #define TAILLE_EEP 76
@@ -24,13 +24,13 @@ int initializeEEPListFirst()
 	
 	FILE *f = fopen("eep.txt", "w");
 
-	eep = createCJSONFirstEEP("050201","Interrupteur � 2 boutons, installe a l etat 0" );
+	eep = createCJSONFirstEEP("050201","Interrupteur à 2 boutons, installe a l etat 0" );
 	fprintf(f,eep);
 	
-	eep= createCJSONFirstEEP("050202","Interrupteur � 2 boutons, installe a l etat 1" );
+	eep= createCJSONFirstEEP("050202","Interrupteur à 2 boutons, installe a l etat 1" );
 	fprintf(f,eep);
 	
-	eep= createCJSONFirstEEP("050301","Interrupteur � 4 boutons, installe a l etat 0" );
+	eep= createCJSONFirstEEP("050301","Interrupteur à 4 boutons, installe a l etat 0" );
 	fprintf(f,eep);
 	
 	eep= createCJSONFirstEEP("050401","Interrupteur a insertion de carte" );

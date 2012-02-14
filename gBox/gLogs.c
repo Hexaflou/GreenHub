@@ -4,10 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 
-#include "cJSON.h"
-#include "gCommunication.h"
+#include "lib/cJSON.h"
+#include "gCommunication/gCommunication.h"
 #include "gLogs.h"
 
 typedef struct {
@@ -124,24 +123,6 @@ static void * gLogFunc(void * attr)
 		sleep(LOG_SEND_PERIOD);
 	}
 	
-	return 0;
-}
-	
-int main2 ()
-{
-	int i = 0;
-	gCommunicationInit(2);
-	/* initialize random seed: */
-	srand ( time(NULL) );
-	/*gLogThreadInit();*/
-	for (i = 0 ; i < 50 ; i++)
-	{
-		gLogsLog("48151623eT",(rand() % 13 + 12));
-		sleep(1);
-	}
-	sleep(3);
-	/*gLogThreadClose();*/
-	gCommunicationClose();
 	return 0;
 }
 

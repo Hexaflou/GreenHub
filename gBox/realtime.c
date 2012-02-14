@@ -1,8 +1,8 @@
 #include "realtime.h"
-#include "semaphore.h"
-#include "gCommunication.h"
-#include "../CapteurNew/ComponentInterface.h"
-#include "../CapteurNew/Component.h"
+#include <semaphore.h>
+#include "gCommunication/gCommunication.h"
+#include "sensors/ComponentInterface.h"
+#include "sensors/Component.h"
 #include <pthread.h>
 
 /********************* LOCAL functions and variables *****************/

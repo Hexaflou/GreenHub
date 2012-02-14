@@ -11,14 +11,14 @@
 #define SOCKET_ERROR -1
 #define ERROR -1
 #define OK 0
-#define DEBUG 0
+#define DEBUG 1
 
 #include "Utility.h"
 #include "Component.h"
 #include "EEP.h"
-#include "semaphore.h"
+#include <semaphore.h>
 
-int ComponentInterface(void);
+int ComponentInterface(void *);
 
 void *ListenSunSpot(void *ptr);
 

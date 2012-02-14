@@ -3,7 +3,7 @@
 #include "EEP.h"
 #include "string.h"
 #include <stdlib.h>
-#include "cJSON.h"
+#include "../lib/cJSON.h"
 #include <stdio.h>
 #include "Utility.h"
 

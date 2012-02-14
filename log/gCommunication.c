@@ -74,13 +74,34 @@ int gCommunicationSend(char * msg)
 	return mq_send(smq, msg, MAX_MQ_SIZE, 0);
 }
 
+int gCommunicationSendValue(char mac[40], double value)
+{
+	cJSON *data = cJSON_CreateObject();
+	char * msg = NULL;
+	int ret;
+	
+	cJSON_AddStringToObject(data,"msg_type","new_state");
+	cJSON_AddStringToObject(data,"mac_address",mac);
+	cJSON_AddNumberToObject(data,"new_value",value);
+	cJSON_AddNumberToObject(data,"date",(int)time(NULL));
+	
+	
+	msg = cJSON_Print(data);
+	
+	ret = gCommunicationSend(msg);
+	
+	/* Clean data */
+	free(msg);
+	cJSON_Delete(data);
+	return ret;
+}
+
 int gCommunicationClose()
 {
 	comSendTaskClose();
 	closesocket(sock);
 	return 0;
 }
-
 
 
 

@@ -21,6 +21,9 @@ int gCommunicationClose();
 /* send data to the server (thread-safe) */
 int gCommunicationSend(char * msg);
 
+/* send value to the server (thread-safe) */
+int gCommunicationSendValue(char mac[40], double value);
+
 
 #endif
 

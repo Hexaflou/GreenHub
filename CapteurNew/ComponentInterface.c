@@ -40,6 +40,8 @@ int ComponentInterface()
 	int iret1, iret2;
 	void* ptt;	
 
+	gCommunicationInit(2); /* 2 pour SuperManon (A VIRER) */
+	gLogThreadInit();
 
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
@@ -63,13 +65,15 @@ int ComponentInterface()
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
 
 	/* on les créé, passe un argument on verra plus tard lequel exactement */
-	/* iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);	
-	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); */
+	/* iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);	*/
+	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
 
 	/* on les attend
-	pthread_join(thread1, NULL);	
-	pthread_join(thread2, NULL);	*/
+	pthread_join(thread1, NULL);	*/
+	pthread_join(thread2, NULL);	
 	/*StartSimulationSensor();*/
+	gLogThreadClose();
+	gCommunicationClose();
 	return 0;
 }
 
@@ -279,7 +283,7 @@ void ManageMessage(char* message)
 		if (strcmp(str_sub(currentSensor->id, 0, 7), str_sub(message, 10, 17)) == 0) /* Détecteur présent dans la liste */
 		{
 			/*printf("Détecteur présent dans la liste ! \n");*/
-			currentSensor->decodeMessage(message, *currentSensor);
+			currentSensor->decodeMessage(message, currentSensor);
 			currentSensor = currentSensor->next;
 		}
 		else
@@ -287,8 +291,7 @@ void ManageMessage(char* message)
 			currentSensor = currentSensor->next;
 		}
 	}
-	sem_post(&mutex_sensorList);
-	destroyEEPList(p_EEPList);
+	sem_post(&mutex_sensorList);	
 
 	/* If the sensor isn't in the sensors' list */
 

@@ -32,7 +32,7 @@ typedef struct Sensor
 	char EEP[6];
 	Range * rangeData;
 	float value;	
-	int (*decodeMessage)(char*, struct Sensor);
+	int (*decodeMessage)(char*, struct Sensor*);
 	struct Sensor* next;
 }Sensor;
 
@@ -47,12 +47,12 @@ int addSensors(char id[8], Sensor *sensorList);
 
 int removeSensor(char* id);
 
-int decodeMessageTemp(char* message, struct Sensor);
-int decodeMessageLightOccup(char* message, struct Sensor);
-int decodeMessageContact(char* message, struct Sensor);
-int decodeMessageSwitch(char* message, struct Sensor);
-int decodeMessageOccupancy(char * message, struct Sensor);
-int decodeMessageLight(char * message, struct Sensor);
+int decodeMessageTemp(char* message, struct Sensor *);
+int decodeMessageLightOccup(char* message, struct Sensor *);
+int decodeMessageContact(char* message, struct Sensor *);
+int decodeMessageSwitch(char* message, struct Sensor *);
+int decodeMessageOccupancy(char * message, struct Sensor *);
+int decodeMessageLight(char * message, struct Sensor *);
 
 
 int getTempWithoutRange(char* message);

@@ -18,10 +18,11 @@ int gCommunicationInit(int userId);
 /* don't forget need for exemple to kill the logs process */
 int gCommunicationClose();
 
+/* send data to the server (thread-safe) */
 int gCommunicationSend(char * msg);
 
-/* the unique identifier of the sensor and the getting value */
-int gLogsLog(char mac[40], double value);
+/* send value to the server (thread-safe) */
+int gCommunicationSendValue(char mac[40], double value);
 
 
 #endif

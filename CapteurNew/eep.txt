@@ -1,0 +1,121 @@
+{
+	"EEP":	"050201",
+	"Name":	"Interrupteur � 2 boutons, installe a l etat 0"
+}{
+	"EEP":	"050202",
+	"Name":	"Interrupteur � 2 boutons, installe a l etat 1"
+}{
+	"EEP":	"050301",
+	"Name":	"Interrupteur � 4 boutons, installe a l etat 0"
+}{
+	"EEP":	"050401",
+	"Name":	"Interrupteur a insertion de carte"
+}{
+	"EEP":	"051000",
+	"Name":	"Capteur de poignee de fenetre"
+}{
+	"EEP":	"060001",
+	"Name":	"Capteur de poignee de fenetre"
+}{
+	"EEP":	"070201",
+	"Name":	"Capteur de temp�rature, entre -40�C et 0�C"
+}{
+	"EEP":	"070202",
+	"Name":	"Capteur de temp�rature, entre -30�C et 10�C"
+}{
+	"EEP":	"070203",
+	"Name":	"Capteur de temp�rature, entre -20�C et 20�C"
+}{
+	"EEP":	"070204",
+	"Name":	"Capteur de temp�rature, entre -10�C et 30�C"
+}{
+	"EEP":	"070205",
+	"Name":	"Capteur de temp�rature, entre 0�C et 40�C"
+}{
+	"EEP":	"070206",
+	"Name":	"Capteur de temp�rature, entre 10�C et 50�C"
+}{
+	"EEP":	"070207",
+	"Name":	"Capteur de temp�rature, entre 20�C et 60�C"
+}{
+	"EEP":	"070208",
+	"Name":	"Capteur de temp�rature, entre 30�C et 70�C"
+}{
+	"EEP":	"070209",
+	"Name":	"Capteur de temp�rature, entre 40�C et 80�C"
+}{
+	"EEP":	"07020A",
+	"Name":	"Capteur de temp�rature, entre 50�C et 90�C"
+}{
+	"EEP":	"07020B",
+	"Name":	"Capteur de temp�rature, entre 60�C et 100�C"
+}{
+	"EEP":	"070210",
+	"Name":	"Capteur de temp�rature, entre -60�C et 20�C"
+}{
+	"EEP":	"070211",
+	"Name":	"Capteur de temp�rature, entre -50�C et 30�C"
+}{
+	"EEP":	"070212",
+	"Name":	"Capteur de temp�rature, entre -40�C et 40�C"
+}{
+	"EEP":	"070213",
+	"Name":	"Capteur de temp�rature, entre -30�C et 50�C"
+}{
+	"EEP":	"070214",
+	"Name":	"Capteur de temp�rature, entre -20�C et 60�C"
+}{
+	"EEP":	"070215",
+	"Name":	"Capteur de temp�rature, entre -10�C et 70�C"
+}{
+	"EEP":	"070216",
+	"Name":	"Capteur de temp�rature, entre 0�C et 80�C"
+}{
+	"EEP":	"070217",
+	"Name":	"Capteur de temp�rature, entre 10�C et 90�C"
+}{
+	"EEP":	"070215",
+	"Name":	"Capteur de temp�rature, entre 20�C et 100�C"
+}{
+	"EEP":	"070219",
+	"Name":	"Capteur de temp�rature, entre 30�C et 110�C"
+}{
+	"EEP":	"07021A",
+	"Name":	"Capteur de temp�rature, entre 40�C et 120�C"
+}{
+	"EEP":	"07021B",
+	"Name":	"Capteur de temp�rature, entre 50�C et 130�C"
+}{
+	"EEP":	"070401",
+	"Name":	"Capteur de temp�rature et d'humidit� [0-40�C] [0-100%]"
+}{
+	"EEP":	"070601",
+	"Name":	"Capteur de luminosit�, entre 300 et 60000lx"
+}{
+	"EEP":	"070602",
+	"Name":	"Capteur de luminosit�, entre 0 et 1024lx"
+}{
+	"EEP":	"070701",
+	"Name":	"Capteur de pr�sence"
+}{
+	"EEP":	"070801",
+	"Name":	"Capteur de lumi�re, temp�rature et pr�sence [0-510lx][0-51�C]"
+}{
+	"EEP":	"070802",
+	"Name":	"Capteur de lumi�re, temp�rature et pr�sence [0-1020lx][0-51�C]"
+}{
+	"EEP":	"070803",
+	"Name":	"Capteur de lumi�re, temp�rature et pr�sence [0-1530lx][-30-50�C]"
+}{
+	"EEP":	"070901",
+	"Name":	"Capteur de gaz"
+}{
+	"EEP":	"070904",
+	"Name":	"Capteur de CO2"
+}{
+	"EEP":	"070908",
+	"Name":	"Capteur de O2"
+}{
+	"EEP":	"07090C",
+	"Name":	"Capteur de propane"
+}

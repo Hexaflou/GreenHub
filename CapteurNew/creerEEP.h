@@ -1,0 +1,1 @@
+/* * creerEEP.h * * Created on: 1 Fev. 2012 * Author: Hexaflou */#ifndef CREEREEP_H_#define CREEREEP_H_#include "EEP.h"char* createCJSONFirstEEP(char* EEP, char* name);int initializeEEPListFirst();#endif /* CREEREEP_H_ */ 

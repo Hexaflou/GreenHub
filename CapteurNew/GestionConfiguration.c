@@ -1,5 +1,5 @@
 /*
- * Ce fichier permet de lire et réécrire la configuration du système à partir d'un fichier .txt
+ * Ce fichier permet de lire et rï¿½ï¿½crire la configuration du systï¿½me ï¿½ partir d'un fichier .txt
  *
  * 
  */
@@ -14,7 +14,7 @@
 #define TAILLE_EEP 6
 
  /*
-* Retourne le cJSON contenant les données passées en paramètre : l'id et l'EEP
+* Retourne le cJSON contenant les donnees passees en parametre : l'id et l'EEP
 *
 */
 cJSON* createCSON(char* id, char* EEP){
@@ -28,50 +28,77 @@ cJSON* createCSON(char* id, char* EEP){
 
 
 /*
-* Charge la configuration du système à partir de la lecture d'un fichier contenant l'EEP et l'id des capteurs
+* Charge la configuration du systeme a partir de la lecture d'un fichier contenant l'EEP et l'id des capteurs
+* 
 *
 */
-void readConfig(char* fileName, Sensor * p_sensorList, EEP* EEPList){
+void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** pp_sensorList, EEP* EEPList){
 	
-	char* sensor;
+	char sensor[TAILLE_ID+TAILLE_EEP+40];
 	cJSON *root;
-	char org[2];
-	char funct[2]; 
-	char type[2];
+	char org[3];
+	char funct[3]; 
+	char type[3];
+	char c;
+	int nbOpenedAccolade;
 	
 	/* Ouverture du fichier en lecture */
-	FILE *f = fopen(fileName, "r");  
+	FILE *f = fopen(fileNameSensor, "r");  
 	
-	EEPList = (EEP*)malloc(sizeof(EEP));
 	
-	/* Initialisaition de la EEPList */
-	initializeEEPList(EEPList);
+	/* Initialisation de la EEPList */
+	initializeEEPList(fileNameEEP, EEPList);
 	
-	/* Récupération des informations de chaque capteur */
-	while (fgets(sensor,TAILLE_ID+TAILLE_EEP, f) != NULL){
+	/* Recuperation des informations de chaque capteur */
+	c=fgetc(f);
+	while (c!=EOF){
+		memset (sensor, 0, sizeof (sensor));
+		/* Recuperation du message entier */
+		/* Lecture jusqu'au debut de l'objet json :*/
+		while (c != '{') {
+			c=fgetc(f);
+		}
+		sprintf(sensor, "%s%c", sensor, c);
+		
+		/* Lecture de l'objet JSON : */
+		nbOpenedAccolade = 1;
+		while (nbOpenedAccolade > 0) {
+			c=fgetc(f);
+			sprintf(sensor, "%s%c", sensor, c);	
+			if (c=='{') {
+				nbOpenedAccolade++;
+			}
+			else if (c=='}') {
+				nbOpenedAccolade--;
+			}
+		}		
 		root = cJSON_Parse(sensor);
 		org[0]= cJSON_GetObjectItem(root,"EEP")->valuestring[0];
 		org[1]= cJSON_GetObjectItem(root,"EEP")->valuestring[1];
+		org[2]='\0';
 		funct[0]=cJSON_GetObjectItem(root,"EEP")->valuestring[2];
 		funct[1]=cJSON_GetObjectItem(root,"EEP")->valuestring[3];
+		funct[2]='\0';
 		type[0]=cJSON_GetObjectItem(root,"EEP")->valuestring[4];
 		type[1]=cJSON_GetObjectItem(root,"EEP")->valuestring[5];
+		type[2]='\0';
 		/* Ajout du capteur */
-		AddSensorByEEP(cJSON_GetObjectItem(root,"id")->valuestring, p_sensorList, EEPList, org, funct, type);
+		AddSensorByEEP(cJSON_GetObjectItem(root,"id")->valuestring, pp_sensorList, EEPList, org, funct, type);
 		cJSON_Delete(root);
+		c=fgetc(f);
 	}
 
 }
 /*
-* Enregistre la configuration du système (contenant l'EEP et l'id des capteurs) dans un fichier 
-*
+* Enregistre la configuration du systeme (contenant l'EEP et l'id des capteurs) dans un fichier 
+* ATTENTION PAS FINI !
 */
 void rewriteConfig(char* fileName, Sensor * p_sensorList){
 	Sensor * pCurrent;
 	cJSON * root;
-	char * sensor:
+	char * sensor;
 	
-	/* Ouverture du fichier en écriture */
+	/* Ouverture du fichier en ï¿½criture */
 	FILE *f = fopen(fileName, "w");  
 	
 	/* Parcours de la liste de capteurs */
@@ -79,10 +106,10 @@ void rewriteConfig(char* fileName, Sensor * p_sensorList){
 		pCurrent = p_sensorList;
 
 		while (pCurrent->next != NULL){
-			/* Création du json */
+			/* Crï¿½ation du json */
 			root = createCSON(pCurrent->id,pCurrent->EEP);
 			sensor = cJSON_Print(root);
-			/* Ecriture des données */
+			/* Ecriture des donnï¿½es */
 			fprintf(f,sensor);  
 			
 			cJSON_Delete(root);

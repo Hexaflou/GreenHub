@@ -48,27 +48,28 @@ int ComponentInterface()
 
 	sem_wait(&mutex_sensorList);
 
-	p_sensorList = (Sensor*)malloc(sizeof(Sensor*));
-	p_sensorList->next = NULL;
-	p_EEPList = NULL;
+	p_sensorList = NULL;
+	/*p_sensorList->next = NULL;*/
+	p_EEPList = (EEP*)malloc(sizeof(EEP));
+	p_EEPList->next = NULL;
 
 	
 
 	/* Initialisation des capteurs et EEP */
-	initializeSensorAndEEPList(p_sensorList, p_EEPList);
+	initializeSensorAndEEPList(&p_sensorList, p_EEPList);
 
 	sem_post(&mutex_sensorList);
 
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
 
 	/* on les créé, passe un argument on verra plus tard lequel exactement */
-	/* iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);	*/
-	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
+	/* iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);	
+	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); */
 
 	/* on les attend
-	pthread_join(thread1, NULL);	*/
-	pthread_join(thread2, NULL);		
-	StartSimulationSensor();
+	pthread_join(thread1, NULL);	
+	pthread_join(thread2, NULL);	*/
+	/*StartSimulationSensor();*/
 	return 0;
 }
 

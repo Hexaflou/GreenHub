@@ -18,8 +18,6 @@
 #include "EEP.h"
 #include "semaphore.h"
 
-int initializeEEPList(EEP*);
-
 int ComponentInterface(void);
 
 void *ListenSunSpot(void *ptr);

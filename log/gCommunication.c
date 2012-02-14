@@ -3,29 +3,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h> /* close */
-#include <netdb.h> /* gethostbyname */
-#define INVALID_SOCKET -1
-#define SOCKET_ERROR -1
-#define closesocket(s) close(s)
-typedef int SOCKET;
-typedef struct sockaddr_in SOCKADDR_IN;
-typedef struct sockaddr SOCKADDR;
-typedef struct in_addr IN_ADDR;
-
+#include "comIncludes.h"
+#include "comSendTask.h"
 #include <time.h>
 
 #include "cJSON.h"
 
-
+/****************************PRIVATE DECLARATION***********************/
 static SOCKET sock;
 static struct hostent *hostinfo;
 static SOCKADDR_IN sin  = { 0 };/* initialise la structure avec des 0 */
+static static mqd_t smq;
 
+
+/*********************************PUBLIC FUNCTIONS*********************/
 int gCommunicationInit(int userId)
 {
 	cJSON *init = cJSON_CreateObject();
@@ -60,6 +51,9 @@ int gCommunicationInit(int userId)
 		return SOCKET_ERROR;
 	}
 	
+	/* Creation du service d'emmission */
+	smq = comSendTaskInit(sock);
+	
 	/* Envoi des informations de login */
 	cJSON_AddStringToObject(init,"msg_type","login");
 	cJSON_AddNumberToObject(init,"user_id",userId);
@@ -76,42 +70,16 @@ int gCommunicationInit(int userId)
 
 int gCommunicationSend(char * msg)
 {
-	if(send(sock, msg, strlen(msg), 0) < 0)
-	{
-		perror("send()");
-		return SOCKET_ERROR;
-	}
-	else
-	{
-		printf("send to server : \n %s \n\n",msg);
-	}
-	return 0;
+	assert_perror(0 <= mq_send(mq, msg, MAX_SIZE, 0));
 }
 
 int gCommunicationClose()
 {
+	comSendTaskClose();
 	closesocket(sock);
 	return 0;
 }
 
-int gCommunicationLogSend(char mac[40], double value)
-{
-	cJSON *data = cJSON_CreateObject();
-	char * msg = NULL;
-	int ret;
-	
-	cJSON_AddStringToObject(data,"msg_type","new_state");
-	cJSON_AddStringToObject(data,"mac_address",mac);
-	cJSON_AddNumberToObject(data,"new_value",value);
-	cJSON_AddNumberToObject(data,"date",(int)time(NULL));
-	
-	
-	msg = cJSON_Print(data);
-	
-	ret = gCommunicationSend(msg);
-	
-	/* Clean data */
-	free(msg);
-	cJSON_Delete(data);
-	return ret;
-}
+
+
+

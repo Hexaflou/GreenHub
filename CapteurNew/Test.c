@@ -24,26 +24,8 @@ void initializeSensorAndEEPListFirst(){
 void initializeSensorAndEEPList(Sensor ** pp_sensorList, EEP* p_EEPList){
 
 	EEP* p_EEPCurrent;
-	Sensor* p_sensorCurrent;
-		
+	Sensor* p_sensorCurrent;	
 	readConfig("sensors.txt", "eep.txt", pp_sensorList, p_EEPList);
-	p_EEPCurrent = p_EEPList;
-	p_sensorCurrent = *pp_sensorList;
-	
-	printf("Prout\n");
-	printf("Atention voici les eep ! \n");
-	while (p_EEPCurrent != NULL){
-		printf("EEP %s, nom : %s\n",p_EEPCurrent->eep, p_EEPCurrent->name);
-		p_EEPCurrent=p_EEPCurrent->next;
-	}
-	printf("Atention voici les capteurs ! \n");
-	
-	while (p_sensorCurrent != NULL){
-		printf("Sensor  ID : %s, EEP : %s\n",p_sensorCurrent->id, p_sensorCurrent->EEP);
-		p_sensorCurrent = p_sensorCurrent->next;
-	}
-	
-	printf("Tout fini !!! \n");
 }
 
 

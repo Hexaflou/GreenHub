@@ -15,25 +15,26 @@
 **	Si la nouvelle valeur est differente de l ancienne, elle est mise a jour, et celle-ci est reporte dans un fichier de log.
 **	Renvoie 0 si un changement de valeur a eu lieu, 1 sinon.
 */
-int decodeMessageLight(char * message, struct Sensor sensor){
+int decodeMessageLight(char * message, struct Sensor* p_sensor){
 	float light;
 	float multiplier;
 	light = (float) getLightLittleSensor(message);	/* Valeur entre rangeMin et rangeMax (en general 0..255) */
 
 	/* Calcul du multiplicateur pour determiner la vraie valeur mesuree par le capteur */
-	multiplier = ( (((Range*) sensor.rangeData)->scaleMax - ((Range*) sensor.rangeData)->scaleMin)
-		/ (((Range*) sensor.rangeData)->rangeMax - ((Range*) sensor.rangeData)->rangeMin));
+	multiplier = ( (((Range*) p_sensor->rangeData)->scaleMax - ((Range*) p_sensor->rangeData)->scaleMin)
+		/ (((Range*) p_sensor->rangeData)->rangeMax - ((Range*) p_sensor->rangeData)->rangeMin));
 	if (multiplier < 0){
-		light = light * multiplier + ((Range*) sensor.rangeData)->scaleMax;	
+		light = light * multiplier + ((Range*) p_sensor->rangeData)->scaleMax;	
 	}else{
-		light = light * multiplier + ((Range*) sensor.rangeData)->scaleMin;
+		light = light * multiplier + ((Range*) p_sensor->rangeData)->scaleMin;
 	}
 
 	/* Si la nouvelle valeur est differente de l ancienne */
-	if (sensor.value != light)
+	if (p_sensor->value != light)
 	{
-		sensor.value = light;
-		printf("Valeur du capteur de luminosite : %f \n", sensor.value);
+		p_sensor->value = light;
+		gLogsLog (p_sensor->id, p_sensor->value);
+		printf("Valeur du capteur de luminosite : %f \n", p_sensor->value);
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -45,7 +46,7 @@ int decodeMessageLight(char * message, struct Sensor sensor){
 **	Si la nouvelle valeur est differente de l ancienne, elle est mise a jour, et celle-ci est reporte dans un fichier de log.
 **	Renvoie 0 si un changement de valeur a eu lieu, 1 sinon.
 */
-int decodeMessageOccupancy(char* message, struct Sensor sensor)
+int decodeMessageOccupancy(char* message, struct Sensor* p_sensor)
 {
 	int occupancy;	
 	occupancy = getOccupancy(message);
@@ -56,8 +57,9 @@ int decodeMessageOccupancy(char* message, struct Sensor sensor)
 		printf("Presence detectee. \n");
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
-	if (occupancy != sensor.value){
-		/*gLogLogs... */
+	if (occupancy != p_sensor->value){
+		p_sensor->value = occupancy;
+		gLogsLog (p_sensor->id, p_sensor->value);
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -69,26 +71,26 @@ int decodeMessageOccupancy(char* message, struct Sensor sensor)
 **	Si la nouvelle valeur est differente de l ancienne, elle est mise a jour, et celle-ci est reporte dans un fichier de log.
 **	Renvoie 0 si un changement de valeur a eu lieu, 1 sinon.
 */
-int decodeMessageTemp(char* message, struct Sensor sensor)
+int decodeMessageTemp(char* message, struct Sensor* p_sensor)
 {
 	float temp, multiplier;
 	temp = (float) getTempWithoutRange(message);	/* Valeur entre rangeMin et rangeMax (en general 0..255) */
 
 	/* Calcul du multiplicateur pour determiner la vraie valeur mesuree par le capteur */
-	multiplier = ( (((Range*) sensor.rangeData)->scaleMax - ((Range*) sensor.rangeData)->scaleMin)
-		/ (((Range*) sensor.rangeData)->rangeMax - ((Range*) sensor.rangeData)->rangeMin));
+	multiplier = ( (((Range*) p_sensor->rangeData)->scaleMax - ((Range*) p_sensor->rangeData)->scaleMin)
+		/ (((Range*) p_sensor->rangeData)->rangeMax - ((Range*) p_sensor->rangeData)->rangeMin));
 	if (multiplier < 0){
-		temp = temp * multiplier + ((Range*) sensor.rangeData)->scaleMax;	
+		temp = temp * multiplier + ((Range*) p_sensor->rangeData)->scaleMax;	
 	}else{
-		temp = temp * multiplier + ((Range*) sensor.rangeData)->scaleMin;
+		temp = temp * multiplier + ((Range*) p_sensor->rangeData)->scaleMin;
 	}
-
-	printf("Valeur du capteur de temperature : %f \n", sensor.value);
+	printf("Valeur du capteur de temperature : %f \n", temp);
 
 	/* Si la nouvelle valeur est differente de l ancienne */
-	if (sensor.value != temp)
+	if (p_sensor->value != temp)
 	{
-		sensor.value = temp;				
+		p_sensor->value = temp;
+		gLogsLog (p_sensor->id, p_sensor->value);				
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -99,7 +101,7 @@ int decodeMessageTemp(char* message, struct Sensor sensor)
 **	Si la nouvelle valeur est differente de l ancienne, elle est mise a jour, et celle-ci est reporte dans un fichier de log.
 **	Renvoie 0 si un changement de valeur a eu lieu, 1 sinon.
 */
-int decodeMessageContact(char* message, struct Sensor sensor)
+int decodeMessageContact(char* message, struct Sensor * p_sensor)
 {
 	int closed;
 	closed = getContact(message);
@@ -109,8 +111,9 @@ int decodeMessageContact(char* message, struct Sensor sensor)
 		printf("Contact ouvert. \n");
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
-	if (closed != sensor.value){
-		sensor.value = closed;
+	if (closed != p_sensor->value){
+		p_sensor->value = closed;
+		gLogsLog (p_sensor->id, p_sensor->value);
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -122,15 +125,17 @@ int decodeMessageContact(char* message, struct Sensor sensor)
 **	Si la nouvelle valeur est differente de l ancienne, elle est mise a jour, et celle-ci est reporte dans un fichier de log.
 **	Renvoie 0 si un changement de valeur a eu lieu, 1 sinon.
 */
-int decodeMessageSwitch(char* message, struct Sensor sensor)
+int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
 {
 	int switch_button = getSwitch(message);	
 	if (switch_button != NO_BUTTON){
 		printf("Valeur de l interrupteur : %i \n", switch_button);
+		printf("Ancienne Valeur de l interrupteur : %i \n", p_sensor->value);
 		/* Si la nouvelle valeur est differente de l ancienne */
-		if (switch_button != sensor.value)
+		if (switch_button != p_sensor->value)
 		{		
-			sensor.value = switch_button;
+			p_sensor->value = switch_button;
+			gLogsLog (p_sensor->id, p_sensor->value);
 			return VALUE_CHANGE;
 		}
 		else

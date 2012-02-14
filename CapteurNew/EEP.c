@@ -248,18 +248,38 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 								EEPCurrent->rangeMin = 255;
 								EEPCurrent->rangeMax = 0;		
 								break;
-							}
-					
-							
-							
+							}										
 						} /* Fin switch type */
-					break;
+						break;
 					} /* Fin case 2 */
+					case 8 :{
+						EEPCurrent->AddSensors =AddSensorsLightOccupancy;	
+						switch(type){
+							case 1 :
+								EEPCurrent->scaleMin = 0;
+								EEPCurrent->scaleMax = 510;
+								EEPCurrent->rangeMin = 0;
+								EEPCurrent->rangeMax = 255;
+								break;
+							case 2 :
+								EEPCurrent->scaleMin = 0;
+								EEPCurrent->scaleMax = 1020;
+								EEPCurrent->rangeMin = 0;
+								EEPCurrent->rangeMax = 255;
+								break;
+							case 3 :
+								EEPCurrent->scaleMin = 0;
+								EEPCurrent->scaleMax = 1530;
+								EEPCurrent->rangeMin = 0;
+								EEPCurrent->rangeMax = 255;
+								break;
+						}
+						break;
+					}
 					default:{
 						EEPCurrent->AddSensors =NULL;	
 						break;
 					} /* Fin default */
-				
 				} /* Fin switch funct*/
 			break;
 			} /* Fin case 7 */
@@ -815,8 +835,8 @@ int AddSensorsContact(char id[8], Sensor ** pp_sensorList, float scaleMin, float
 		}
 	}
 	strcpy(p_sensor->id,id);
-	p_sensor->id[9] = 'e';
-	p_sensor->id[10] = 'C';
+	p_sensor->id[8] = 'e';
+	p_sensor->id[9] = 'C';
 	p_sensor->value = 0;
 	p_sensor->decodeMessage = decodeMessageContact;
 	p_sensor->next = NULL;
@@ -842,8 +862,8 @@ int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, float scaleMin, float 
 		}
 	}
 	strcpy(p_sensor->id,id);
-	p_sensor->id[9] = 'e';
-	p_sensor->id[10] = 'S';
+	p_sensor->id[8] = 'e';
+	p_sensor->id[9] = 'S';
 	p_sensor->value = 0;
 	p_sensor->decodeMessage = decodeMessageSwitch;
 	p_sensor->next = NULL;
@@ -869,8 +889,8 @@ int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, float scaleMin, float sc
 		}
 	}
 	strcpy(p_sensor->id,id);
-	p_sensor->id[9] = 'e';
-	p_sensor->id[10] = 'T';
+	p_sensor->id[8] = 'e';
+	p_sensor->id[9] = 'T';
 	p_sensor->value = 0;
 	p_sensor->rangeData = (Range*)malloc(sizeof(Range));
 	p_sensor->rangeData->scaleMax = scaleMax;
@@ -901,8 +921,8 @@ int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float scaleMin
 		}
 	}	
 	strcpy(p_sensor->id,id);
-	p_sensor->id[9] = 'e';
-	p_sensor->id[10] = 'L';
+	p_sensor->id[8] = 'e';
+	p_sensor->id[9] = 'L';
 	p_sensor->value = 0;
 	p_sensor->rangeData = (Range*)malloc(sizeof(Range));
 	p_sensor->rangeData->scaleMax = scaleMax;
@@ -915,8 +935,8 @@ int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float scaleMin
 	p_sensor = p_sensor->next;
 
 	strcpy(p_sensor->id,id);
-	p_sensor->id[9] = 'e';
-	p_sensor->id[10] = 'O';
+	p_sensor->id[8] = 'e';
+	p_sensor->id[9] = 'O';
 	p_sensor->value = 0;	
 	p_sensor->decodeMessage = decodeMessageOccupancy;
 	p_sensor->next = NULL;

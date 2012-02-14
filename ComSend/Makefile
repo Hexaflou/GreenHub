@@ -11,7 +11,7 @@ LDFLAGS	= -m32 -g
 LIBS = -lm -lpthread -lrt
 SRC	= $(wildcard *.c)
 OBJS	= $(SRC:.c=.o)
-EXE     = gLogs
+EXE     = comSend
 
 
 

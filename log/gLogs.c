@@ -134,12 +134,13 @@ int main ()
 	/* initialize random seed: */
 	srand ( time(NULL) );
 	/*gLogThreadInit();*/
-	for (i = 0 ; i < 50 ; i++)
+	for (i = 0 ; i < 10 ; i++)
 	{
 		gLogsLog("48151623eT",(rand() % 13 + 12));
 		sleep(1);
 	}
 	sleep(3);
+	getchar();
 	/*gLogThreadClose();*/
 	gCommunicationClose();
 	return 0;

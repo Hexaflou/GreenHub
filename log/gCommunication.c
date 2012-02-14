@@ -5,6 +5,7 @@
 #include <string.h>
 #include "comIncludes.h"
 #include "comSendTask.h"
+#include "comRcvTask.h"
 #include <time.h>
 
 #include "cJSON.h"
@@ -51,7 +52,8 @@ int gCommunicationInit(int userId)
 		return SOCKET_ERROR;
 	}
 	
-	/* Creation du service d'emmission */
+	/* Creation du service de reception puis d'emmission */
+	comRcvTaskInit(sock);
 	smq = comSendTaskInit(sock);
 	
 	/* Envoi des informations de login */
@@ -70,7 +72,6 @@ int gCommunicationInit(int userId)
 
 int gCommunicationSend(char * msg)
 {
-	printf("tentative d'envoi : \n%s \n\n",msg);
 	return mq_send(smq, msg, MAX_MQ_SIZE, 0);
 }
 
@@ -99,6 +100,7 @@ int gCommunicationSendValue(char mac[40], double value)
 int gCommunicationClose()
 {
 	comSendTaskClose();
+	comRcvTaskClose();
 	closesocket(sock);
 	return 0;
 }

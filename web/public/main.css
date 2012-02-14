@@ -268,3 +268,8 @@ section h3 {
 .login-form dt:after {
     content: " :";
 }
+
+/* =========================== HOME ========================== */
+#main-content > section {
+    margin-right: 320px;
+}

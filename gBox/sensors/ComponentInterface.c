@@ -325,7 +325,7 @@ int GetInfoFromSensor(char id[10], float * p_value){
 
 int AddSensor(char id[8], char org[2], char funct[2], char type[2])
 {
-	return AddSensorByEEP(id, p_sensorList, p_EEPList, org, funct, type);	
+	return AddSensorByEEP(id, &p_sensorList, p_EEPList, org, funct, type);	
 }
 
 Sensor * getSensorList(){

@@ -40,10 +40,11 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** pp_sensorList
 	char funct[3]; 
 	char type[3];
 	char c;
+	char * eepstr = NULL;
 	int nbOpenedAccolade;
 	
 	/* Ouverture du fichier en lecture */
-	FILE *f = fopen(fileNameSensor, "r");  
+	FILE *f = fopen(fileNameSensor, "r");
 	
 	
 	/* Initialisation de la EEPList */
@@ -71,20 +72,23 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** pp_sensorList
 			else if (c=='}') {
 				nbOpenedAccolade--;
 			}
-		}		
+		}	
+		sprintf(sensor, "%s%c", sensor, '\0');	
 		root = cJSON_Parse(sensor);
-		org[0]= cJSON_GetObjectItem(root,"EEP")->valuestring[0];
-		org[1]= cJSON_GetObjectItem(root,"EEP")->valuestring[1];
-		org[2]='\0';
-		funct[0]=cJSON_GetObjectItem(root,"EEP")->valuestring[2];
-		funct[1]=cJSON_GetObjectItem(root,"EEP")->valuestring[3];
-		funct[2]='\0';
-		type[0]=cJSON_GetObjectItem(root,"EEP")->valuestring[4];
-		type[1]=cJSON_GetObjectItem(root,"EEP")->valuestring[5];
-		type[2]='\0';
-		/* Ajout du capteur */
-		AddSensorByEEP(cJSON_GetObjectItem(root,"id")->valuestring, pp_sensorList, EEPList, org, funct, type);
-		cJSON_Delete(root);
+		if (root != NULL){
+			eepstr= cJSON_GetObjectItem(root,"EEP")->valuestring;
+			if(eepstr == NULL)
+				printf("error\n");
+			strncpy(org,str_sub(eepstr,2,3), 3);
+			strncpy(funct,str_sub(eepstr,2,3), 3);
+			strncpy(type,str_sub(eepstr,4,5), 3);
+			/* Ajout du capteur */
+			eepstr=cJSON_GetObjectItem(root,"id")->valuestring;
+			if(eepstr == NULL)
+				printf("error 2\n");
+			AddSensorByEEP(eepstr, pp_sensorList, EEPList, org, funct, type);
+			/*cJSON_Delete(root);*/
+		}
 		c=fgetc(f);
 	}
 

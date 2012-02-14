@@ -1,43 +1,65 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
+# Dépandances Twisted
 from twisted.internet.protocol import Factory, Protocol
 from twisted.internet.endpoints import TCP4ServerEndpoint, UNIXServerEndpoint
 from twisted.internet import reactor
 import time, sys, os.path
 
+# Dépandances Django
 from django.core.management import setup_environ
 import settings
 
 setup_environ(settings)
 
+# Dépendances GreenHub
 from greenhub.models import *
+
+# Autres dépendances
 import json
+
+# Configuration
+debug = True
+
+# Utilitaires
+if debug:
+    def debug(level, msg):
+        """Affiche un message de debug sur la sortie standard, d'un niveau de sévérité 
+        donné (level, chaîne de moins de cinq caractères)."""
+        print u"[%s] %s > %s" % (datetime.datetime.now().strftime("%d/%m/%y %H:%M:%S"), level.rjust(5), msg.decode("utf-8"))
+else:
+    def debug(level, msg):
+        """Ne fait rien. Cette fonction est utilisée si le mode Debug est désactivé ; pour
+        éviter de faire des tests à chaque message, la fonction est définie comme vide
+        en début de programme."""
+        pass
 
 class GreenhubProtocol(Protocol):
     def __init__(self):
         self.current_buffer = ""
 
     def computeMessage(self, message):
-        print repr(message)
-
         msg_type = message["msg_type"]
+        debug("INFO", "Traitement d'un message de type \"%s\"" % msg_type)
 
         if msg_type == "login":
             self.user_id = int(message["user_id"])
             self.factory.clients[self.user_id] = self
+            debug("INFO", "Utilisateur #%d loggué." % self.user_id)
             pass
 
         elif msg_type == "new_state":
-
             try:
                 sensor = Sensor.objects.filter(user__id = self.user_id, mac_address = message["mac_address"])[0]
             except IndexError:
+                debug("ERROR", "Aucun sensor connu pour l'adresse MAC %s (user = %s)." % (message["mac_address"], self.user_id))
                 return
 
             state = State(sensor = sensor, value=float(message["new_value"]), date = time.gmtime(int(message["date"])))
 
             state.save()
+            debug("INFO", "Sauvegarde de l'état pour le senseur à l'adresse %s (valeur = %s)" % (mac_address, float(message["new_value"])))
 
             pass
 
@@ -54,32 +76,31 @@ class GreenhubProtocol(Protocol):
 
         while index != -1:
             try:
-                print "Parsé :", repr(self.current_buffer[0:index+1].strip()) # Affiche le message lu
-                obj = json.loads(self.current_buffer[0:index+1].strip())
+                one_msg = self.current_buffer[0:index + 1].strip()
+                debug("DEBUG", "Message reçu : %s" % repr(one_msg))
+                obj = json.loads(one_msg)
 
                 self.computeMessage(obj)
 
-                self.current_buffer = self.current_buffer[index + 1:] # Ne garde que de index +1 à la fin
-                print "TEST :", self.current_buffer
+                self.current_buffer = self.current_buffer[index + 1:] # Ne garde que de index + 1 à la fin
 
                 index = 0
 
             except ValueError:
-                print "Can't parse data"
-                raise
+                debug("WARN", "Impossible d'analyser les données reçue (pas encore assez ?)")
+		raise
 
             index = self.current_buffer.find('}', index)
 
         pass
 
     def connectionMade(self):
-        print "Nouvelle connection."
+        debug("INFO", "Nouvelle connection.")
 
     def connectionLost(self, reason):
-        print "Connection perdue."
+        debug("INFO", "Connection perdue.")
 
 class GreenhubFactory(Factory):
-    # This will be used by the default buildProtocol to create new protocols:
     protocol = GreenhubProtocol
 
     def __init__(self):
@@ -97,7 +118,7 @@ class GProxyProtocol(Protocol):
 
         while index != -1:
             try:
-                obj = json.loads(self.current_buffer[0:index].strip())
+                obj = json.loads(self.current_buffer[0:index + 1].strip())
 
                 uid = obj["user_id"]
 
@@ -106,12 +127,12 @@ class GProxyProtocol(Protocol):
                 except IndexError:
                     pass
 
-                self.current_buffer = self.current_buffer[index:]
+                self.current_buffer = self.current_buffer[index + 1:]
 
                 index = 0
 
             except ValueError:
-                pass
+                debug("WARN", "Impossible d'analyser les données reçues par Django (pas encore assez ?)")
 
             index = self.current_buffer.find('}', index)
 
@@ -134,4 +155,5 @@ endpoint.listen(gfactory)
 localendpoint = UNIXServerEndpoint(reactor, "/tmp/greenhub.sock")
 localendpoint.listen(GProxyFactory(gfactory))
 
+debug("INFO", "Serveur démarré.")
 reactor.run()

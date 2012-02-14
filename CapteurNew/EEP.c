@@ -4,8 +4,233 @@
 #include "string.h"
 #include <stdlib.h>
 
+/*
+* Initialise la liste des EEP à partir d'un fichier .txt de configuration contenant les informations des capteurs : EEP et nom 
+*
+*/
+int initializeEEPList(EEP* EEPList){	
+	struct EEP* EEPCurrent;
+	char* eep;
+	cJSON* root;
+	int funct;
+	int org;
+	int type;
+	
+	/* Ouverture du fichier en lecture */
+	FILE *f = fopen("sensors.txt", "r");
+	
+	EEPCurrent = EEPList;
+	
+	/* Pour chaque "capteur" dans le fichier */
+	while (fgets(eep,TAILLE_EEP+TAILLE_NAME, f) != NULL){
+		/* Récupération des données EEP et name*/
+		root = cJSON_Parse(eep);
+		strcpy(EEPCurrent->eep,cJSON_GetObjectItem(root,"EEP")->valuestring);
+		strcpy(EEPCurrent->name,cJSON_GetObjectItem(root,"Name")->valuestring);
+		
+		/* Création des données org, funct, et type */
+		org = (int)EEPCurrent->eep[1];
+		funct = (int)EEPCurrent->eep[2]*10+(int)EEPCurrent->eep[3];
+		type = (int)EEPCurrent->eep[4]*10+(int)EEPCurrent->eep[5];
+		
+		/* Récupération de la fonction et des arguments associés */
+		switch(org){
+			case 5:{
+				switch(funct){
+					case 2:{
+						EEPCurrent->AddSensors = AddSensorsSwitch;	
+						EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
+						EEPCurrent = EEPCurrent->next;
+						break;
+					}
+					case 3:
+					case 4:
+					case 10:{
+						EEPCurrent->AddSensors =NULL;	
+						EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
+						EEPCurrent = EEPCurrent->next;
+						break;
+					}
+				
+				} /* Fin switch funct */
+				break;
+			} /* Fin case 5 */
+			case 6:{
+				EEPCurrent->AddSensors = AddSensorsContact;	
+				EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
+				EEPCurrent = EEPCurrent->next;
+				break;
+			} /* Fin case 6 */
+			case 7:{
+				switch(funct){
+					case 2:{
+						EEPCurrent->AddSensors =AddSensorsTemp;	
+						EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
+						switch(type){
+							case 1:{
+								EEPCurrent->arg1 = -40;
+								EEPCurrent->arg2 = 0;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 2:{
+								EEPCurrent->arg1 = -30;
+								EEPCurrent->arg2 = 10;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 3:{
+								EEPCurrent->arg1 = -20;
+								EEPCurrent->arg2 = 20;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 4:{
+								EEPCurrent->arg1 = -10;
+								EEPCurrent->arg2 = 30;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 5:{
+								EEPCurrent->arg1 = 0;
+								EEPCurrent->arg2 = 40;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 6:{
+								EEPCurrent->arg1 = 10;
+								EEPCurrent->arg2 = 50;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 7:{
+								EEPCurrent->arg1 = 20;
+								EEPCurrent->arg2 = 60;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 8:{
+								EEPCurrent->arg1 = 30;
+								EEPCurrent->arg2 = 70;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 9:{
+								EEPCurrent->arg1 = 40;
+								EEPCurrent->arg2 = 80;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 10:{
+								EEPCurrent->arg1 = -60;
+								EEPCurrent->arg2 = 20;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 11:{
+								EEPCurrent->arg1 = -50;
+								EEPCurrent->arg2 = 30;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 12:{
+								EEPCurrent->arg1 = -40;
+								EEPCurrent->arg2 = 40;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 13:{
+								EEPCurrent->arg1 = -30;
+								EEPCurrent->arg2 = 50;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 14:{
+								EEPCurrent->arg1 = -20;
+								EEPCurrent->arg2 = 60;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 15:{
+								EEPCurrent->arg1 = -10;
+								EEPCurrent->arg2 = 70;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 16:{
+								EEPCurrent->arg1 = 0;
+								EEPCurrent->arg2 = 80;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 17:{
+								EEPCurrent->arg1 = 10;
+								EEPCurrent->arg2 = 90;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 18:{
+								EEPCurrent->arg1 = 20;
+								EEPCurrent->arg2 = 100;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 19:{
+								EEPCurrent->arg1 = 30;
+								EEPCurrent->arg2 = 110;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 65:{ // 0A
+								EEPCurrent->arg1 = 50;
+								EEPCurrent->arg2 = 90;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 66:{ //0B
+								EEPCurrent->arg1 = 60;
+								EEPCurrent->arg2 = 100;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 75:{ //1A
+								EEPCurrent->arg1 = 40;
+								EEPCurrent->arg2 = 120;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+							case 76:{ //1B
+								EEPCurrent->arg1 = 50;
+								EEPCurrent->arg2 = 130;		
+								EEPCurrent = EEPCurrent->next;
+								break;
+							}
+					
+							
+							
+						} /* Fin switch type */
+					break;
+					} /* Fin case 2 */
+					default:{
+						EEPCurrent->AddSensors =NULL;	
+						EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
+						EEPCurrent = EEPCurrent->next;
+						break;
+					} /* Fin default */
+				
+				} /* Fin switch funct*/
+			break;
+			} /* Fin case 7 */
+		} /* Fin switch org */
+	} /* Fin while */
+	
+	EEPCurrent = NULL;
+
+	return 0;
+}
+
 /* EEPList has to be initialized before calling this function */
-int initializeEEPList(EEP* EEPList)
+int initializeEEPListOld(EEP* EEPList)
 {	
 	struct EEP* EEPCurrent;
 	EEPCurrent = EEPList;

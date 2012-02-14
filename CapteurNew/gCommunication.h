@@ -1,5 +1,5 @@
-#ifndef H_GTHREAD
-#define H_GTHREAD
+#ifndef H_GCOMMUNICATION
+#define H_GCOMMUNICATION
 /***********************************************************************
  * 				Fonctions GreenHub de sauvegarde des données
  * 
@@ -9,14 +9,20 @@
  * 														Hexanome H4212
  * ********************************************************************/
 
+#define SRV_IP "greenhub.signez.fr"
+#define SRV_PORT 1863
+
 /* maybe will get a config filename in the future */
-int gLogsInit();
+int gCommunicationInit(int userId);
 
 /* don't forget need for exemple to kill the logs process */
-int gLogsClose();
+int gCommunicationClose();
+
+int gCommunicationSend(char * msg);
 
 /* the unique identifier of the sensor and the getting value */
 int gLogsLog(char mac[40], double value);
 
 
 #endif
+

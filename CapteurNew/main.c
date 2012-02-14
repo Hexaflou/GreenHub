@@ -5,6 +5,7 @@
 
 
 int main(){		
+	
 	ComponentInterface();
 	return 0;
 }

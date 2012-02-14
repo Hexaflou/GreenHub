@@ -8,13 +8,8 @@
  * 														Hexanome H4212
  * ********************************************************************/
  
- /* initialise la tache de log periodique des donnees*/
- int gRT_init(int period);
- 
  /* change la frequence de log du mode temps reel */
- int gRT_setPeriod(int period);
- 
- /* Kill de la tâche de log periodique des donnees */
- int gRT_Close();
+ int gRTSetPeriod(int period);
+
  
  #endif

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <mqueue.h>
 #include <pthread.h>
+#include <assert.h>
 #include "comIncludes.h"
 #include "comSendTask.h"
 
@@ -10,7 +11,7 @@
 
 /***************************PRIVATE DECLARATION***********************/
 static void * comSendTask(void * attr);
-static int send(char * msg);
+static int dataSend(char * msg);
 static mqd_t smq;
 static mqd_t rmq;
 static pthread_t comSendThread;
@@ -30,7 +31,7 @@ mqd_t comSendTaskInit(int socket)
 
 	/* create the message queue */
 	smq = mq_open(QUEUE_NAME, O_WRONLY | O_CREAT, 0644, &attr);
-	assert_perror((mqd_t)-1 != smq);
+	assert((mqd_t)-1 != smq);
 	
 	/* lancement de la tache */
 	pthread_create(&comSendThread, NULL, &comSendTask,NULL);
@@ -42,38 +43,38 @@ mqd_t comSendTaskInit(int socket)
 int comSendTaskClose()
 {
 	/* close task */
-	pthread_cancel(comSendThread);
-	assert_perror((mqd_t)-1 != mq_close(rmq));
+	int ret = pthread_cancel(comSendThread);
+	assert((mqd_t)-1 != mq_close(rmq));
 	/* cleanup */
-	assert_perror((mqd_t)-1 != mq_close(smq));
-	assert_perror((mqd_t)-1 != mq_unlink(QUEUE_NAME));
+	assert((mqd_t)-1 != mq_close(smq));
+	assert((mqd_t)-1 != mq_unlink(QUEUE_NAME));
+	return ret;
 }
 
 /************************PRIVATE***************************************/
 static void * comSendTask(void * attr)
 {
 	    char buffer[MAX_MQ_SIZE + 1];
-	    int must_stop = 0;
 		ssize_t bytes_read;
 		
 	    /* create the message queue */
 	    rmq = mq_open(QUEUE_NAME, O_RDONLY);
-	    assert_perror((mqd_t)-1 != rmq);
+	    assert((mqd_t)-1 != rmq);
 
 	    while(1)
 	    {
 	        /* receive the message */
 	        bytes_read = mq_receive(rmq, buffer, MAX_MQ_SIZE, NULL);
-	        assert_perror(bytes_read >= 0);
+	        assert(bytes_read >= 0);
 
 	        buffer[bytes_read] = '\0';
-	        send(buffer);
+	        dataSend(buffer);
 	    }
 
 	    return (void *) NULL;
 }
 
-static int send(char * msg)
+static int dataSend(char * msg)
 {
 	if(send(sock, msg, strlen(msg), 0) < 0)
 	{

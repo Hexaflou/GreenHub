@@ -1,64 +1,142 @@
+#include <pthread.h>
+#include <time.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <mysql/mysql.h>
+#include <string.h>
+#include <signal.h>
 
-#define MYSQL_SADDR 	"134.214.221.25" /*localhost for now*/
-#define MYSQL_SLOGIN	"greenhub"
-#define MYSQL_SPWD  	"greenhub-pass"
-#define MYSQL_SBASE 	"greenhub"
-#define MYSQL_SPORT	0 /* auto */
+#include "cJSON.h"
+#include "gCommunication.h"
+#include "gLogs.h"
 
-#define DATETIME_LENGHT 20
+typedef struct {
+	char mac[40];
+	double value;
+	int date;
+} GInformation;
 
-static MYSQL mysql;
+/***************************PRIVATE DECLARATION***********************/
+static void * gLogFunc(void *);
+/* variables */
+pthread_t gLogThread;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static FILE* rLogFile = NULL;
+static FILE* wLogFile = NULL;
+static FILE* stateFile = NULL;
+static int position = 0;
 
-/* Put in the given char the time in Datetime format */
-static void getDateTime(char * return_date)
+/************************PUBLIC***************************************/
+int gLogsLog (char mac[40], double value)
 {
-	time_t t;
-	time(& t);
-	/************************TODO**************************/
-}
-
-int gLogsInit()
-{
-	mysql_init(&mysql);
-	mysql_options(&mysql,MYSQL_READ_DEFAULT_GROUP,"option");
+	GInformation info;
+	strcpy(info.mac,mac);
+	info.value = value;
+	info.date = (int)time(NULL);
+	if(wLogFile !=NULL)
+	{
+		pthread_mutex_lock( &mutex );
+		fwrite(&info,sizeof(GInformation),1,wLogFile);
+		pthread_mutex_unlock( &mutex );
+	}
+	else
+	{
+		printf("Error : impossible to log, files are not initialized\n");
+		return -1;
+	}
 	return 0;
 }
 
-int gLogsClose()
+int gLogThreadInit()
 {
+	wLogFile = fopen(LOG_FILENAME,"ab");
+	rLogFile = fopen(LOG_FILENAME,"rb");
+	/*Si l'etat de lecture existe on le recupere */
+	stateFile = fopen(LOG_STATE_FILENAME,"rb");
+	if(stateFile!=NULL)
+	{
+		fread(&position,sizeof(int),1,stateFile);
+		fclose(stateFile);
+	}
+
+	stateFile = fopen(LOG_STATE_FILENAME,"wb");
+	fwrite(&position,sizeof(int),1,stateFile);
+	fseek(rLogFile,position,SEEK_SET);
+	return pthread_create( &gLogThread, NULL, gLogFunc, (void *) NULL);
+}
+
+int gLogThreadClose()
+{
+	pthread_mutex_lock( &mutex );
+	pthread_cancel(gLogThread);
+	fclose(rLogFile);
+	fclose(wLogFile);
+	fclose(stateFile);
+	wLogFile=NULL;
+	pthread_mutex_unlock( &mutex );
 	return 0;
 }
 
-int gLogsLog(char mac[40], double value)
+/************************PRIVATE***************************************/
+static int send(GInformation * info)
 {
+	cJSON *data = cJSON_CreateObject();
+	char * msg = NULL;
+	int ret;
 	
-	char instruction[500];	
-	if(mysql_real_connect(&mysql,MYSQL_SADDR,MYSQL_SLOGIN,
-								MYSQL_SPWD,MYSQL_SBASE,MYSQL_SPORT,NULL,0))
-    {
-		printf("Envoi donnees à la BDD, valeur : %lf \n", value);
-		sprintf(instruction,"INSERT INTO greenhub_state"
-		" (captured_at, value, sensor_id) SELECT NOW(), '%lf',"
-		" s.id FROM greenhub_sensor s WHERE s.mac_address = '%s';",
-		value,mac);
-		
-		mysql_query(&mysql,instruction);
-		
-        mysql_close(&mysql);
-        return 0;
-    }
-    else
-    {
-        printf("Une erreur s'est produite lors de la connexion à la BDD!");
-    }
-    return -1;
+	cJSON_AddStringToObject(data,"msg_type","new_state");
+	cJSON_AddStringToObject(data,"mac_address",info->mac);
+	cJSON_AddNumberToObject(data,"new_value",info->value);
+	cJSON_AddNumberToObject(data,"date",info->date);
+	
+	
+	msg = cJSON_Print(data);
+	
+	ret = gCommunicationSend(msg);
+	
+	/* Clean data */
+	free(msg);
+	cJSON_Delete(data);
+	return ret;
 }
 
-/*void main()
+static void * gLogFunc(void * attr)
 {
-	printf("hello\n");
+	GInformation info;
+	
+	while(1)
+	{
+		pthread_mutex_lock( &mutex );
+
+		while (!feof(rLogFile))
+		{
+			if(fread(&info,sizeof(GInformation),1,rLogFile)>0)
+				send(&info);
+		}
+		
+		position = ftell (rLogFile);
+		fseek(stateFile,0,SEEK_SET);
+		fwrite(&position,sizeof(int),1,stateFile);
+		pthread_mutex_unlock( &mutex );
+		
+		/* wait for next time */
+		sleep(LOG_SEND_PERIOD);
+	}
+	
+	return 0;
+}
+/*	
+int main ()
+{
+	int i = 0;
+	int tache;
+	gCommunicationInit(1);
+	tache = gLogThreadInit();
+	for (i = 0 ; i < 50 ; i++)
+		gLogsLog("42",i);
+	sleep(100);
+	gLogThreadClose();
+	gCommunicationClose();
+	return 0;
 }*/
+

@@ -1,5 +1,5 @@
-#ifndef H_GTHREAD
-#define H_GTHREAD
+#ifndef H_GCOMMUNICATION
+#define H_GCOMMUNICATION
 /***********************************************************************
  * 				Fonctions GreenHub de sauvegarde des données
  * 
@@ -9,14 +9,12 @@
  * 														Hexanome H4212
  * ********************************************************************/
 
-/* maybe will get a config filename in the future */
-int gLogsInit();
 
-/* don't forget need for exemple to kill the logs process */
-int gLogsClose();
-
-/* the unique identifier of the sensor and the getting value */
-int gLogsLog(char mac[40], double value);
+int gCommunicationParse(char * msg);
+void sensorAction(char* mac_address,char * action);
+void getValue(char * mac_address);
+void activateRT();
 
 
 #endif
+

@@ -13,6 +13,7 @@
 #include "Test.h"
 #include "gLogs.h"
 #include "EEP.h"
+#include "SimulationSensor.h"
 
 /* Inclusions externes */
 
@@ -67,6 +68,7 @@ int ComponentInterface()
 	/* on les attend
 	pthread_join(thread1, NULL);	*/
 	pthread_join(thread2, NULL);		
+	StartSimulationSensor();
 	return 0;
 }
 

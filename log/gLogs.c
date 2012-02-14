@@ -18,6 +18,7 @@ typedef struct {
 
 /***************************PRIVATE DECLARATION***********************/
 static void * gLogFunc(void *);
+static int send(GInformation * info);
 /* variables */
 pthread_t gLogThread;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -33,7 +34,8 @@ int gLogsLog (char mac[40], double value)
 	strcpy(info.mac,mac);
 	info.value = value;
 	info.date = (int)time(NULL);
-	if(wLogFile !=NULL)
+	send(&info);
+	/*if(wLogFile !=NULL)
 	{
 		pthread_mutex_lock( &mutex );
 		fwrite(&info,sizeof(GInformation),1,wLogFile);
@@ -43,7 +45,7 @@ int gLogsLog (char mac[40], double value)
 	{
 		printf("Error : impossible to log, files are not initialized\n");
 		return -1;
-	}
+	}*/
 	return 0;
 }
 
@@ -118,7 +120,6 @@ static void * gLogFunc(void * attr)
 		fseek(stateFile,0,SEEK_SET);
 		fwrite(&position,sizeof(int),1,stateFile);
 		pthread_mutex_unlock( &mutex );
-		
 		/* wait for next time */
 		sleep(LOG_SEND_PERIOD);
 	}
@@ -129,13 +130,17 @@ static void * gLogFunc(void * attr)
 int main ()
 {
 	int i = 0;
-	int tache;
-	gCommunicationInit(1);
-	tache = gLogThreadInit();
+	gCommunicationInit(2);
+	/* initialize random seed: */
+	srand ( time(NULL) );
+	/*gLogThreadInit();*/
 	for (i = 0 ; i < 50 ; i++)
-		gLogsLog("42",i);
-	sleep(100);
-	gLogThreadClose();
+	{
+		gLogsLog("48151623eT",(rand() % 13 + 12));
+		sleep(1);
+	}
+	sleep(3);
+	/*gLogThreadClose();*/
 	gCommunicationClose();
 	return 0;
 }

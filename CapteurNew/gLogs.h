@@ -1,5 +1,5 @@
-#ifndef H_GTHREAD
-#define H_GTHREAD
+#ifndef H_GLOGS
+#define H_GLOGS
 /***********************************************************************
  * 				Fonctions GreenHub de sauvegarde des données
  * 
@@ -9,14 +9,15 @@
  * 														Hexanome H4212
  * ********************************************************************/
 
-/* maybe will get a config filename in the future */
-int gLogsInit();
+#define LOG_SEND_PERIOD 	60
+#define LOG_FILENAME 		"sensors.log"
+#define LOG_STATE_FILENAME 	"sendstate.data"
 
-/* don't forget need for exemple to kill the logs process */
-int gLogsClose();
+/* Log the given datas */
+int gLogsLog (char mac[40], double value);
 
-/* the unique identifier of the sensor and the getting value */
-int gLogsLog(char mac[40], double value);
+int gLogThreadInit();
 
+int gLogThreadClose();
 
 #endif

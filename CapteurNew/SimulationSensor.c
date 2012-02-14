@@ -109,3 +109,22 @@ void * SimulationSensorSwitch(void * p_argSensor)
 		printf("Message du capteur d'interrupteur : %s\n",message);
 	}
 }
+
+
+
+char* CalculateCheckSum(char * message){
+	int nbChar, ii;
+	float byteSum;
+	char byte[2];
+	char * byteSumHexa;
+	byteSumHexa =(char*)malloc(sizeof(char)*30);
+	nbChar = xtoi(str_sub(message,0,1));
+	for (ii = 0; ii<nbChar ; ii + 2){
+		byte[0] = str_sub(message,ii,ii);
+		byte[1] = str_sub(message,ii+1,ii+1);
+		byteSum = byteSum + xtoi(byte);		
+	}
+	sprintf(byteSumHexa,"%X",byteSum);
+	printf("ByteSumHexa : %s \n",byteSumHexa);
+	return byteSumHexa;
+}

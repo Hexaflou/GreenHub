@@ -14,7 +14,7 @@
 * Retourne le cJSON contenant les données passées en paramètre : l'id et l'EEP
 *
 */
-cJSON* createCSON(char* id, char* EEP){
+cJSON* createCSONFirst(char* id, char* EEP){
 	cJSON *root ; 
 	root=cJSON_CreateObject();
 	cJSON_AddStringToObject(root,"id",id);
@@ -34,23 +34,23 @@ void createConfigSensors(){
 	FILE *f = fopen("sensors.txt", "w");  
 	
 	/* Création et écriture des cJSON */
-  	jsonSensor= createCSON("00893378", "070205");
-	sensor = cJSON_Print(jsonSsensor);
+  	jsonSensor= createCSONFirst("00893378", "070205");
+	sensor = cJSON_Print(jsonSensor);
 	cJSON_Delete(jsonSensor);
     fprintf(f, sensor);  
 	
-   	jsonSensor= createCSON("0021CBE5", "050201");
-	sensor = cJSON_Print(jsonSsensor);
+   	jsonSensor= createCSONFirst("0021CBE5", "050201");
+	sensor = cJSON_Print(jsonSensor);
 	cJSON_Delete(jsonSensor);
     fprintf(f, sensor);  
 	
-  	jsonSensor= createCSON("0001B015", "060001");
-	sensor = cJSON_Print(jsonSsensor);
+  	jsonSensor= createCSONFirst("0001B015", "060001");
+	sensor = cJSON_Print(jsonSensor);
 	cJSON_Delete(jsonSensor);
     fprintf(f, sensor);  
 	
-  	jsonSensor= createCSON("0001B016", "060001");
-	sensor = cJSON_Print(jsonSsensor);
+  	jsonSensor= createCSONFirst("0001B016", "060001");
+	sensor = cJSON_Print(jsonSensor);
 	cJSON_Delete(jsonSensor);
     fprintf(f, sensor);  
   

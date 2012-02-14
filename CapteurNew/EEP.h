@@ -26,9 +26,9 @@ typedef struct EEP
 	int rangeMax;
 }EEP;
 
-int initializeEEPList(EEP*);
+int initializeEEPList(char*,EEP*);
 
-int AddSensorByEEP(char id[8], Sensor * p_sensorList, EEP* p_EEPList, char org[3], char funct[3], char type[3]);
+int AddSensorByEEP(char id[8], Sensor ** pp_sensorList, EEP* p_EEPList, char org[3], char funct[3], char type[3]);
 
 int AddSensorsContact(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax);
 int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax);

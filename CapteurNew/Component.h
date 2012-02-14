@@ -29,6 +29,7 @@ typedef struct Range{
 typedef struct Sensor
 {
 	char id[10];
+	char EEP[6];
 	Range * rangeData;
 	float value;	
 	int (*decodeMessage)(char*, struct Sensor);

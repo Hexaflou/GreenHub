@@ -5,7 +5,7 @@ body {
     background-color: white;
 }
 
-body a:link {
+body a {
     color: #17c200;
     font-weight: bold;
     text-decoration: none;

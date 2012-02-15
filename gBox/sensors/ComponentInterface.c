@@ -273,7 +273,7 @@ void *ListenEnOcean(void *message2)
 ** etre integre dynamiquement a notre configuration, seulement si son EEP est connu de
 ** l'application.
 */
-void ManageMessage(char* message)
+void ManageMessage(char* message) /* FF00LLTT00IDIDIDID0000 */
 {
 	int org, teachIn;
 	Sensor* currentSensor;

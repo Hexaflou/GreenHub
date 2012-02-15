@@ -281,8 +281,13 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 						break;
 					} /* Fin default */
 				} /* Fin switch funct*/
-			break;
+				break;
 			} /* Fin case 7 */
+			case 255:
+				switch(type){
+					EEPCurrent->AddSensors =AddSensorsTempLightSunSpot;	
+					break;
+				}
 		} /* Fin switch org */
 		c=fgetc(f);
 		if(c!=EOF){
@@ -939,6 +944,42 @@ int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float scaleMin
 	p_sensor->id[9] = 'O';
 	p_sensor->value = 0;	
 	p_sensor->decodeMessage = decodeMessageOccupancy;
+	p_sensor->next = NULL;
+
+	return 0;
+}
+int AddSensorsTempLightSunSpot(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax){
+	Sensor* p_sensor;
+	if (*pp_sensorList == NULL){
+		*pp_sensorList = (Sensor*)malloc(sizeof(Sensor));
+		(*pp_sensorList)->next = NULL;
+		p_sensor = *pp_sensorList;
+	}else{		
+		p_sensor = *pp_sensorList;
+		while ( (p_sensor != NULL) && (p_sensor->next != NULL) ){
+			p_sensor = p_sensor->next;
+		}
+		if (p_sensor != NULL){
+			p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
+			p_sensor = p_sensor->next;
+		}else{
+			p_sensor = (Sensor*)malloc(sizeof(Sensor));
+		}
+	}	
+	strcpy(p_sensor->id,id);
+	p_sensor->id[8] = 's';
+	p_sensor->id[9] = 'L';
+	p_sensor->value = 0;
+	p_sensor->decodeMessage = decodeMessageLight;
+
+	p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
+	p_sensor = p_sensor->next;
+
+	strcpy(p_sensor->id,id);
+	p_sensor->id[8] = 's';
+	p_sensor->id[9] = 'T';
+	p_sensor->value = 0;	
+	p_sensor->decodeMessage = decodeMessageTemp;
 	p_sensor->next = NULL;
 
 	return 0;

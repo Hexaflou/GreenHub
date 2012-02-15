@@ -34,7 +34,7 @@ int AddSensorsContact(char id[8], Sensor ** pp_sensorList, float scaleMin, float
 int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax);
 int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax);
 int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax);
-
+int AddSensorsTempLightSunSpot(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax);
 
 #endif /* COMPONENTINTERFACE_H_ */
  

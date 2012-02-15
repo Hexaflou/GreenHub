@@ -54,7 +54,6 @@ int decodeMessageSwitch(char* message, struct Sensor *);
 int decodeMessageOccupancy(char * message, struct Sensor *);
 int decodeMessageLight(char * message, struct Sensor *);
 
-
 int getTempWithoutRange(char* message);
 int getLightLittleSensor(char* message);
 int getLightBigSensor(char* message);

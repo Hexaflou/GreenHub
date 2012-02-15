@@ -35,6 +35,7 @@ import com.sun.spot.util.Utils;
 import javax.microedition.io.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
+import java.lang.Math;
 
 /*
  * Application tournant sur les SunSPOTs (capteurs).
@@ -77,8 +78,12 @@ public class SensorSampler extends MIDlet {
             try {
                 // On récupère les valeurs actuelles des captures
                 long now = System.currentTimeMillis();
-                int brightness = lightSensor.getAverageValue(); // valeur moyenne, si on a des néons c'est faux sinon
+                int brightness = lightSensor.getAverageValue(); // on prend bien une valeur moyenne
                 double temperature = tempSensor.getCelsius(); // rajouté : température
+                
+                // petite manipulation sur la température : on a un int, directement valeur en °C, de -40 à +125
+                // on le passe en un int de 0 à 165
+                int convertedTemperature = ((int)Math.floor(temperature))+40;
                 
                 // On fait clignoter un petit coup la LED
                 led.setRGB(255, 255, 255); // en blanc
@@ -94,7 +99,7 @@ public class SensorSampler extends MIDlet {
                 // et l'envoie
                 rCon.send(dg);
 
-                System.out.println("Time: " + now + " - Brightness: " + brightness +" - Temperature: " + temperature);
+                System.out.println("Time: " + now + " - Brightness: " + brightness +" - Temperature: " + convertedTemperature);
                 
                 // On va en veille jusqu'au prochain relevé dans 60 secondes
                 Utils.sleep(SAMPLE_PERIOD - (System.currentTimeMillis() - now));

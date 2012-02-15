@@ -9,9 +9,9 @@
 #include "../realtime.h"
 #include <errno.h>
 #include <semaphore.h>
-#include "gCommunication/gCommunication.h"
-#include "sensors/ComponentInterface.h"
-#include "sensors/Component.h"
+#include "gCommunication.h"
+#include "../sensors/ComponentInterface.h"
+#include "../sensors/Component.h"
 
 /****************************PRIVATE DECLARATION***********************/
 static void * comRcvTask(void * attr);
@@ -151,11 +151,11 @@ void sensorAction(char* mac_address,char * action)
 void getValue(char * mac_address)
 {
 	
-	printf("get value for mac address : %s\n",mac_address);
-	
 	Sensor* tempSensor = NULL;
+	sem_t semSensorList;
 	
 	tempSensor=getSensorList();
+	/* TODO : Penser à passer aux mutex p_thread*/
 	semSensorList = getSemaphore() ;
 
 		sem_wait(&semSensorList);

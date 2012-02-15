@@ -29,6 +29,7 @@ sem_t mutex_sensorList;
 Sensor* p_sensorList;
 EEP* p_EEPList;
 
+
 /* Fonction lançant les deux connections d'écoute avec les périphériques EnOcean et SunSpot */
 int ComponentInterface(void* attr)
 {

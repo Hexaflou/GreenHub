@@ -12,8 +12,8 @@
 #include "Component.h"
 
 cJSON* createCSON(char* id, char* EEP);
-void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** p_sensorList, EEP* EEPList);
-void rewriteConfig(char* fileName, Sensor * p_sensorList);
+void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** pp_sensorList, EEP* EEPList);
+void writeConfig(char* fileNameSensor,char* fileNameEEP, Sensor * p_sensorList,EEP* p_EEPList);
 
 #endif /* GESTIONCONFIGURATION_H_ */
  

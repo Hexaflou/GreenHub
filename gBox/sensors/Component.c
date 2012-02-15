@@ -33,9 +33,9 @@ int decodeMessageLight(char * message, struct Sensor* p_sensor){
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (p_sensor->value != light)
 	{
-		char id[7];
-		strncpy(id,p_sensor->id,6);
-		id[7] = '\0';
+		char id[11];
+		strncpy(id,p_sensor->id,10);
+		id[10] = '\0';
 		p_sensor->value = light;
 		gLogsLog (id, p_sensor->value);
 		printf("Valeur du capteur de luminosite : %f \n", p_sensor->value);
@@ -62,9 +62,9 @@ int decodeMessageOccupancy(char* message, struct Sensor* p_sensor)
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (occupancy != p_sensor->value){
-		char id[7];
-		strncpy(id,p_sensor->id,6);
-		id[7] = '\0';
+		char id[11];
+		strncpy(id,p_sensor->id,10);
+		id[10] = '\0';
 		p_sensor->value = occupancy;
 		gLogsLog (id, p_sensor->value);
 		return VALUE_CHANGE;
@@ -96,9 +96,9 @@ int decodeMessageTemp(char* message, struct Sensor* p_sensor)
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (p_sensor->value != temp)
 	{
-		char id[7];
-		strncpy(id,p_sensor->id,6);
-		id[7] = '\0';
+		char id[11];
+		strncpy(id,p_sensor->id,10);
+		id[10] = '\0';
 		p_sensor->value = temp;
 		gLogsLog (id, p_sensor->value);				
 		return VALUE_CHANGE;
@@ -122,9 +122,9 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor)
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (closed != p_sensor->value){
-		char id[7];
-		strncpy(id,p_sensor->id,6);
-		id[7] = '\0';
+		char id[11];
+		strncpy(id,p_sensor->id,10);
+		id[10] = '\0';
 		p_sensor->value = closed;
 		gLogsLog (id, p_sensor->value);
 		return VALUE_CHANGE;
@@ -146,9 +146,9 @@ int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
 		/* Si la nouvelle valeur est differente de l ancienne */
 		if (switch_button != p_sensor->value)
 		{		
-			char id[7];
-			strncpy(id,p_sensor->id,6);
-			id[7] = '\0';
+			char id[11];
+			strncpy(id,p_sensor->id,10);
+			id[10] = '\0';
 			p_sensor->value = switch_button;
 			gLogsLog (id, p_sensor->value);
 			return VALUE_CHANGE;

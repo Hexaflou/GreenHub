@@ -77,7 +77,7 @@ public class SensorSampler extends MIDlet {
             try {
                 // On récupère les valeurs actuelles des captures
                 long now = System.currentTimeMillis();
-                int brightness = lightSensor.getValue();
+                int brightness = lightSensor.getAverageValue(); // valeur moyenne, si on a des néons c'est faux sinon
                 double temperature = tempSensor.getCelsius(); // rajouté : température
                 
                 // On fait clignoter un petit coup la LED

@@ -83,7 +83,7 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** pp_sensorList
 			eepstr= cJSON_GetObjectItem(root,"EEP")->valuestring;
 			if(eepstr == NULL)
 				printf("error\n");
-			strncpy(org,str_sub(eepstr,2,3), 3);
+			strncpy(org,str_sub(eepstr,0,1), 3);
 			strncpy(funct,str_sub(eepstr,2,3), 3);
 			strncpy(type,str_sub(eepstr,4,5), 3);
 			/* Ajout du capteur */

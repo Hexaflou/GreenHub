@@ -800,7 +800,7 @@ int AddSensorByEEP(char id[8], Sensor ** pp_sensorList, EEP* EEPList, char org[3
 	strcat(eep,type);
 
 	while (EEPList != NULL){
-		if (strcmp(EEPList->eep,eep) != 0)	/* Si l EEP courant est different de l EEP du capteur */
+		if (strcmp(EEPList->eep,str_sub(eep,0,5)) != 0)	/* Si l EEP courant est different de l EEP du capteur */
 		{
 			EEPList = EEPList->next;
 		}else{

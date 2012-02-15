@@ -166,25 +166,42 @@ void *ListenSunSpot(void *message1) {
         */
         char* idCapteur = str_sub(strtok(NULL, ";"), 14, 18);
          
-        /* date et heure de la mesure : info pas utilisée pour l'instant */
+        /* --- date et heure de la mesure : info pas utilisée pour l'instant --- */
         char* dateTime = strtok(NULL, ";");
         
-        /* luminosité */
-        int brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
-        
-        char hexBrightness[5]; /* petit code pour convertir en hexadécimal */
-        if (brightness <= 0xFFFF)
-        {
-            sprintf(&hexBrightness[0], "%04x", brightness);
-        }
-        
-        /* température - même fonctionnement */
+        /* --- température - même fonctionnement --- */
         int temperature = atoi(strtok(NULL, ";"));
+        
+        /* il faut qu'on applique un coefficient (diviseur)
+            détail du calcul :
+                    (scaleMax-scaleMin)/(rangeMax/rangeMin)
+                on remplace avec les valeurs, issues de la datasheet pour la scale et le range est celui d'un int :
+                    (165-0)/(255-0) = 0,647058824
+         */
+        temperature = temperature*0,647058824;
         
         char hexTemperature[5]; /* petit code pour convertir en hexadécimal */
         if (temperature <= 0xFFFF)
         {
             sprintf(&hexTemperature[0], "%04x", temperature);
+        }
+        
+        /* --- luminosité --- */
+        int brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
+        
+        /* il faut qu'on applique un coefficient de nouveau :
+         la valeur envoyée par le capteur est entre 0 et 750 (cf datasheet)
+         il faut que cela tienne dans un int entre 0 et 255
+         
+         détail du calcul :
+            (750-0)/(255-0)
+         */
+        brightness = brightness/2,94117647;
+        
+        char hexBrightness[5]; /* petit code pour convertir en hexadécimal */
+        if (brightness <= 0xFFFF)
+        {
+            sprintf(&hexBrightness[0], "%04x", brightness);
         }
         
         /*

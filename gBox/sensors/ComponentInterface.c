@@ -24,7 +24,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-/* Déclaration de variable */
+/* Déclaration de variables */
 sem_t mutex_sensorList;
 Sensor* p_sensorList;
 EEP* p_EEPList;
@@ -35,8 +35,7 @@ int ComponentInterface(void* attr)
 	pthread_t thread1, thread2;
 	char *message1 = "Thread SunSPOT";
 	char *message2 = "Thread EnOcean";
-	int iret1, iret2;
-	void* ptt;	
+	int iret1=0, iret2=0;
 
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
@@ -65,9 +64,9 @@ int ComponentInterface(void* attr)
 
 	/* on les attend
 	pthread_join(thread1, NULL);
-	pthread_join(thread2, NULL);	
+	pthread_join(thread2, NULL);*/
 	/*StartSimulationSensor();*/
-	return 0;
+	return (iret1 || iret2);
 }
 
 
@@ -158,12 +157,8 @@ void *ListenSunSpot(void *message1) {
          */
         
         /*
-         On traite l'id du capteur :
-         petite adaptation (tous les SunSPOTS ont un id commençant par 0014.4F01.0000., on raccourcit)
-         on regarde si les capteurs existe déjà (à chaque SunSPOT correspond une struct capteur de température, 
-         et une capteur de luminosité)
-         si oui, stocke ses valeurs
-         si non, créé les capteurs
+        On récupère le restant du message, pour construire une "pseudo-trame",
+         similaire à ce que les capteurs EnOcean envoient
          */
         
         #if DEBUG > 0
@@ -275,7 +270,6 @@ void *ListenEnOcean(void *message2)
 */
 void ManageMessage(char* message) /* FF00LLTT00IDIDIDID0000 */
 {
-	int org, teachIn;
 	Sensor* currentSensor;
 	#if DEBUG > 0
 		printf("Message : %s \n", message);

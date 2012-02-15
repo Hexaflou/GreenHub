@@ -8,6 +8,10 @@
 #include "../lib/cJSON.h"
 #include "../realtime.h"
 #include <errno.h>
+#include <semaphore.h>
+#include "gCommunication.h"
+#include "../sensors/ComponentInterface.h"
+#include "../sensors/Component.h"
 
 /****************************PRIVATE DECLARATION***********************/
 static void * comRcvTask(void * attr);
@@ -126,7 +130,7 @@ int communicationParse(char* trame)
 	else if ( strncmp(msg_type,"realtime",9) ==0)
 	{
 		interval=cJSON_GetObjectItem(data,"interval")->valueint;
-		gRTSetPeriod(interval);
+		activateRT(interval);
 	}
 	else
 	{
@@ -141,12 +145,38 @@ int communicationParse(char* trame)
 void sensorAction(char* mac_address,char * action)
 {
 	printf("mac address : %s, Action : %s \n",mac_address,action);
+	
+	
 }
 void getValue(char * mac_address)
 {
-	printf("get value for mac address : %s\n",mac_address);
+	
+	Sensor* tempSensor = NULL;
+	sem_t semSensorList;
+	
+	tempSensor=getSensorList();
+	/* TODO : Penser à passer aux mutex p_thread*/
+	semSensorList = getSemaphore() ;
+
+		sem_wait(&semSensorList);
+		
+		while(tempSensor != NULL)
+		{
+			if ( strncmp(tempSensor->id , mac_address , 10) == 0 )
+			{
+			gCommunicationSendValue(tempSensor->id,tempSensor->value);
+			}
+			else
+			{
+			tempSensor = tempSensor->next;
+		    }
+		}
+		
+		sem_post(&semSensorList);
+	
 }
 void activateRT(int interval)
 {
 	printf("Activating Real Time mode for : %d seconds \n",interval);
+	gRTSetPeriod(interval);
 }

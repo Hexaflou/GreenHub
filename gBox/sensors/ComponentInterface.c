@@ -24,7 +24,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-/* Déclaration de variable */
+/* Déclaration de variables */
 sem_t mutex_sensorList;
 Sensor* p_sensorList;
 EEP* p_EEPList;

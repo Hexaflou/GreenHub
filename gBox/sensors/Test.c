@@ -29,7 +29,7 @@ void initializeSensorAndEEPList(Sensor ** pp_sensorList, EEP* p_EEPList){
 }
 
 
-
+#ifdef TODO_SUPPRIMER /* TODO SUPPRIMER ?????? */
 void initializeSensorAndEEPListOld(Sensor * p_sensorList, EEP* EEPList){
 
 	char id[8]; 
@@ -87,3 +87,4 @@ void initializeSensorAndEEPListOld(Sensor * p_sensorList, EEP* EEPList){
 	AddSensorByEEP(id, p_sensorList, EEPList, org, funct, type);
 
 }
+#endif

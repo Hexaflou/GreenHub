@@ -11,7 +11,6 @@
 
 int main ()
 {
-	int i = 0;
 	gCommunicationInit(2);
 	/* initialize random seed: */
 	srand ( time(NULL) );

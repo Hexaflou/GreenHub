@@ -126,7 +126,7 @@ int communicationParse(char* trame)
 	else if ( strncmp(msg_type,"realtime",9) ==0)
 	{
 		interval=cJSON_GetObjectItem(data,"interval")->valueint;
-		gRTSetPeriod(interval);
+		activateRT(interval);
 	}
 	else
 	{
@@ -149,4 +149,5 @@ void getValue(char * mac_address)
 void activateRT(int interval)
 {
 	printf("Activating Real Time mode for : %d seconds \n",interval);
+	gRTSetPeriod(interval);
 }

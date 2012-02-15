@@ -303,12 +303,12 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 */
 int destroyEEPList(EEP* p_EEPList){
 	char reponse;
-	int retour;
+	int retour;/* TODO : sert à quoi ?*/
 	int ok = 0;
 	printf("Etes-vous sur de vouloir supprimer la liste d EEP? Ceux non sauvegardes dans le fichier de configuration ne pourront etre recupere (y/n) :\n");
 	while (!ok){
 	
-		retour = scanf("%c%*[^\n]", &reponse);
+		/*retour = */scanf("%c%*[^\n]", &reponse);
 		if (reponse!= 'y' && reponse != 'Y' && reponse !='n' && reponse != 'N' ){
 			/* erreur de saisie, on vide le flux */
 			int c;

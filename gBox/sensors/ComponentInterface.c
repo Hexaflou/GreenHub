@@ -65,8 +65,8 @@ int ComponentInterface(void* attr)
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
 
 	/* on les créé, passe un argument on verra plus tard lequel exactement */
-	iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
-	 /*iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); */
+	 iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
+	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2);
 
 	/* on les attend
 	pthread_join(thread1, NULL);
@@ -147,16 +147,20 @@ void *ListenSunSpot(void *message1) {
          Il a le même format que celui des capteurs EnOcean
          */
 
-        message = (char*) buffer; /* on mets ça dans un char*, passe à une chaîne de charactères */
+        /* message = (char*) buffer; */ /* on mets ça dans un char*, passe à une chaîne de charactères */
+	/*strncpy(message, buffer, 30);
+
+	printf(message);*/
+	message = buffer;
 
         /* on regarde l'entête, vérifie que c'est bien "A55A" */
-		if (strcmp(strtok(message, ";"), "A55A") != 0)
+	if (strcmp(strtok(message, ";"), "A55A") != 0)
         {
             printf("[ListenSunSpot] Wrong header.\n");
         }
 
         /* on vérifie maintenant si on est bien sur un vrai capteur SunSpot : type "03" */
-		if (strcmp(strtok(NULL, ";"), "03") != 0)
+	if (strcmp(strtok(NULL, ";"), "03") != 0)
         {
             printf("[ListenSunSpot] Good sensor type.\n");
         }

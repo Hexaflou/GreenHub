@@ -76,19 +76,19 @@ int ComponentInterface(void* attr)
 */
 void *ListenSunSpot(void *message1) {
 	int sFd;
-	char buffer[46], *message; /* on recevra le message en une seule fois */
-    	long n;
+	char buffer[47], *message; /* on recevra le message en une seule fois */
+    long n;
 	int tailleTrame;
 	struct sockaddr_in serverAddr;
 	socklen_t serverAddrLen = sizeof(serverAddr);
     
-	/* Protocole internet */
+	/* Déclaration des infos réseau */
 	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); /* on assume que le serveur Java sera local */
+	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); /* on assume que le serveur Java tournera sur la même machine */
 	serverAddr.sin_port = htons(1337);
-
-	/* Création d'un socket UDP */
-	if ((sFd = socket(AF_INET, SOCK_STREAM, 0)) == ERROR)
+    
+	/* On est en UDP (mode non connecté), création du socket */
+	if ((sFd = socket(AF_INET, SOCK_DGRAM, 0)) == ERROR)
 	{
 		perror("[ListenSunSpot] SunSPOT UDP Socket Creation Error \n");
 		return (int*)ERROR;
@@ -97,68 +97,82 @@ void *ListenSunSpot(void *message1) {
     #if DEBUG > 0
         printf("[ListenSunSpot] Binding with server...\n");
     #endif
-
-	/* on est en UDP, pas de connect à faire, mais un bind */
-	if (bind(sFd, (struct sockaddr*) &serverAddr, serverAddrLen) == -1)
+    
+	/* Pas de connect à faire, il faut juste se binder */
+	if (bind(sFd, (struct sockaddr*) &serverAddr, serverAddrLen) == SOCKET_ERROR)
 	{
-		perror("[ListenSunSpot] Socket bond Error \n");
-		return (int*)SOCKET_ERROR;
+		perror("[ListenSunSpot] Socket bind Error \n");
+		return (int*) SOCKET_ERROR;
 	}
     
     #if DEBUG > 0
-        printf("[ListenSunSpot] Bind with server OK\n");
+        printf("[ListenSunSpot] Bind with socket OK\n");
     #endif
-
+    
 	while (1)
 	{
-    #if DEBUG > 0
+        #if DEBUG > 0
             printf("[ListenSunSpot] Waiting for a message debut...\n");
-    #endif
-
-		while (strcmp(buffer, "A55A") != 0)
+        #endif
+        
+        /* on reçoit le message en une seule fois, comme un gros tableau de caractères */
+		if ((n = recvfrom(sFd, buffer, sizeof(buffer)-1, 0, (struct sockaddr*) &serverAddr, &serverAddrLen)) < 0)
 		{
-			if ((n = recv(sFd, buffer, sizeof(buffer - 1), 0)) < 0)
-			{
-				perror("[ListenSunSpot] Receive Error \n");
-				break;
-			}
-			buffer[4] = '\0';
-		}
+			perror("[ListenSunSpot] Receive Error \n");
+            
+			break;
+        }
         
         #if DEBUG > 0
-            printf("[ListenSunSpot] Message received.\n");
+            printf("[ListenSunSpot] Sensor message received.\n");
         #endif
-
-		if ((n = recv(sFd, buffer, 2, 0)) < 0)
-		{
-			perror("[ListenSunSpot] Data Reception Error \n");
-			break;
-		}
-		buffer[2] = '\0';
+        
+        /*
+         On va maintenant parser le message
+         Il a le même format que celui des capteurs EnOcean
+         */
+        
+        message = (char*) buffer; /* on mets ça dans un char*, passe à une chaîne de charactères */
+        
+        /* on regarde l'entête, vérifie que c'est bien "A55A" */
+		if (strcmp(strtok(message, ";"), "A55A") != 0)
+        {
+            printf("[ListenSunSpot] Wrong header.\n");
+        }
+        
+        /* on vérifie maintenant si on est bien sur un vrai capteur SunSpot : type "03" */
+		if (strcmp(strtok(NULL, ";"), "03") != 0)
+        {
+            printf("[ListenSunSpot] Good sensor type.\n");
+        }
+        
+        /*
+         Maintenant on a, séparés par des ; :
+         adresse du capteur (id)
+         date/time
+         luminosité
+         température
+         
+         TODO la fin !
+         */
+        
+        /*
+         On traite l'id du capteur :
+         petite adaptation (tous les SunSPOTS ont un id commençant par 0014.4F01.0000., on raccourcit)
+         on regarde si les capteurs existe déjà (à chaque SunSPOT correspond une struct capteur de température, 
+         et une capteur de luminosité)
+         si oui, stocke ses valeurs
+         si non, créé les capteurs
+         */
         
         #if DEBUG > 0
-            printf("[ListenSunSpot] Buffer length : %s \n", buffer);
+            printf(strtok(NULL, ";"));
         #endif
-
-		/* Convertit un tableau de caractère hexadecimal en entier */
-		tailleTrame = xtoi(buffer);
-
-		/* Un octet correspond à 2 caractères */
-		message = (char*) malloc(tailleTrame * sizeof(char) * 2 + 1);
-
-		/* Reception du message sans le header */
-		if ((n = recv(sFd, message, tailleTrame * 2, 0)) < 0)
-		{
-			perror("[ListenSunSpot] Data Reception Error \n");
-			break;
-		}
-
-		message[tailleTrame * 2] = '\0';
-		ManageMessage(message);
 	}
-
+    
 	free(message);
 	close(sFd);
+    
 	return 0;
 }
 
@@ -273,7 +287,7 @@ void ManageMessage(char* message)
 	{
 		if (strcmp(str_sub(currentSensor->id, 0, 7), str_sub(message, 10, 17)) == 0) /* Détecteur présent dans la liste */
 		{
-			printf("Détecteur présent dans la liste ! \n");
+			/*printf("Détecteur présent dans la liste ! \n");*/
 			currentSensor->decodeMessage(message, currentSensor);
 			currentSensor = currentSensor->next;
 		}

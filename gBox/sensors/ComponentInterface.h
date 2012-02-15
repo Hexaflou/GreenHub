@@ -11,7 +11,7 @@
 #define SOCKET_ERROR -1
 #define ERROR -1
 #define OK 0
-#define DEBUG 1
+#define DEBUG 0
 
 #include "Utility.h"
 #include "Component.h"

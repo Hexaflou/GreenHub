@@ -1,5 +1,5 @@
 /*
-* Ce fichier permet de créer une configuration de base : créer le fichier .txt qui contient les informations sur les capteurs
+* Ce fichier permet de crï¿½er une configuration de base : crï¿½er le fichier .txt qui contient les informations sur les capteurs
 *
 *
 */
@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 /*
-* Retourne le cJSON contenant les données passées en paramètre : l'id et l'EEP
+* Retourne le cJSON contenant les donnï¿½es passï¿½es en paramï¿½tre : l'id et l'EEP
 *
 */
 cJSON* createCSONFirst(char* id, char* EEP){
@@ -23,17 +23,17 @@ cJSON* createCSONFirst(char* id, char* EEP){
 }
  
 /*
-* Crée le fichier .txt contenant les informations sur les capteurs
+* Crï¿½e le fichier .txt contenant les informations sur les capteurs
 *
 */
 void createConfigSensors(){
 	char* sensor;
 	cJSON* jsonSensor;
 	
-	/* Ouverture du fichier en écriture */
+	/* Ouverture du fichier en ï¿½criture */
 	FILE *f = fopen("sensors.txt", "w");  
 	
-	/* Création et écriture des cJSON */
+	/* Crï¿½ation et ï¿½criture des cJSON */
   	jsonSensor= createCSONFirst("00893378", "070205");
 	sensor = cJSON_Print(jsonSensor);
 	cJSON_Delete(jsonSensor);

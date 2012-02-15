@@ -9,6 +9,7 @@
 #include "ComponentInterface.h"
 #include "EEP.h"
 #include "../lib/cJSON.h"
+#include <stdio.h>
 
 #define TAILLE_ID 8
 #define TAILLE_EEP 6
@@ -39,14 +40,17 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** pp_sensorList
 	char org[3];
 	char funct[3]; 
 	char type[3];
-	char c;
+	int c;
 	char * eepstr = NULL;
 	int nbOpenedAccolade;
 	
 	/* Ouverture du fichier en lecture */
 	FILE *f = fopen(fileNameSensor, "r");
 	
-	
+	if (f == NULL)
+	{
+		printf("ERREUR dans l'ouverture du fichier \n");
+	}
 	/* Initialisation de la EEPList */
 	initializeEEPList(fileNameEEP, EEPList);
 	
@@ -79,7 +83,7 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** pp_sensorList
 			eepstr= cJSON_GetObjectItem(root,"EEP")->valuestring;
 			if(eepstr == NULL)
 				printf("error\n");
-			strncpy(org,str_sub(eepstr,2,3), 3);
+			strncpy(org,str_sub(eepstr,0,1), 3);
 			strncpy(funct,str_sub(eepstr,2,3), 3);
 			strncpy(type,str_sub(eepstr,4,5), 3);
 			/* Ajout du capteur */
@@ -87,11 +91,11 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** pp_sensorList
 			if(eepstr == NULL)
 				printf("error 2\n");
 			AddSensorByEEP(eepstr, pp_sensorList, EEPList, org, funct, type);
-			/*cJSON_Delete(root);*/
+			cJSON_Delete(root);
 		}
 		c=fgetc(f);
 	}
-
+	fclose(f);
 }
 /*
 * Enregistre la configuration du systeme (contenant l'EEP et l'id des capteurs) dans un fichier 

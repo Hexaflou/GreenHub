@@ -21,7 +21,7 @@ void initializeSensorAndEEPListFirst(){
 }
 
 
-void initializeSensorAndEEPList(Sensor ** pp_sensorList, EEP* p_EEPList){
+void initializeConfig(Sensor ** pp_sensorList, EEP* p_EEPList){
 
 	EEP* p_EEPCurrent;
 	Sensor* p_sensorCurrent;	

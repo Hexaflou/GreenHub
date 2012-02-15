@@ -36,17 +36,20 @@ typedef struct Sensor
 	struct Sensor* next;
 }Sensor;
 
-
-int saveSensor(char* file);
-int loadSensor(char* file);
+typedef struct Actuator
+{
+	char id[10];
+	char EEP[6];
+	float status;
+	int (*action)(float value);
+	struct Actuator * next;
+}Actuator;
 
 /* Add sensor to the sensors' list. If the sensor can get several measures, the function creates as many sensors as measures. 
 ** Returns 0 if the addition is successful, 1 if there's an error	
 */
-int addSensors(char id[8], Sensor *sensorList);
 
-int removeSensor(char* id);
-
+/* Fonctions de decodage pour les capteurs */
 int decodeMessageTemp(char* message, struct Sensor *);
 int decodeMessageLightOccup(char* message, struct Sensor *);
 int decodeMessageContact(char* message, struct Sensor *);
@@ -54,17 +57,15 @@ int decodeMessageSwitch(char* message, struct Sensor *);
 int decodeMessageOccupancy(char * message, struct Sensor *);
 int decodeMessageLight(char * message, struct Sensor *);
 
-
+/* Fonctions de retrait de donnees des trames en parametre */
 int getTempWithoutRange(char* message);
 int getLightLittleSensor(char* message);
 int getLightBigSensor(char* message);
-
 int getSwitch(char* message);
 int getOccupancy(char* message);
 int getContact(char* message);
 
-float getValueTemp(char c, struct Sensor *sensor);
-float getValueContact(char c, struct Sensor *sensor);
-float getValueSwitch(char c, struct Sensor *sensor);
+/* Fonctions d actions pour les actionneurs */
+int actionCurrent(float value);
 
 #endif /* COMPONENT_H_ */

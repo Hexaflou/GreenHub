@@ -67,14 +67,22 @@ void * gRealTimeLog( void * attr)
 	
 	while ( lPeriod != 0 )
 	{
+		
+		
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
+		
 		sem_wait(&semSensorList);
+		
 		while(tempSensor != NULL)
 		{
 			gCommunicationSendValue(tempSensor->id,tempSensor->value);
 			tempSensor = tempSensor->next;
 		}
 		
+		
 		sem_post(&semSensorList);
+		
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,NULL);
 		
 		sleep(lPeriod);
 		

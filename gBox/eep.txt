@@ -118,4 +118,7 @@
 }{
 	"EEP":	"07090C",
 	"Name":	"Capteur de propane"
+}{
+	"EEP":	"FFFF01",
+	"Name":	"Capteur SunSPOT, de température et de luminosité"
 }

@@ -58,7 +58,6 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** pp_sensorList
 	c=fgetc(f);
 	while (c!=EOF){
 		memset (sensor, 0, sizeof (sensor));
-		/* Recuperation du message entier */
 		/* Lecture jusqu'au debut de l'objet json :*/
 		while (c != '{') {
 			c=fgetc(f);
@@ -78,25 +77,31 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** pp_sensorList
 			}
 		}	
 		sprintf(sensor, "%s%c", sensor, '\0');	
+		/* Recuperation des donnees du json */
 		root = cJSON_Parse(sensor);
 		if (root != NULL){
+			/* EEP */
 			eepstr= cJSON_GetObjectItem(root,"EEP")->valuestring;
 			if(eepstr == NULL)
 				printf("error\n");
+			/* org, funct, type */
 			strncpy(org,str_sub(eepstr,0,1), 3);
 			strncpy(funct,str_sub(eepstr,2,3), 3);
 			strncpy(type,str_sub(eepstr,4,5), 3);
-			/* Ajout du capteur */
+			/* id */
 			eepstr=cJSON_GetObjectItem(root,"id")->valuestring;
 			if(eepstr == NULL)
 				printf("error 2\n");
+			/* Ajout du capteur */
 			AddSensorByEEP(eepstr, pp_sensorList, EEPList, org, funct, type);
 			cJSON_Delete(root);
 		}
 		c=fgetc(f);
-	}
+	} /* Fin while */
+	/* Fermeture du fichier */
 	fclose(f);
 }
+
 /*
 * Enregistre la configuration du systeme (contenant l'EEP et l'id des capteurs) dans un fichier 
 * ATTENTION PAS FINI !

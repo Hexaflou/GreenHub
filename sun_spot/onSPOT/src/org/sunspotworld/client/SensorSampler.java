@@ -35,6 +35,7 @@ import com.sun.spot.util.Utils;
 import javax.microedition.io.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
+import java.lang.Math;
 
 /*
  * Application tournant sur les SunSPOTs (capteurs).
@@ -46,7 +47,7 @@ import javax.microedition.midlet.MIDletStateChangeException;
 public class SensorSampler extends MIDlet {
 
     private static final int HOST_PORT = 67;
-    private static final int SAMPLE_PERIOD = 60 * 1000; // 60 secondes, que l'on passe en millisecondes
+    private static final int SAMPLE_PERIOD = 10 * 1000; // 10 secondes, que l'on passe en millisecondes
     
     protected void startApp() throws MIDletStateChangeException {
         RadiogramConnection rCon = null;
@@ -77,8 +78,12 @@ public class SensorSampler extends MIDlet {
             try {
                 // On récupère les valeurs actuelles des captures
                 long now = System.currentTimeMillis();
-                int brightness = lightSensor.getValue();
+                int brightness = lightSensor.getAverageValue(); // on prend bien une valeur moyenne
                 double temperature = tempSensor.getCelsius(); // rajouté : température
+                
+                // petite manipulation sur la température : on a un int, directement valeur en °C, de -40 à +125
+                // on le passe en un int de 0 à 165
+                int convertedTemperature = ((int)Math.floor(temperature))+40;
                 
                 // On fait clignoter un petit coup la LED
                 led.setRGB(255, 255, 255); // en blanc
@@ -94,9 +99,9 @@ public class SensorSampler extends MIDlet {
                 // et l'envoie
                 rCon.send(dg);
 
-                System.out.println("Time: " + now + " - Brightness: " + brightness +" - Temperature: " + temperature);
+                System.out.println("Time: " + now + " - Brightness: " + brightness +" - Temperature: " + convertedTemperature);
                 
-                // On va en veille jusqu'au prochain relevé dans 60 secondes
+                // On va en veille jusqu'au prochain relevé dans 10 secondes
                 Utils.sleep(SAMPLE_PERIOD - (System.currentTimeMillis() - now));
             } catch (Exception e) {
                 System.err.println("Caught " + e + " while collecting/sending sensor sample.");

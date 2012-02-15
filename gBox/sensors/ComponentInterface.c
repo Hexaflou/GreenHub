@@ -65,8 +65,8 @@ int ComponentInterface(void* attr)
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
 
 	/* on les créé, passe un argument on verra plus tard lequel exactement */
-	 /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
-	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
+	 iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
+	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2);
 
 	/* on les attend
 	pthread_join(thread1, NULL);
@@ -85,7 +85,7 @@ void *ListenSunSpot(void *message1) {
 	char buffer[47], *message; /* on recevra le message en une seule fois */
     	long n;
 	struct sockaddr_in serverAddr;
-    socklen_t serverAddrLen = sizeof(serverAddr);
+    	socklen_t serverAddrLen = sizeof(serverAddr);
 
 	/* Variable pour la trame a gerer, seront utilises bien plus tard */
 	char* idCapteur;
@@ -147,16 +147,20 @@ void *ListenSunSpot(void *message1) {
          Il a le même format que celui des capteurs EnOcean
          */
 
-        message = (char*) buffer; /* on mets ça dans un char*, passe à une chaîne de charactères */
+        /* message = (char*) buffer; */ /* on mets ça dans un char*, passe à une chaîne de charactères */
+	/*strncpy(message, buffer, 30);
+
+	printf(message);*/
+	message = buffer;
 
         /* on regarde l'entête, vérifie que c'est bien "A55A" */
-		if (strcmp(strtok(message, ";"), "A55A") != 0)
+	if (strcmp(strtok(message, ";"), "A55A") != 0)
         {
             printf("[ListenSunSpot] Wrong header.\n");
         }
 
         /* on vérifie maintenant si on est bien sur un vrai capteur SunSpot : type "03" */
-		if (strcmp(strtok(NULL, ";"), "03") != 0)
+	if (strcmp(strtok(NULL, ";"), "03") != 0)
         {
             printf("[ListenSunSpot] Good sensor type.\n");
         }
@@ -192,7 +196,7 @@ void *ListenSunSpot(void *message1) {
         }
 
         /* température - même fonctionnement */
-        int temperature = atoi(strtok(NULL, ";"));
+        temperature = atoi(strtok(NULL, ";"));
         
         /* il faut qu'on applique un coefficient (diviseur)
          détail du calcul :
@@ -208,7 +212,7 @@ void *ListenSunSpot(void *message1) {
         }
         
         /* --- luminosité --- */
-        int brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
+        brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
         
         /* il faut qu'on applique un coefficient de nouveau :
          la valeur envoyée par le capteur est entre 0 et 750 (cf datasheet)
@@ -236,7 +240,6 @@ void *ListenSunSpot(void *message1) {
             0000 : "trou"
         */
 
-        
         memcpy(&frame[4], hexBrightness, 2); /* recopie 2 octets */
         memcpy(&frame[6], hexTemperature, 2);
 

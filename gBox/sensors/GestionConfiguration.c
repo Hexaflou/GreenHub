@@ -103,26 +103,30 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, Sensor ** pp_sensorList
 }
 
 /*
-* Enregistre la configuration du systeme (contenant l'EEP et l'id des capteurs) dans un fichier 
-* ATTENTION PAS FINI !
+** Enregistre la configuration du systeme : la liste des eep et la liste des capteurs
+** 
 */
-void rewriteConfig(char* fileName, Sensor * p_sensorList){
+void writeConfig(char* fileNameSensor,char* fileNameEEP, Sensor * p_sensorList,EEP* p_EEPList){
 	Sensor * pCurrent;
 	cJSON * root;
 	char * sensor;
 	
-	/* Ouverture du fichier en �criture */
-	FILE *f = fopen(fileName, "w");  
+	/* Ecriture du fichier eep */
+	writeEEPList(fileNameEEP,p_EEPList);
+
+
+	/* Ouverture du fichier en ecriture */
+	FILE *f = fopen(fileNameSensor, "w");
 	
-	/* Parcours de la liste de capteurs */
+	
 	if (p_sensorList!= NULL) {
 		pCurrent = p_sensorList;
-
-		while (pCurrent->next != NULL){
-			/* Cr�ation du json */
-			root = createCSON(pCurrent->id,pCurrent->EEP);
+		/* Parcours de la liste de capteurs */
+		while (pCurrent!= NULL){
+			/* Creation du json */
+			root = createCSON(str_sub(pCurrent->id,0,7),str_sub(pCurrent->EEP,0,5));
 			sensor = cJSON_Print(root);
-			/* Ecriture des donn�es */
+			/* Ecriture des donnees */
 			fprintf(f,"%s",sensor);  
 			
 			cJSON_Delete(root);

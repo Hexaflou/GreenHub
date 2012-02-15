@@ -26,4 +26,7 @@ void initializeSensorAndEEPList(Sensor ** pp_sensorList, EEP* p_EEPList){
 	EEP* p_EEPCurrent;
 	Sensor* p_sensorCurrent;	
 	readConfig("sensors.txt", "eep.txt", pp_sensorList, p_EEPList);
+
+	/*writeConfig("sensorsWrite.txt", "eepWrite.txt", *pp_sensorList, p_EEPList);*/
+
 }

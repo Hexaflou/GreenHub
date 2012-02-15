@@ -47,7 +47,7 @@ import java.lang.Math;
 public class SensorSampler extends MIDlet {
 
     private static final int HOST_PORT = 67;
-    private static final int SAMPLE_PERIOD = 60 * 1000; // 60 secondes, que l'on passe en millisecondes
+    private static final int SAMPLE_PERIOD = 10 * 1000; // 10 secondes, que l'on passe en millisecondes
     
     protected void startApp() throws MIDletStateChangeException {
         RadiogramConnection rCon = null;
@@ -101,7 +101,7 @@ public class SensorSampler extends MIDlet {
 
                 System.out.println("Time: " + now + " - Brightness: " + brightness +" - Temperature: " + convertedTemperature);
                 
-                // On va en veille jusqu'au prochain relevé dans 60 secondes
+                // On va en veille jusqu'au prochain relevé dans 10 secondes
                 Utils.sleep(SAMPLE_PERIOD - (System.currentTimeMillis() - now));
             } catch (Exception e) {
                 System.err.println("Caught " + e + " while collecting/sending sensor sample.");

@@ -281,8 +281,13 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 						break;
 					} /* Fin default */
 				} /* Fin switch funct*/
-			break;
+				break;
 			} /* Fin case 7 */
+			case 255:
+				switch(type){
+					EEPCurrent->AddSensors =AddSensorsTempLightSunSpot;	
+					break;
+				}
 		} /* Fin switch org */
 		c=fgetc(f);
 		if(c!=EOF){
@@ -296,6 +301,54 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 
 	return 0;
 }
+
+/*
+** Fonction retournant le cJSON cree a partir des parametres EEP et name
+**
+*/
+cJSON* createCJSONEEP(char* EEP, char* name){
+
+	cJSON *root ; 
+	root=cJSON_CreateObject();
+	cJSON_AddStringToObject(root,"EEP",EEP);
+	cJSON_AddStringToObject(root,"Name",name);
+	return root;
+}
+
+/*
+** Fonction permettant l ecriture dans un fichier de l EEPList
+**
+*/
+int writeEEPList(char* fileNameEEP, EEP* p_EEPList){	
+	struct EEP* p_EEPCurrent;
+	cJSON* root;
+	char* EEPstr;
+
+	/* Ouverture du fichier en ecriture */
+	FILE *f = fopen(fileNameEEP, "w");
+	
+	if (p_EEPList !=NULL){
+		p_EEPCurrent = p_EEPList;
+		/* Parcours de la EEPList */
+		while (p_EEPCurrent !=NULL){
+			/* Creation du cJSON */
+			root = createCJSONEEP(p_EEPCurrent->eep, p_EEPCurrent->name);
+			EEPstr = cJSON_Print(root);
+			/* Ecriture de l EEP */
+			fprintf(f,"%s",EEPstr);
+	
+			cJSON_Delete(root);
+	
+			/* Passage au suivant */
+			p_EEPCurrent = p_EEPCurrent ->next;
+		} /* Fin while */
+	}
+	/* Fermeture du fichier */
+	fclose(f);
+	return 0;
+}
+
+
 
 /*
 ** Supprime la liste d EEP passee en parametres
@@ -352,7 +405,8 @@ int AddSensorByEEP(char id[8], Sensor ** pp_sensorList, EEP* EEPList, char org[3
 			if (EEPList->AddSensors == NULL){
 				return NOT_SUPPORTED;	/* L EEP n est pas encore supporte */
 			}
-			EEPList->AddSensors(id, pp_sensorList, EEPList->scaleMin, EEPList->scaleMax, EEPList->rangeMin, EEPList->rangeMax); 
+
+			EEPList->AddSensors(id, pp_sensorList, eep,EEPList->scaleMin, EEPList->scaleMax, EEPList->rangeMin, EEPList->rangeMax); 
 			return OK;
 		}
 	}
@@ -363,7 +417,8 @@ int AddSensorByEEP(char id[8], Sensor ** pp_sensorList, EEP* EEPList, char org[3
 ** Ajoute un capteur de contact à la liste de capteurs
 **
 */
-int AddSensorsContact(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax){	
+
+int AddSensorsContact(char id[8], Sensor ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){	
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */
 		/* Creation du premier de la liste */
@@ -388,6 +443,7 @@ int AddSensorsContact(char id[8], Sensor ** pp_sensorList, float scaleMin, float
 	strcpy(p_sensor->id,id);
 	p_sensor->id[8] = 'e';
 	p_sensor->id[9] = 'C';
+	strncpy(p_sensor->EEP, eep, 6);
 	p_sensor->value = 0;
 	p_sensor->decodeMessage = decodeMessageContact;
 	p_sensor->next = NULL;
@@ -398,7 +454,9 @@ int AddSensorsContact(char id[8], Sensor ** pp_sensorList, float scaleMin, float
 ** Ajoute un capteur swicth à la liste de capteurs
 **
 */
-int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax){
+
+int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
+
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */
 		/* Creation du premier de la liste */
@@ -422,6 +480,7 @@ int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, float scaleMin, float 
 	strcpy(p_sensor->id,id);
 	p_sensor->id[8] = 'e';
 	p_sensor->id[9] = 'S';
+	strncpy(p_sensor->EEP, eep, 6);
 	p_sensor->value = 0;
 	p_sensor->decodeMessage = decodeMessageSwitch;
 	p_sensor->next = NULL;
@@ -432,7 +491,8 @@ int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, float scaleMin, float 
 ** Ajoute un capteur de temperature à la liste de capteurs
 **
 */
-int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax){
+
+int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */
 		/* Creation du premier de la liste */
@@ -456,6 +516,7 @@ int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, float scaleMin, float sc
 	strcpy(p_sensor->id,id);
 	p_sensor->id[8] = 'e';
 	p_sensor->id[9] = 'T';
+	strncpy(p_sensor->EEP, eep, 6);
 	p_sensor->value = 0;
 	p_sensor->rangeData = (Range*)malloc(sizeof(Range));
 	p_sensor->rangeData->scaleMax = scaleMax;
@@ -471,7 +532,8 @@ int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, float scaleMin, float sc
 ** Ajoute un capteur de presence et de luminosite à la liste de capteurs
 **
 */
-int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float scaleMin, float scaleMax, float rangeMin, float rangeMax){
+
+int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */
 		/* Creation du premier de la liste */
@@ -495,6 +557,7 @@ int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float scaleMin
 	strcpy(p_sensor->id,id);
 	p_sensor->id[8] = 'e';
 	p_sensor->id[9] = 'L';
+	strncpy(p_sensor->EEP, eep, 6);
 	p_sensor->value = 0;
 	p_sensor->rangeData = (Range*)malloc(sizeof(Range));
 	p_sensor->rangeData->scaleMax = scaleMax;
@@ -510,8 +573,47 @@ int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, float scaleMin
 	strcpy(p_sensor->id,id);
 	p_sensor->id[8] = 'e';
 	p_sensor->id[9] = 'O';
+	strncpy(p_sensor->EEP, eep, 6);
 	p_sensor->value = 0;	
 	p_sensor->decodeMessage = decodeMessageOccupancy;
+	p_sensor->next = NULL;
+
+	return 0;
+}
+int AddSensorsTempLightSunSpot(char id[8], Sensor ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
+	Sensor* p_sensor;
+	if (*pp_sensorList == NULL){
+		*pp_sensorList = (Sensor*)malloc(sizeof(Sensor));
+		(*pp_sensorList)->next = NULL;
+		p_sensor = *pp_sensorList;
+	}else{		
+		p_sensor = *pp_sensorList;
+		while ( (p_sensor != NULL) && (p_sensor->next != NULL) ){
+			p_sensor = p_sensor->next;
+		}
+		if (p_sensor != NULL){
+			p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
+			p_sensor = p_sensor->next;
+		}else{
+			p_sensor = (Sensor*)malloc(sizeof(Sensor));
+		}
+	}	
+	strcpy(p_sensor->id,id);
+	p_sensor->id[8] = 's';
+	p_sensor->id[9] = 'L';
+	strncpy(p_sensor->EEP, eep, 6);
+	p_sensor->value = 0;
+	p_sensor->decodeMessage = decodeMessageLight;
+
+	p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
+	p_sensor = p_sensor->next;
+
+	strcpy(p_sensor->id,id);
+	p_sensor->id[8] = 's';
+	p_sensor->id[9] = 'T';
+	strncpy(p_sensor->EEP, eep, 6);
+	p_sensor->value = 0;	
+	p_sensor->decodeMessage = decodeMessageTemp;
 	p_sensor->next = NULL;
 
 	return 0;

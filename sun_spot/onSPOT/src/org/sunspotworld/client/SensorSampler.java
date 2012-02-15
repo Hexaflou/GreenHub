@@ -99,7 +99,7 @@ public class SensorSampler extends MIDlet {
                 // et l'envoie
                 rCon.send(dg);
 
-                System.out.println("Time: " + now + " - Brightness: " + brightness +" - Temperature: " + temperature);
+                System.out.println("Time: " + now + " - Brightness: " + brightness +" - Temperature: " + convertedTemperature);
                 
                 // On va en veille jusqu'au prochain relevé dans 60 secondes
                 Utils.sleep(SAMPLE_PERIOD - (System.currentTimeMillis() - now));

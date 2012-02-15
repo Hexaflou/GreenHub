@@ -157,12 +157,8 @@ void *ListenSunSpot(void *message1) {
          */
         
         /*
-         On traite l'id du capteur :
-         petite adaptation (tous les SunSPOTS ont un id commençant par 0014.4F01.0000., on raccourcit)
-         on regarde si les capteurs existe déjà (à chaque SunSPOT correspond une struct capteur de température, 
-         et une capteur de luminosité)
-         si oui, stocke ses valeurs
-         si non, créé les capteurs
+        On récupère le restant du message, pour construire une "pseudo-trame",
+         similaire à ce que les capteurs EnOcean envoient
          */
         
         #if DEBUG > 0

@@ -85,16 +85,17 @@ void *ListenSunSpot(void *message1) {
 	char buffer[47], *message; /* on recevra le message en une seule fois */
     	long n;
 	struct sockaddr_in serverAddr;
+    socklen_t serverAddrLen = sizeof(serverAddr);
 
-	/* Variable pour la trame a gerer */
+	/* Variable pour la trame a gerer, seront utilises bien plus tard */
 	char* idCapteur;
 	char* dateTime;
 	int temperature;
 	char hexTemperature[5];
 	int brightness;
 	char hexBrightness[5];
-	char frame[22] = {'F', 'F'}; /* toutes les autres valeurs seront des 0, utilise plus tard */
-	socklen_t serverAddrLen = sizeof(serverAddr);
+	char frame[22] = {'F', 'F'}; /* toutes les autres valeurs seront des 0 */
+
 
 	/* Déclaration des infos réseau */
 	serverAddr.sin_family = AF_INET;
@@ -208,8 +209,7 @@ void *ListenSunSpot(void *message1) {
             (750-0)/(255-0)
          */
         brightness = brightness/2,94117647;
-        
-        char hexBrightness[5]; /* petit code pour convertir en hexadécimal */
+
         if (brightness <= 0xFFFF)
         {
             sprintf(&hexBrightness[0], "%04x", brightness);

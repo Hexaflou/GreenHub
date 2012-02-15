@@ -14,10 +14,10 @@ int main ()
 	gCommunicationInit(2);
 	/* initialize random seed: */
 	srand ( time(NULL) );
-	/*gLogThreadInit();*/
+	gLogThreadInit();
 	ComponentInterface((void*) NULL);
 	getchar();
-	/*gLogThreadClose();*/
+	gLogThreadClose();
 	gCommunicationClose();
 	return 0;
 }

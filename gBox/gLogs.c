@@ -9,15 +9,10 @@
 #include "gCommunication/gCommunication.h"
 #include "gLogs.h"
 
-typedef struct {
-	char mac[40];
-	double value;
-	int date;
-} GInformation;
 
 /***************************PRIVATE DECLARATION***********************/
 static void * gLogFunc(void *);
-static int send(GInformation * info);
+static int send(char * mac, double value, int date);
 /* variables */
 pthread_t gLogThread;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -29,45 +24,50 @@ static int position = 0;
 /************************PUBLIC***************************************/
 int gLogsLog (char mac[40], double value)
 {
-	GInformation info;
-	strcpy(info.mac,mac);
-	info.value = value;
-	info.date = (int)time(NULL);
-	send(&info);
-	/*if(wLogFile !=NULL)
+	if(wLogFile !=NULL)
 	{
 		pthread_mutex_lock( &mutex );
-		fwrite(&info,sizeof(GInformation),1,wLogFile);
+		fprintf(wLogFile,"MAC: %s ; Value: %f ; Timestamp: %d\n",mac,value,(int)time(NULL));
 		pthread_mutex_unlock( &mutex );
 	}
 	else
 	{
 		printf("Error : impossible to log, files are not initialized\n");
 		return -1;
-	}*/
+	}
 	return 0;
 }
 
 int gLogThreadInit()
 {
-	wLogFile = fopen(LOG_FILENAME,"ab");
-	rLogFile = fopen(LOG_FILENAME,"rb");
+	int i=0;
+	int pos = 0;
+	char data[1024];
+	position = 0;
+	wLogFile = fopen(LOG_FILENAME,"a");
+	rLogFile = fopen(LOG_FILENAME,"r");
 	/*Si l'etat de lecture existe on le recupere */
-	stateFile = fopen(LOG_STATE_FILENAME,"rb");
+	stateFile = fopen(LOG_STATE_FILENAME,"r");
 	if(stateFile!=NULL)
 	{
-		fread(&position,sizeof(int),1,stateFile);
+		fscanf(stateFile,"%d",&pos);
 		fclose(stateFile);
+		for(i = 0;i<pos;i++)
+		{
+			if(fgets(data,1024,rLogFile)!=NULL)
+			{
+				position++;
+			}
+		}
 	}
-
-	stateFile = fopen(LOG_STATE_FILENAME,"wb");
-	fwrite(&position,sizeof(int),1,stateFile);
-	fseek(rLogFile,position,SEEK_SET);
+	
+	stateFile = fopen(LOG_STATE_FILENAME,"w+");
+	fprintf(stateFile,"%d\n",position);
 	return pthread_create( &gLogThread, NULL, gLogFunc, (void *) NULL);
 }
 
 int gLogThreadClose()
-{
+{ 
 	pthread_mutex_lock( &mutex );
 	pthread_cancel(gLogThread);
 	fclose(rLogFile);
@@ -79,16 +79,16 @@ int gLogThreadClose()
 }
 
 /************************PRIVATE***************************************/
-static int send(GInformation * info)
+static int send(char * mac, double value, int date)
 {
 	cJSON *data = cJSON_CreateObject();
 	char * msg = NULL;
 	int ret;
 	
 	cJSON_AddStringToObject(data,"msg_type","new_state");
-	cJSON_AddStringToObject(data,"mac_address",info->mac);
-	cJSON_AddNumberToObject(data,"new_value",info->value);
-	cJSON_AddNumberToObject(data,"date",info->date);
+	cJSON_AddStringToObject(data,"mac_address",mac);
+	cJSON_AddNumberToObject(data,"new_value",value);
+	cJSON_AddNumberToObject(data,"date",date);
 	
 	
 	msg = cJSON_Print(data);
@@ -103,21 +103,26 @@ static int send(GInformation * info)
 
 static void * gLogFunc(void * attr)
 {
-	GInformation info;
+	char mac[40];
+	double value = 0.0;
+	int date = 0;
+	char data[1024]; 
 	
 	while(1)
 	{
 		pthread_mutex_lock( &mutex );
-
 		while (!feof(rLogFile))
 		{
-			if(fread(&info,sizeof(GInformation),1,rLogFile)>0)
-				send(&info);
+			if(fgets(data,1024,rLogFile)!=NULL)
+			{
+				sscanf(data,"%*s %s %*c %*s %lf %*c %*s %d",mac,&value,&date);
+				send(mac, value, date);
+				position++;
+			}
 		}
 		
-		position = ftell (rLogFile);
 		fseek(stateFile,0,SEEK_SET);
-		fwrite(&position,sizeof(int),1,stateFile);
+		fprintf(stateFile,"%d\n",position);
 		pthread_mutex_unlock( &mutex );
 		/* wait for next time */
 		sleep(LOG_SEND_PERIOD);

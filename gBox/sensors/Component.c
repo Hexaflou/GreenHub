@@ -34,6 +34,12 @@ int decodeMessageLight(char * message, struct Sensor* p_sensor){
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (p_sensor->value != light)
 	{
+<<<<<<< HEAD
+=======
+		char id[11];
+		strncpy(id,p_sensor->id,10);
+		id[10] = '\0';
+>>>>>>> 861eee2eec507f44c9d7d28a42f51bf77fe90a3e
 		p_sensor->value = light;
 		gLogsLog (p_sensor->id, p_sensor->value);
 		printf("Valeur du capteur de luminosite : %f \n", p_sensor->value);
@@ -60,6 +66,12 @@ int decodeMessageOccupancy(char* message, struct Sensor* p_sensor)
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (occupancy != p_sensor->value){
+<<<<<<< HEAD
+=======
+		char id[11];
+		strncpy(id,p_sensor->id,10);
+		id[10] = '\0';
+>>>>>>> 861eee2eec507f44c9d7d28a42f51bf77fe90a3e
 		p_sensor->value = occupancy;
 		gLogsLog (p_sensor->id, p_sensor->value);
 		return VALUE_CHANGE;
@@ -91,6 +103,12 @@ int decodeMessageTemp(char* message, struct Sensor* p_sensor)
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (p_sensor->value != temp)
 	{
+<<<<<<< HEAD
+=======
+		char id[11];
+		strncpy(id,p_sensor->id,10);
+		id[10] = '\0';
+>>>>>>> 861eee2eec507f44c9d7d28a42f51bf77fe90a3e
 		p_sensor->value = temp;
 		gLogsLog (p_sensor->id, p_sensor->value);				
 		return VALUE_CHANGE;
@@ -114,6 +132,12 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor)
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (closed != p_sensor->value){
+<<<<<<< HEAD
+=======
+		char id[11];
+		strncpy(id,p_sensor->id,10);
+		id[10] = '\0';
+>>>>>>> 861eee2eec507f44c9d7d28a42f51bf77fe90a3e
 		p_sensor->value = closed;
 		gLogsLog (p_sensor->id, p_sensor->value);
 		return VALUE_CHANGE;

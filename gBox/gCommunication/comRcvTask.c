@@ -163,9 +163,12 @@ void getValue(char * mac_address)
 		while(tempSensor != NULL)
 		{
 			if ( strncmp(tempSensor->id , mac_address , 10) == 0 )
-			{
+		       {
 			gCommunicationSendValue(tempSensor->id,tempSensor->value);
-			}
+                        /* We can return from here (MAC address is unique) */
+                        sem_post(&semSensorList); 
+			return;
+		       }
 			else
 			{
 			tempSensor = tempSensor->next;

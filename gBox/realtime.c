@@ -75,6 +75,7 @@ void * gRealTimeLog( void * attr)
 		
 		while(tempSensor != NULL)
 		{
+			tempSensor->id[11] = '\0';
 			gCommunicationSendValue(tempSensor->id,tempSensor->value);
 			tempSensor = tempSensor->next;
 		}

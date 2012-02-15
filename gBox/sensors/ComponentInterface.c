@@ -27,6 +27,7 @@
 /* Déclaration de variables */
 sem_t mutex_sensorList;
 Sensor* p_sensorList;
+Actuator* p_actuatorList;
 EEP* p_EEPList;
 
 /* Fonction lançant les deux connections d'écoute avec les périphériques EnOcean et SunSpot */
@@ -45,14 +46,14 @@ int ComponentInterface(void* attr)
 	sem_wait(&mutex_sensorList);
 
 	p_sensorList = NULL;
-	/*p_sensorList->next = NULL;*/
+	p_actuatorList = NULL;	
 	p_EEPList = (EEP*)malloc(sizeof(EEP));
 	p_EEPList->next = NULL;
 
 	
 
 	/* Initialisation des capteurs et EEP */
-	initializeSensorAndEEPList(&p_sensorList, p_EEPList);
+	initializeConfig(&p_sensorList, p_EEPList);
 
 	sem_post(&mutex_sensorList);
 

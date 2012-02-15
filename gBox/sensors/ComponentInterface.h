@@ -21,7 +21,6 @@
 int ComponentInterface(void *);
 
 void *ListenSunSpot(void *ptr);
-
 void *ListenEnOcean(void *ptr);
 
 void ManageMessage(char* message);
@@ -29,7 +28,11 @@ void ManageMessage(char* message);
 int GetInfoFromSensor(char id[10], float * p_value);
 int AddSensor(char id[8], char org[2], char funct[2], char type[2]);
 
+int AddActuator(char id[8], char org[2], char funct[2], char type[2]);
+int GetStatusFromActuator(char id[10], float * p_value);
+
 Sensor * getSensorList();
+Actuator * getActuatorList();
 sem_t getSemaphore();
 
 #endif /* COMPONENTINTERFACE_H_ */

@@ -17,7 +17,8 @@
 */
 int decodeMessageLight(char * message, struct Sensor* p_sensor){
 	float light;
-	float multiplier;
+	float multiplier;	
+
 	light = (float) getLightLittleSensor(message);	/* Valeur entre rangeMin et rangeMax (en general 0..255) */
 
 	/* Calcul du multiplicateur pour determiner la vraie valeur mesuree par le capteur */
@@ -32,8 +33,11 @@ int decodeMessageLight(char * message, struct Sensor* p_sensor){
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (p_sensor->value != light)
 	{
+		char id[7];
+		strncpy(id,p_sensor->id,6);
+		id[7] = '\0';
 		p_sensor->value = light;
-		gLogsLog (p_sensor->id, p_sensor->value);
+		gLogsLog (id, p_sensor->value);
 		printf("Valeur du capteur de luminosite : %f \n", p_sensor->value);
 		return VALUE_CHANGE;
 	}
@@ -58,8 +62,11 @@ int decodeMessageOccupancy(char* message, struct Sensor* p_sensor)
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (occupancy != p_sensor->value){
+		char id[7];
+		strncpy(id,p_sensor->id,6);
+		id[7] = '\0';
 		p_sensor->value = occupancy;
-		gLogsLog (p_sensor->id, p_sensor->value);
+		gLogsLog (id, p_sensor->value);
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -89,8 +96,11 @@ int decodeMessageTemp(char* message, struct Sensor* p_sensor)
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (p_sensor->value != temp)
 	{
+		char id[7];
+		strncpy(id,p_sensor->id,6);
+		id[7] = '\0';
 		p_sensor->value = temp;
-		gLogsLog (p_sensor->id, p_sensor->value);				
+		gLogsLog (id, p_sensor->value);				
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -112,8 +122,11 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor)
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (closed != p_sensor->value){
+		char id[7];
+		strncpy(id,p_sensor->id,6);
+		id[7] = '\0';
 		p_sensor->value = closed;
-		gLogsLog (p_sensor->id, p_sensor->value);
+		gLogsLog (id, p_sensor->value);
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -133,8 +146,11 @@ int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
 		/* Si la nouvelle valeur est differente de l ancienne */
 		if (switch_button != p_sensor->value)
 		{		
+			char id[7];
+			strncpy(id,p_sensor->id,6);
+			id[7] = '\0';
 			p_sensor->value = switch_button;
-			gLogsLog (p_sensor->id, p_sensor->value);
+			gLogsLog (id, p_sensor->value);
 			return VALUE_CHANGE;
 		}
 		else

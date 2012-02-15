@@ -416,6 +416,8 @@ int AddSensorByEEP(char id[8], Sensor ** pp_sensorList, EEP* EEPList, char org[3
 	return NOT_FOUND;	/* EEP introuvable */
 }
 
+
+
 /*
 ** Ajoute un capteur de contact à la liste de capteurs
 **

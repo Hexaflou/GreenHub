@@ -55,7 +55,6 @@ int ComponentInterface(void* attr)
 	p_actuatorList = NULL;	
 	p_EEPList = (EEP*)malloc(sizeof(EEP));
 	p_EEPList->next = NULL;
-
 	
 
 	/* Initialisation des capteurs et EEP */
@@ -196,6 +195,24 @@ void *ListenSunSpot(void *message1) {
         if (temperature <= 0xFFFF)
         {
             sprintf(&hexTemperature[0], "%04x", temperature);
+        }
+        
+        /* --- luminosité --- */
+        int brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
+        
+        /* il faut qu'on applique un coefficient de nouveau :
+         la valeur envoyée par le capteur est entre 0 et 750 (cf datasheet)
+         il faut que cela tienne dans un int entre 0 et 255
+         
+         détail du calcul :
+            (750-0)/(255-0)
+         */
+        brightness = brightness/2,94117647;
+        
+        char hexBrightness[5]; /* petit code pour convertir en hexadécimal */
+        if (brightness <= 0xFFFF)
+        {
+            sprintf(&hexBrightness[0], "%04x", brightness);
         }
         
         /*

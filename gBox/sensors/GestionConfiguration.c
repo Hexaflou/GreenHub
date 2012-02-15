@@ -114,7 +114,7 @@ void rewriteConfig(char* fileName, Sensor * p_sensorList){
 			root = createCSON(pCurrent->id,pCurrent->EEP);
 			sensor = cJSON_Print(root);
 			/* Ecriture des donn�es */
-			fprintf(f,sensor);  
+			fprintf(f,"%s",sensor);  
 			
 			cJSON_Delete(root);
 			pCurrent = pCurrent->next;

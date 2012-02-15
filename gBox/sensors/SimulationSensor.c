@@ -119,7 +119,8 @@ char* CalculateCheckSum(char * message){
 	char * byteSumHexa;
 	byteSumHexa =(char*)malloc(sizeof(char)*30);
 	nbChar = xtoi(str_sub(message,0,1));
-	for (ii = 0; ii<nbChar ; ii + 2){
+	for (ii = 0; ii<nbChar ; ii += 2){
+		/* TODO: MARCHE PAS */
 		byte[0] = str_sub(message,ii,ii);
 		byte[1] = str_sub(message,ii+1,ii+1);
 		byteSum = byteSum + xtoi(byte);		

@@ -37,22 +37,22 @@ void createConfigSensors(){
   	jsonSensor= createCSONFirst("00893378", "070205");
 	sensor = cJSON_Print(jsonSensor);
 	cJSON_Delete(jsonSensor);
-    fprintf(f, sensor);  
+    fprintf(f, "%s",sensor);  
 	
    	jsonSensor= createCSONFirst("0021CBE5", "050201");
 	sensor = cJSON_Print(jsonSensor);
 	cJSON_Delete(jsonSensor);
-    fprintf(f, sensor);  
+    fprintf(f, "%s",sensor);  
 	
   	jsonSensor= createCSONFirst("0001B015", "060001");
 	sensor = cJSON_Print(jsonSensor);
 	cJSON_Delete(jsonSensor);
-    fprintf(f, sensor);  
+    fprintf(f, "%s",sensor);  
 	
   	jsonSensor= createCSONFirst("0001B016", "060001");
 	sensor = cJSON_Print(jsonSensor);
 	cJSON_Delete(jsonSensor);
-    fprintf(f, sensor);  
+    fprintf(f, "%s",sensor);  
   
 	/* Fermeture du fichier */
     fclose(f);  

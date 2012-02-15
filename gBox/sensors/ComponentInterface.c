@@ -35,8 +35,7 @@ int ComponentInterface(void* attr)
 	pthread_t thread1, thread2;
 	char *message1 = "Thread SunSPOT";
 	char *message2 = "Thread EnOcean";
-	int iret1, iret2;
-	void* ptt;	
+	int iret1=0, iret2=0;
 
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
@@ -65,9 +64,9 @@ int ComponentInterface(void* attr)
 
 	/* on les attend
 	pthread_join(thread1, NULL);
-	pthread_join(thread2, NULL);	
+	pthread_join(thread2, NULL);*/
 	/*StartSimulationSensor();*/
-	return 0;
+	return (iret1 || iret2);
 }
 
 
@@ -261,7 +260,6 @@ void *ListenEnOcean(void *message2)
 */
 void ManageMessage(char* message)
 {
-	int org, teachIn;
 	Sensor* currentSensor;
 	#if DEBUG > 0
 		printf("Message : %s \n", message);

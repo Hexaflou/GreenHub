@@ -65,7 +65,7 @@ int ComponentInterface(void* attr)
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
 
 	/* on les créé, passe un argument on verra plus tard lequel exactement */
-	 /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
+	 /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
 	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
 
 	/* on les attend

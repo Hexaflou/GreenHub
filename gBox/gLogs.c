@@ -24,6 +24,7 @@ static int position = 0;
 /************************PUBLIC***************************************/
 int gLogsLog (char mac[40], double value)
 {
+	wLogFile = fopen(LOG_FILENAME,"a");
 	if(wLogFile !=NULL)
 	{
 		pthread_mutex_lock( &mutex );
@@ -35,6 +36,7 @@ int gLogsLog (char mac[40], double value)
 		printf("Error : impossible to log, files are not initialized\n");
 		return -1;
 	}
+	fclose(wLogFile);
 	return 0;
 }
 
@@ -45,7 +47,8 @@ int gLogThreadInit()
 	char data[1024];
 	position = 0;
 	wLogFile = fopen(LOG_FILENAME,"a");
-	rLogFile = fopen(LOG_FILENAME,"r");
+	fclose(wLogFile);
+	rLogFile = fopen(LOG_FILENAME,"r"); // TODO: CHECK IF ITS WORKING (!= NULL)
 	/*Si l'etat de lecture existe on le recupere */
 	stateFile = fopen(LOG_STATE_FILENAME,"r");
 	if(stateFile!=NULL)
@@ -71,7 +74,6 @@ int gLogThreadClose()
 	pthread_mutex_lock( &mutex );
 	pthread_cancel(gLogThread);
 	fclose(rLogFile);
-	fclose(wLogFile);
 	fclose(stateFile);
 	wLogFile=NULL;
 	pthread_mutex_unlock( &mutex );
@@ -110,21 +112,31 @@ static void * gLogFunc(void * attr)
 	
 	while(1)
 	{
+		printf("Bonjour !\n");
 		pthread_mutex_lock( &mutex );
+		fseek(rLogFile, 0, SEEK_CUR);
 		while (!feof(rLogFile))
 		{
-			if(fgets(data,1024,rLogFile)!=NULL)
-			{
+			printf("We are at the %d nth character.\n", ftell(rLogFile));
+			printf("Youuuuuuuuouuuuh\n");
+			if(fgets(data,1024,rLogFile) != NULL)
+			{				
+				printf("J'ai lu quelque chose !\n");
 				sscanf(data,"%*s %s %*c %*s %lf %*c %*s %d",mac,&value,&date);
+				printf("Lu : mac=%s, value=%lf, date=%d (from data=%s)\n", mac, value, date, data);
 				send(mac, value, date);
 				position++;
-			}
+			}else if (ferror(rLogFile)){
+				printf("Erreur lors de la lecture.\n");
+			}	
+			printf("Yahahahahahaha !\n");
 		}
 		
 		fseek(stateFile,0,SEEK_SET);
 		fprintf(stateFile,"%d\n",position);
 		pthread_mutex_unlock( &mutex );
 		/* wait for next time */
+		printf("Dodo...\n");
 		sleep(LOG_SEND_PERIOD);
 	}
 	

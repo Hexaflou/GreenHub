@@ -289,7 +289,7 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 			EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
 			EEPCurrent = EEPCurrent->next;
 		}
-
+		cJSON_Delete(root);
 	} /* Fin while */
 	
 	fclose(f);
@@ -792,7 +792,7 @@ int destroyEEPList(EEP* p_EEPList){
 ** Renvoie 0 si OK, -1 si l EEP n est pas supporte, et -2 si l EEP correspondant est introuvable.
 */
 int AddSensorByEEP(char id[8], Sensor ** pp_sensorList, EEP* EEPList, char org[3], char funct[3], char type[3]){
-	char eep[6];
+	char eep[7];
 
 	/* Concatenation de org, funct et type dans eep */
 	strcpy(eep,org);
@@ -807,7 +807,7 @@ int AddSensorByEEP(char id[8], Sensor ** pp_sensorList, EEP* EEPList, char org[3
 			if (EEPList->AddSensors == NULL){
 				return NOT_SUPPORTED;	/* L EEP n est pas encore supporte */
 			}
-			EEPList->AddSensors(id, pp_sensorList, EEPList->scaleMin, EEPList->scaleMax, EEPList->rangeMin, EEPList->rangeMax);
+			EEPList->AddSensors(id, pp_sensorList, EEPList->scaleMin, EEPList->scaleMax, EEPList->rangeMin, EEPList->rangeMax); 
 			return OK;
 		}
 	}

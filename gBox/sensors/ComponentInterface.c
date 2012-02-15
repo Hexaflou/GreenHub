@@ -30,6 +30,7 @@ Sensor* p_sensorList;
 Actuator* p_actuatorList;
 EEP* p_EEPList;
 
+
 /* Fonction lançant les deux connections d'écoute avec les périphériques EnOcean et SunSpot */
 int ComponentInterface(void* attr)
 {
@@ -154,17 +155,61 @@ void *ListenSunSpot(void *message1) {
          luminosité
          température
          
-         TODO la fin !
-         */
-        
-        /*
-        On récupère le restant du message, pour construire une "pseudo-trame",
+         On récupère le restant du message, pour construire une "pseudo-trame",
          similaire à ce que les capteurs EnOcean envoient
          */
         
+        /* id du capteur :
+         forme 0014.4F01.0000.5620,
+         les 15 premiers charactères sont toujours les mêmes,
+         du coup on raccourcit sans problèmes pour ne garder que les 4 derniers
+        */
+        char* idCapteur = str_sub(strtok(NULL, ";"), 14, 18);
+         
+        /* date et heure de la mesure : info pas utilisée pour l'instant */
+        char* dateTime = strtok(NULL, ";");
+        
+        /* luminosité */
+        int brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
+        
+        char hexBrightness[5]; /* petit code pour convertir en hexadécimal */
+        if (brightness <= 0xFFFF)
+        {
+            sprintf(&hexBrightness[0], "%04x", brightness);
+        }
+        
+        /* température - même fonctionnement */
+        int temperature = atoi(strtok(NULL, ";"));
+        
+        char hexTemperature[5]; /* petit code pour convertir en hexadécimal */
+        if (temperature <= 0xFFFF)
+        {
+            sprintf(&hexTemperature[0], "%04x", temperature);
+        }
+        
+        /*
+         On construit concrètement la pseudo trame maintenant :
+            FF : code org
+            00 : "trou"
+            LL : valeur de la luminosité
+            TT : valeur de la température
+            00 : "trou"
+            0000 : "faux" ID
+            IDID : ID réel du SPOT
+            0000 : "trou"
+        */
+        char frame[22] = {'F', 'F'}; /* toutes les autres valeurs seront des 0 */
+        
+        memcpy(frame[4], hexBrightness, 2); /* recopie 2 octets */
+        memcpy(frame[6], hexTemperature, 2);
+
+        memcpy(frame[14], idCapteur, 4); /* finalement, l'id */
+        
         #if DEBUG > 0
-            printf(strtok(NULL, ";"));
+            printf(frame);
         #endif
+        
+        ManageMessage(frame);
 	}
     
 	free(message);

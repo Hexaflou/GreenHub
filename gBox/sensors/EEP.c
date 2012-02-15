@@ -303,6 +303,54 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 }
 
 /*
+** Fonction retournant le cJSON cree a partir des parametres EEP et name
+**
+*/
+cJSON* createCJSONEEP(char* EEP, char* name){
+
+	cJSON *root ; 
+	root=cJSON_CreateObject();
+	cJSON_AddStringToObject(root,"EEP",EEP);
+	cJSON_AddStringToObject(root,"Name",name);
+	return root;
+}
+
+/*
+** Fonction permettant l ecriture dans un fichier de l EEPList
+**
+*/
+int writeEEPList(char* fileNameEEP, EEP* p_EEPList){	
+	struct EEP* p_EEPCurrent;
+	cJSON* root;
+	char* EEPstr;
+
+	/* Ouverture du fichier en ecriture */
+	FILE *f = fopen(fileNameEEP, "w");
+	
+	if (p_EEPList !=NULL){
+		p_EEPCurrent = p_EEPList;
+		/* Parcours de la EEPList */
+		while (p_EEPCurrent !=NULL){
+			/* Creation du cJSON */
+			root = createCJSONEEP(p_EEPCurrent->eep, p_EEPCurrent->name);
+			EEPstr = cJSON_Print(root);
+			/* Ecriture de l EEP */
+			fprintf(f,"%s",EEPstr);
+	
+			cJSON_Delete(root);
+	
+			/* Passage au suivant */
+			p_EEPCurrent = p_EEPCurrent ->next;
+		} /* Fin while */
+	}
+	/* Fermeture du fichier */
+	fclose(f);
+	return 0;
+}
+
+
+
+/*
 ** Supprime la liste d EEP passee en parametres
 **
 */
@@ -357,6 +405,7 @@ int AddSensorByEEP(char id[8], Sensor ** pp_sensorList, EEP* EEPList, char org[3
 			if (EEPList->AddSensors == NULL){
 				return NOT_SUPPORTED;	/* L EEP n est pas encore supporte */
 			}
+
 			EEPList->AddSensors(id, pp_sensorList, eep,EEPList->scaleMin, EEPList->scaleMax, EEPList->rangeMin, EEPList->rangeMax); 
 			return OK;
 		}
@@ -368,6 +417,7 @@ int AddSensorByEEP(char id[8], Sensor ** pp_sensorList, EEP* EEPList, char org[3
 ** Ajoute un capteur de contact à la liste de capteurs
 **
 */
+
 int AddSensorsContact(char id[8], Sensor ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){	
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */
@@ -404,7 +454,9 @@ int AddSensorsContact(char id[8], Sensor ** pp_sensorList, char eep[7], float sc
 ** Ajoute un capteur swicth à la liste de capteurs
 **
 */
+
 int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
+
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */
 		/* Creation du premier de la liste */
@@ -439,6 +491,7 @@ int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, char eep[7], float sca
 ** Ajoute un capteur de temperature à la liste de capteurs
 **
 */
+
 int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */
@@ -479,6 +532,7 @@ int AddSensorsTemp(char id[8], Sensor ** pp_sensorList, char eep[7], float scale
 ** Ajoute un capteur de presence et de luminosite à la liste de capteurs
 **
 */
+
 int AddSensorsLightOccupancy(char id[8], Sensor ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */

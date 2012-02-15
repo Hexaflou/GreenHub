@@ -27,6 +27,8 @@ typedef struct EEP
 }EEP;
 
 int initializeEEPList(char*,EEP*);
+int writeEEPList(char* fileNameEEP, EEP* p_EEPList);
+
 
 int AddSensorByEEP(char id[8], Sensor ** pp_sensorList, EEP* p_EEPList, char org[3], char funct[3], char type[3]);
 

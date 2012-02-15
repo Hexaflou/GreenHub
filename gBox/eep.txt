@@ -121,4 +121,7 @@
 }{
 	"EEP":	"FFFF01",
 	"Name":	"Capteur SunSPOT, de température et de luminosité"
+}{
+	"EEP":	"EEEE01",
+	"Name":	"Actionneur courant EnOcean"
 }

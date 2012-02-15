@@ -8,6 +8,7 @@
 #include "Component.h"
 #include "Utility.h"
 #include "../gLogs.h"
+#include "ComponentInterface.h"
 
 
 /*
@@ -33,11 +34,8 @@ int decodeMessageLight(char * message, struct Sensor* p_sensor){
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (p_sensor->value != light)
 	{
-		char id[7];
-		strncpy(id,p_sensor->id,6);
-		id[7] = '\0';
 		p_sensor->value = light;
-		gLogsLog (id, p_sensor->value);
+		gLogsLog (p_sensor->id, p_sensor->value);
 		printf("Valeur du capteur de luminosite : %f \n", p_sensor->value);
 		return VALUE_CHANGE;
 	}
@@ -62,11 +60,8 @@ int decodeMessageOccupancy(char* message, struct Sensor* p_sensor)
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (occupancy != p_sensor->value){
-		char id[7];
-		strncpy(id,p_sensor->id,6);
-		id[7] = '\0';
 		p_sensor->value = occupancy;
-		gLogsLog (id, p_sensor->value);
+		gLogsLog (p_sensor->id, p_sensor->value);
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -96,11 +91,8 @@ int decodeMessageTemp(char* message, struct Sensor* p_sensor)
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (p_sensor->value != temp)
 	{
-		char id[7];
-		strncpy(id,p_sensor->id,6);
-		id[7] = '\0';
 		p_sensor->value = temp;
-		gLogsLog (id, p_sensor->value);				
+		gLogsLog (p_sensor->id, p_sensor->value);				
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -122,11 +114,8 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor)
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (closed != p_sensor->value){
-		char id[7];
-		strncpy(id,p_sensor->id,6);
-		id[7] = '\0';
 		p_sensor->value = closed;
-		gLogsLog (id, p_sensor->value);
+		gLogsLog (p_sensor->id, p_sensor->value);
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -141,16 +130,19 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor)
 int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
 {
 	int switch_button = getSwitch(message);	
+	if (switch_button == A0){
+		ActionActuator("0021CBE5aC00\0", B0);		
+	}
+	if (switch_button == A1){
+		ActionActuator("0021CBE5aC00\0", B1);
+	}
 	if (switch_button != NO_BUTTON){
 		printf("Valeur de l interrupteur : %i \n", switch_button);
 		/* Si la nouvelle valeur est differente de l ancienne */
 		if (switch_button != p_sensor->value)
 		{		
-			char id[7];
-			strncpy(id,p_sensor->id,6);
-			id[7] = '\0';
 			p_sensor->value = switch_button;
-			gLogsLog (id, p_sensor->value);
+			gLogsLog (p_sensor->id, p_sensor->value);
 			return VALUE_CHANGE;
 		}
 		else
@@ -246,4 +238,22 @@ int getContact(char* message)
 	byte = xtoi(str_sub(message, 8, 9)); /* Extraction de l octet de donnee a partir du message */
 	closed = byte & 0x01; /* Extraction du bit 0 de l octet */
 	return closed;
+}
+
+int actionCurrent(float value, struct Actuator * p_actuator){
+	char message[29];
+	int i_switch;
+	char switchHexa[3];
+	
+	sprintf(switchHexa,"%X",((int)value)<<5);		
+	
+	strcpy(message, "A55A0B05");		
+	strcat(message, "50");
+	strcat(message, "00");
+	strcat(message, "0000");
+	strcat(message, str_sub(p_actuator->id,0,7));
+	strcat(message, "30");
+	strcat(message, "61");
+	printf("Message du capteur d'interrupteur : %s\n",message);
+	return 0;
 }

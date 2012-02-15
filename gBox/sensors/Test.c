@@ -21,11 +21,9 @@ void initializeSensorAndEEPListFirst(){
 }
 
 
-void initializeConfig(Sensor ** pp_sensorList, EEP* p_EEPList){
+void initializeConfig(Sensor ** pp_sensorList, Actuator ** pp_actuatorList, EEP* p_EEPList){
 
-	EEP* p_EEPCurrent;
-	Sensor* p_sensorCurrent;	
-	readConfig("sensors.txt", "eep.txt", pp_sensorList, p_EEPList);
+	readConfig("sensors.txt", "eep.txt", "actuators.txt", pp_sensorList, pp_actuatorList, p_EEPList);
 
 	/*writeConfig("sensorsWrite.txt", "eepWrite.txt", *pp_sensorList, p_EEPList);*/
 

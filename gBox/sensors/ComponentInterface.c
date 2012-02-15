@@ -58,14 +58,14 @@ int ComponentInterface(void* attr)
 	
 
 	/* Initialisation des capteurs et EEP */
-	initializeConfig(&p_sensorList, p_EEPList);
+	initializeConfig(&p_sensorList, &p_actuatorList, p_EEPList);
 
 	sem_post(&mutex_sensorList);
 
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
 
 	/* on les créé, passe un argument on verra plus tard lequel exactement */
-	 iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
+	 /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
 	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
 
 	/* on les attend
@@ -198,7 +198,7 @@ void *ListenSunSpot(void *message1) {
         }
         
         /* --- luminosité --- */
-        int brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
+        brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
         
         /* il faut qu'on applique un coefficient de nouveau :
          la valeur envoyée par le capteur est entre 0 et 750 (cf datasheet)
@@ -209,7 +209,7 @@ void *ListenSunSpot(void *message1) {
          */
         brightness = brightness/2,94117647;
         
-        char hexBrightness[5]; /* petit code pour convertir en hexadécimal */
+        /*hexBrightness[5]; *//* petit code pour convertir en hexadécimal */
         if (brightness <= 0xFFFF)
         {
             sprintf(&hexBrightness[0], "%04x", brightness);
@@ -345,7 +345,7 @@ void *ListenEnOcean(void *message2)
 void ManageMessage(char* message) /* FF00LLTT00IDIDIDID0000 */
 {
 	Sensor* currentSensor;
-	#if DEBUG > 0
+	#if DEBUG == 0
 		printf("Message : %s \n", message);
 	#endif
 
@@ -407,7 +407,7 @@ int GetInfoFromSensor(char id[10], float * p_value){
 
 int AddSensor(char id[8], char org[2], char funct[2], char type[2])
 {
-	return AddSensorByEEP(id, &p_sensorList, p_EEPList, org, funct, type);	
+	return AddComponentByEEP(id, (void**)&p_sensorList, p_EEPList, org, funct, type);	
 }
 
 /* Fonction permettant de retirer l etat d un actionneur. 
@@ -454,4 +454,28 @@ Sensor * getSensorList(){
 
 sem_t getSemaphore(){
 	return mutex_sensorList;
+}
+
+int ActionActuator(char id[13], float value){
+	Actuator* p_currentActuator;
+	sem_wait(&mutex_actuatorList);
+	p_currentActuator = p_actuatorList;
+
+	/* Recherche de l'actionneur dans la liste d'actionneurs */
+	while (p_currentActuator != NULL)
+	{
+		if (strcmp(p_currentActuator->id, id) == 0)
+		{
+			/*printf("Actionneur présent dans la liste ! \n");*/
+			sem_post(&mutex_actuatorList);
+			p_currentActuator->action(value, p_currentActuator);
+			return OK;
+		}
+		else
+		{
+			p_currentActuator = p_currentActuator->next;
+		}
+	}
+	sem_post(&mutex_actuatorList);	
+	return ERROR;
 }

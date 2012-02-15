@@ -28,8 +28,8 @@ typedef struct Range{
 
 typedef struct Sensor
 {
-	char id[10];
-	char EEP[6];
+	char id[11];
+	char EEP[7];
 	Range * rangeData;
 	float value;	
 	int (*decodeMessage)(char*, struct Sensor*);
@@ -38,10 +38,11 @@ typedef struct Sensor
 
 typedef struct Actuator
 {
-	char id[10];
-	char EEP[6];
+	char id[13];
+	char EEP[7];
 	float status;
-	int (*action)(float value);
+	int (*action)(float value, struct Actuator *);
+	char idSensorAssociated[11];
 	struct Actuator * next;
 }Actuator;
 
@@ -66,6 +67,6 @@ int getOccupancy(char* message);
 int getContact(char* message);
 
 /* Fonctions d actions pour les actionneurs */
-int actionCurrent(float value);
+int actionCurrent(float value, struct Actuator *);
 
 #endif /* COMPONENT_H_ */

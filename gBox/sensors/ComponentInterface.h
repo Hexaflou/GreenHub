@@ -30,6 +30,7 @@ int AddSensor(char id[8], char org[2], char funct[2], char type[2]);
 
 int AddActuator(char id[8], char org[2], char funct[2], char type[2]);
 int GetStatusFromActuator(char id[10], float * p_value);
+int ActionActuator(char id[12], float value);
 
 Sensor * getSensorList();
 Actuator * getActuatorList();

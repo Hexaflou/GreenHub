@@ -8,6 +8,10 @@
 #include "../lib/cJSON.h"
 #include "../realtime.h"
 #include <errno.h>
+#include <semaphore.h>
+#include "gCommunication/gCommunication.h"
+#include "sensors/ComponentInterface.h"
+#include "sensors/Component.h"
 
 /****************************PRIVATE DECLARATION***********************/
 static void * comRcvTask(void * attr);
@@ -141,10 +145,35 @@ int communicationParse(char* trame)
 void sensorAction(char* mac_address,char * action)
 {
 	printf("mac address : %s, Action : %s \n",mac_address,action);
+	
+	
 }
 void getValue(char * mac_address)
 {
+	
 	printf("get value for mac address : %s\n",mac_address);
+	
+	Sensor* tempSensor = NULL;
+	
+	tempSensor=getSensorList();
+	semSensorList = getSemaphore() ;
+
+		sem_wait(&semSensorList);
+		
+		while(tempSensor != NULL)
+		{
+			if ( strncmp(tempSensor->id , mac_address , 10) == 0 )
+			{
+			gCommunicationSendValue(tempSensor->id,tempSensor->value);
+			}
+			else
+			{
+			tempSensor = tempSensor->next;
+		    }
+		}
+		
+		sem_post(&semSensorList);
+	
 }
 void activateRT(int interval)
 {

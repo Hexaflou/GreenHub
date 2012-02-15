@@ -9,7 +9,7 @@
  * 														Hexanome H4212
  * ********************************************************************/
 
-#define LOG_SEND_PERIOD 	5
+#define LOG_SEND_PERIOD 	30
 #define LOG_FILENAME 		"sensors.log"
 #define LOG_STATE_FILENAME 	"sendstate.data"
 

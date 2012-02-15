@@ -26,6 +26,7 @@
 
 /* Déclaration de variables */
 sem_t mutex_sensorList;
+sem_t mutex_actuatorList;
 Sensor* p_sensorList;
 Actuator* p_actuatorList;
 EEP* p_EEPList;
@@ -41,6 +42,10 @@ int ComponentInterface(void* attr)
 
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
+		return (int)ERROR;
+	}
+	if (sem_init(&mutex_actuatorList, 0, 1) == ERROR){
+		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste d actionneurs.\n");
 		return (int)ERROR;
 	}
 
@@ -61,7 +66,7 @@ int ComponentInterface(void* attr)
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
 
 	/* on les créé, passe un argument on verra plus tard lequel exactement */
-	/* iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);	*/
+	 iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
 	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
 
 	/* on les attend
@@ -79,109 +84,115 @@ int ComponentInterface(void* attr)
 void *ListenSunSpot(void *message1) {
 	int sFd;
 	char buffer[47], *message; /* on recevra le message en une seule fois */
-    long n;
-	int tailleTrame;
+    	long n;
 	struct sockaddr_in serverAddr;
+
+	/* Variable pour la trame a gerer */
+	char* idCapteur;
+	char* dateTime;
+	int temperature;
+	char hexTemperature[5];
+	int brightness;
+	char hexBrightness[5];
+	char frame[22] = {'F', 'F'}; /* toutes les autres valeurs seront des 0, utilise plus tard */
 	socklen_t serverAddrLen = sizeof(serverAddr);
-    
+
 	/* Déclaration des infos réseau */
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); /* on assume que le serveur Java tournera sur la même machine */
 	serverAddr.sin_port = htons(1337);
-    
+
 	/* On est en UDP (mode non connecté), création du socket */
 	if ((sFd = socket(AF_INET, SOCK_DGRAM, 0)) == ERROR)
 	{
 		perror("[ListenSunSpot] SunSPOT UDP Socket Creation Error \n");
 		return (int*)ERROR;
 	}
-    
+
     #if DEBUG > 0
         printf("[ListenSunSpot] Binding with server...\n");
     #endif
-    
+
 	/* Pas de connect à faire, il faut juste se binder */
 	if (bind(sFd, (struct sockaddr*) &serverAddr, serverAddrLen) == SOCKET_ERROR)
 	{
 		perror("[ListenSunSpot] Socket bind Error \n");
 		return (int*) SOCKET_ERROR;
 	}
-    
+
     #if DEBUG > 0
         printf("[ListenSunSpot] Bind with socket OK\n");
     #endif
-    
+
 	while (1)
 	{
         #if DEBUG > 0
             printf("[ListenSunSpot] Waiting for a message debut...\n");
         #endif
-        
+
         /* on reçoit le message en une seule fois, comme un gros tableau de caractères */
 		if ((n = recvfrom(sFd, buffer, sizeof(buffer)-1, 0, (struct sockaddr*) &serverAddr, &serverAddrLen)) < 0)
 		{
 			perror("[ListenSunSpot] Receive Error \n");
-            
+
 			break;
         }
-        
+
         #if DEBUG > 0
             printf("[ListenSunSpot] Sensor message received.\n");
         #endif
-        
+
         /*
          On va maintenant parser le message
          Il a le même format que celui des capteurs EnOcean
          */
-        
+
         message = (char*) buffer; /* on mets ça dans un char*, passe à une chaîne de charactères */
-        
+
         /* on regarde l'entête, vérifie que c'est bien "A55A" */
 		if (strcmp(strtok(message, ";"), "A55A") != 0)
         {
             printf("[ListenSunSpot] Wrong header.\n");
         }
-        
+
         /* on vérifie maintenant si on est bien sur un vrai capteur SunSpot : type "03" */
 		if (strcmp(strtok(NULL, ";"), "03") != 0)
         {
             printf("[ListenSunSpot] Good sensor type.\n");
         }
-        
+
         /*
          Maintenant on a, séparés par des ; :
          adresse du capteur (id)
          date/time
          luminosité
          température
-         
+
          On récupère le restant du message, pour construire une "pseudo-trame",
          similaire à ce que les capteurs EnOcean envoient
          */
-        
+
         /* id du capteur :
          forme 0014.4F01.0000.5620,
          les 15 premiers charactères sont toujours les mêmes,
          du coup on raccourcit sans problèmes pour ne garder que les 4 derniers
         */
-        char* idCapteur = str_sub(strtok(NULL, ";"), 14, 18);
-         
+        idCapteur = str_sub(strtok(NULL, ";"), 14, 18);
+
         /* date et heure de la mesure : info pas utilisée pour l'instant */
-        char* dateTime = strtok(NULL, ";");
-        
+        dateTime = strtok(NULL, ";");
+
         /* luminosité */
-        int brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
-        
-        char hexBrightness[5]; /* petit code pour convertir en hexadécimal */
+        brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
+
         if (brightness <= 0xFFFF)
         {
             sprintf(&hexBrightness[0], "%04x", brightness);
         }
-        
+
         /* température - même fonctionnement */
-        int temperature = atoi(strtok(NULL, ";"));
-        
-        char hexTemperature[5]; /* petit code pour convertir en hexadécimal */
+        temperature = atoi(strtok(NULL, ";"));
+
         if (temperature <= 0xFFFF)
         {
             sprintf(&hexTemperature[0], "%04x", temperature);
@@ -198,12 +209,12 @@ void *ListenSunSpot(void *message1) {
             IDID : ID réel du SPOT
             0000 : "trou"
         */
-        char frame[22] = {'F', 'F'}; /* toutes les autres valeurs seront des 0 */
-        
-        memcpy(frame[4], hexBrightness, 2); /* recopie 2 octets */
-        memcpy(frame[6], hexTemperature, 2);
 
-        memcpy(frame[14], idCapteur, 4); /* finalement, l'id */
+        
+        memcpy(&frame[4], hexBrightness, 2); /* recopie 2 octets */
+        memcpy(&frame[6], hexTemperature, 2);
+
+        memcpy(&frame[14], idCapteur, 4); /* finalement, l'id */
         
         #if DEBUG > 0
             printf(frame);
@@ -381,6 +392,44 @@ int AddSensor(char id[8], char org[2], char funct[2], char type[2])
 {
 	return AddSensorByEEP(id, &p_sensorList, p_EEPList, org, funct, type);	
 }
+
+/* Fonction permettant de retirer l etat d un actionneur. 
+** Cette valeur est retiree par le pointeur p_value, qui doit etre initialise au prealable.
+** Renvoie -1 si erreur, 0 si OK.
+*/
+int GetStatusFromSensor(char id[10], float * p_value){
+	char realId[8];
+	Actuator* p_currentActuator;
+	strcpy(realId,str_sub(id, 0, 7));	/* L'ID reel d un peripherique est compose de 8 caracteres */
+
+	*p_value = 0;
+
+	sem_wait(&mutex_actuatorList);
+	p_currentActuator = p_actuatorList;
+
+	/* Recherche de l'actionneur dans la liste d'actionneurs */
+	while (p_currentActuator != NULL)
+	{
+		if (strcmp(p_currentActuator->id, realId) == 0)
+		{
+			/*printf("Actionneur présent dans la liste ! \n");*/
+			sem_post(&mutex_actuatorList);
+			*p_value = p_currentActuator->status;
+			return OK;
+		}
+		else
+		{
+			p_currentActuator = p_currentActuator->next;
+		}
+	}
+	sem_post(&mutex_actuatorList);	
+	return ERROR;
+}
+/*
+int AddActuator(char id[8], char org[2], char funct[2], char type[2])
+{
+	return AddActuatorByEEP(id, &p_actuatorList, p_EEPList, org, funct, type);	
+}*/
 
 Sensor * getSensorList(){
 	return p_sensorList;

@@ -283,11 +283,14 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 				} /* Fin switch funct*/
 				break;
 			} /* Fin case 7 */
-			case 255:
-				switch(type){
-					EEPCurrent->AddSensors =AddSensorsTempLightSunSpot;	
-					break;
+			case 255:{
+				switch(funct){
+					case 255:{
+						EEPCurrent->AddSensors =AddSensorsTempLightSunSpot;	
+						break;
+					}
 				}
+			}
 		} /* Fin switch org */
 		c=fgetc(f);
 		if(c!=EOF){

@@ -31,6 +31,8 @@ int writeEEPList(char* fileNameEEP, EEP* p_EEPList);
 
 
 int AddSensorByEEP(char id[8], Sensor ** pp_sensorList, EEP* p_EEPList, char org[3], char funct[3], char type[3]);
+int AddActuatorByEEP(char id[8], Actuator ** pp_actuatorList, EEP* p_EEPList, char org[3], char funct[3], char type[3]);
+
 
 int AddSensorsContact(char id[8], Sensor ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax);
 int AddSensorsSwitch(char id[8], Sensor ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax);

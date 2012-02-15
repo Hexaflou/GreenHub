@@ -65,7 +65,7 @@ int ComponentInterface(void* attr)
 	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
 
 	/* on les créé, passe un argument on verra plus tard lequel exactement */
-	 iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
+	 /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);
 	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
 
 	/* on les attend
@@ -85,16 +85,17 @@ void *ListenSunSpot(void *message1) {
 	char buffer[47], *message; /* on recevra le message en une seule fois */
     	long n;
 	struct sockaddr_in serverAddr;
+    socklen_t serverAddrLen = sizeof(serverAddr);
 
-	/* Variable pour la trame a gerer */
+	/* Variable pour la trame a gerer, seront utilises bien plus tard */
 	char* idCapteur;
 	char* dateTime;
 	int temperature;
 	char hexTemperature[5];
 	int brightness;
 	char hexBrightness[5];
-	char frame[22] = {'F', 'F'}; /* toutes les autres valeurs seront des 0, utilise plus tard */
-	socklen_t serverAddrLen = sizeof(serverAddr);
+	char frame[22] = {'F', 'F'}; /* toutes les autres valeurs seront des 0 */
+
 
 	/* Déclaration des infos réseau */
 	serverAddr.sin_family = AF_INET;
@@ -176,6 +177,7 @@ void *ListenSunSpot(void *message1) {
          les 15 premiers charactères sont toujours les mêmes,
          du coup on raccourcit sans problèmes pour ne garder que les 4 derniers
         */
+
         idCapteur = str_sub(strtok(NULL, ";"), 14, 18);
 
         /* date et heure de la mesure : info pas utilisée pour l'instant */
@@ -190,7 +192,15 @@ void *ListenSunSpot(void *message1) {
         }
 
         /* température - même fonctionnement */
-        temperature = atoi(strtok(NULL, ";"));
+        int temperature = atoi(strtok(NULL, ";"));
+        
+        /* il faut qu'on applique un coefficient (diviseur)
+         détail du calcul :
+         (scaleMax-scaleMin)/(rangeMax/rangeMin)
+         on remplace avec les valeurs, issues de la datasheet pour la scale et le range est celui d'un int :
+         (165-0)/(255-0) = 0,647058824
+         */
+        temperature = temperature*0.647058824;
 
         if (temperature <= 0xFFFF)
         {
@@ -207,9 +217,8 @@ void *ListenSunSpot(void *message1) {
          détail du calcul :
             (750-0)/(255-0)
          */
-        brightness = brightness/2,94117647;
-        
-        char hexBrightness[5]; /* petit code pour convertir en hexadécimal */
+        brightness = brightness/2.94117647;
+
         if (brightness <= 0xFFFF)
         {
             sprintf(&hexBrightness[0], "%04x", brightness);

@@ -11,8 +11,8 @@
 
 typedef struct ArgSensor
 {
-	char id[8];
-	char eep[6];
+	char id[9];
+	char eep[7];
 }ArgSensor;
 
 /* Calcule la check sum d'un message. Les caractères "A55A" ne doivent être pas présents. */

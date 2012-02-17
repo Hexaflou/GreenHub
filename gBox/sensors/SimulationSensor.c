@@ -1,7 +1,9 @@
 /* Inclusions internes */
 #include "SimulationSensor.h"
 #include "ComponentInterface.h"
+#include "Component.h"
 #include "Utility.h"
+#include "ComSndReceptorTask.h"
 
 /* Inclusions externes */
 #include <string.h>
@@ -10,27 +12,32 @@
 #include <stdio.h>
 #include <time.h>
 #include <pthread.h>
+#include <mqueue.h>
 
+static mqd_t smq;
 
-void StartSimulationSensor(){
+void StartSimulationSensor(mqd_t arg_smq){
 	pthread_t thread1, thread2,thread3;
 	/* Simulation d un capteur de temperature entre -30°C et 10°C */
 	ArgSensor* argSensor,*argSensor2,*argSensor3;
+	
+	smq = arg_smq;
+	
 	argSensor=(struct ArgSensor*)malloc(sizeof(struct ArgSensor));
 	argSensor2=(struct ArgSensor*)malloc(sizeof(struct ArgSensor));
 	argSensor3=(struct ArgSensor*)malloc(sizeof(struct ArgSensor));
-	strcpy(argSensor->id,"06080501");
-	strcpy(argSensor->eep,"070202");		
+	strcpy(argSensor->id,"00893360");
+	strcpy(argSensor->eep,"070205");		
 	pthread_create(&thread1, NULL, SimulationSensorTemp, (void*) argSensor);
 	
 
 	/* Simulation d un capteur de contact */
-	strcpy(argSensor2->id,"06888881");
+	strcpy(argSensor2->id,"0001B015");
 	strcpy(argSensor2->eep,"060001");		
 	pthread_create(&thread2, NULL, SimulationSensorContact, (void*) argSensor2);
 
 	/* Simulation d un capteur d interrupteur */
-	strcpy(argSensor3->id,"06555555");
+	strcpy(argSensor3->id,"0021CBE5");
 	strcpy(argSensor3->eep,"050201");		
 	pthread_create(&thread3, NULL, SimulationSensorSwitch, (void*) argSensor3);
 	
@@ -43,7 +50,7 @@ void StartSimulationSensor(){
 
 void * SimulationSensorTemp(void * p_argSensor)
 {
-	char message[28];
+	char message[29];
 	int temp;
 	char tempHexa[3];
 	
@@ -51,22 +58,32 @@ void * SimulationSensorTemp(void * p_argSensor)
 	AddSensor(((struct ArgSensor*)p_argSensor)->id, str_sub(((struct ArgSensor*)p_argSensor)->eep, 0, 1), str_sub(((struct ArgSensor*)p_argSensor)->eep, 2, 3), str_sub(((struct ArgSensor*)p_argSensor)->eep, 4, 5));
 	while (1){
 		sleep(5);
-		temp = rand()%40 + 1;	
+		temp = rand()%40 + 1;		
 		sprintf(tempHexa,"%X",temp);		
+		/* Si la temperature est exprime sur un caractere en hexa il va falloir l etaler sur nos deux caracteres hexa */
+		if (temp < 16)
+		{
+			tempHexa[1] = tempHexa[0];
+			tempHexa[0] = '0';
+			tempHexa[2] = '\0';
+		}
 		strcpy(message, "A55A0B07");
 		strcat(message, "00");
 		strcat(message, tempHexa);
 		strcat(message, "0000");
+		printf("ID du simulateur de capteur de temerature : %s\n",((struct ArgSensor*)p_argSensor)->id);
 		strcat(message, ((struct ArgSensor*)p_argSensor)->id);
 		strcat(message, "00");
-		strcat(message, "11");
+		strcat(message, "00\0");
 		printf("Message du capteur de température : %s\n",message);
+		
+		mq_send(smq, message, MAX_MQ_SIZE, 0);
 	}
 }
 
 void * SimulationSensorContact(void * p_argSensor)
 {
-	char message[28];
+	char message[29];
 	int contact;
 	char contactHexa[3];
 	
@@ -75,21 +92,26 @@ void * SimulationSensorContact(void * p_argSensor)
 	while (1){
 		sleep(5);
 		contact = rand()%2;	
-		sprintf(contactHexa,"%X",contact);		
+		sprintf(contactHexa,"%X",contact);
+		contactHexa[1] = contactHexa[0];
+		contactHexa[0] = '0';
+		contactHexa[2] = '\0';
 		strcpy(message, "A55A0B07");		
 		strcat(message, contactHexa);
 		strcat(message, "00");
 		strcat(message, "0000");
 		strcat(message, ((struct ArgSensor*)p_argSensor)->id);
 		strcat(message, "00");
-		strcat(message, "11");
+		strcat(message, "00");
 		printf("Message du capteur de contact : %s\n",message);
+		
+		mq_send(smq, message, MAX_MQ_SIZE, 0);
 	}
 }
 
 void * SimulationSensorSwitch(void * p_argSensor)
 {
-	char message[28];
+	char message[29];
 	int i_switch;
 	char switchHexa[3];
 	
@@ -99,14 +121,21 @@ void * SimulationSensorSwitch(void * p_argSensor)
 		sleep(5);
 		i_switch = rand()%2;	
 		sprintf(switchHexa,"%X",i_switch);		
+		switchHexa[1] = switchHexa[0];
+		switchHexa[0] = '0';
+		switchHexa[2] = '\0';
 		strcpy(message, "A55A0B07");		
 		strcat(message, switchHexa);
 		strcat(message, "00");
 		strcat(message, "0000");
 		strcat(message, ((struct ArgSensor*)p_argSensor)->id);
 		strcat(message, "00");
-		strcat(message, "11");
+		strcat(message, "00");
 		printf("Message du capteur d'interrupteur : %s\n",message);
+		
+		/*mq_send(smq, message, MAX_MQ_SIZE, 0);*/
+		
+		ActionActuator("0021CBE5aC00\0", B0);		
 	}
 }
 

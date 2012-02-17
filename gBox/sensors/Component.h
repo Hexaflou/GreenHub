@@ -8,6 +8,7 @@
 #ifndef COMPONENT_H_
 #define COMPONENT_H_
 
+#include <mqueue.h>
 
 #define A1 0
 #define A0 1
@@ -41,7 +42,7 @@ typedef struct Actuator
 	char id[13];
 	char EEP[7];
 	float status;
-	int (*action)(float value, struct Actuator *);
+	int (*action)(float value, struct Actuator * actuator, mqd_t smq);
 	char idSensorAssociated[11];
 	struct Actuator * next;
 }Actuator;
@@ -67,6 +68,6 @@ int getOccupancy(char* message);
 int getContact(char* message);
 
 /* Fonctions d actions pour les actionneurs */
-int actionCurrent(float value, struct Actuator *);
+int actionCurrent(float value, struct Actuator * actuator, mqd_t smq);
 
 #endif /* COMPONENT_H_ */

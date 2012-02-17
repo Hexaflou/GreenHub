@@ -407,14 +407,12 @@ int AddComponentByEEP(char* id, void ** pp_componentList, EEP* EEPList, char org
 	strcat(eep,funct);
 	strcat(eep,type);
 	
-	printf(" EEP : %s\n", eep);
 
 	while (EEPList != NULL){
 		if (strcmp(EEPList->eep,eep) != 0)	/* Si l EEP courant est different de l EEP du capteur */
 		{
 			EEPList = EEPList->next;
 		}else{
-			printf(" FNDKDSJFKSFNDSJLF\n");
 			if (EEPList->AddComponent == NULL){
 				return NOT_SUPPORTED;	/* L EEP n est pas encore supporte */
 			}			

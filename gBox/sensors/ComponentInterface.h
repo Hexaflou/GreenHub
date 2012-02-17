@@ -12,6 +12,8 @@
 #define ERROR -1
 #define OK 0
 #define DEBUG 1
+#define MAX_MQ_SIZE    1024
+
 
 #include "Utility.h"
 #include "Component.h"

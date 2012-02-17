@@ -12,6 +12,7 @@
 #include "Test.h"
 #include "EEP.h"
 #include "SimulationSensor.h"
+#include "ComSndReceptorTask.h"
 
 /* Inclusions externes */
 
@@ -23,13 +24,15 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <mqueue.h> 
 
 /* Déclaration de variables */
-sem_t mutex_sensorList;
-sem_t mutex_actuatorList;
-Sensor* p_sensorList;
-Actuator* p_actuatorList;
-EEP* p_EEPList;
+static mqd_t smq;
+static sem_t mutex_sensorList;
+static sem_t mutex_actuatorList;
+static Sensor* p_sensorList;
+static Actuator* p_actuatorList;
+static EEP* p_EEPList;
 
 
 /* Fonction lançant les deux connections d'écoute avec les périphériques EnOcean et SunSpot */
@@ -300,6 +303,12 @@ void *ListenEnOcean(void *message2)
 	printf("[ListenEnOcean] Connection avec le serveur OK\n");
 #endif
 
+	/* Creation et lancement de la tache permettant d envoyer des trames au recepteur EnOcean */
+	smq = comSndReceptorTaskInit(sFd);
+	
+	/* Creation et lancement de la tache de simulation */
+	/*StartSimulationSensor(smq);*/
+
 	while (1)
 	{
 #if DEBUG > 0
@@ -347,6 +356,7 @@ void *ListenEnOcean(void *message2)
 		ManageMessage(message);
 	}
 	close(sFd);
+	comSndReceptorTaskClose();
 	free(message);
 	return 0;
 }
@@ -357,7 +367,7 @@ void *ListenEnOcean(void *message2)
 ** etre integre dynamiquement a notre configuration, seulement si son EEP est connu de
 ** l'application.
 */
-void ManageMessage(char* message) /* FF00LLTT00IDIDIDID0000 */
+void ManageMessage(char* message)
 {
 	Sensor* currentSensor;
 	#if DEBUG == 0
@@ -372,7 +382,7 @@ void ManageMessage(char* message) /* FF00LLTT00IDIDIDID0000 */
 	{
 		if (strcmp(str_sub(currentSensor->id, 0, 7), str_sub(message, 10, 17)) == 0) /* Détecteur présent dans la liste */
 		{
-			/*printf("Détecteur présent dans la liste ! \n");*/
+			printf("Détecteur présent dans la liste ! \n");
 			currentSensor->decodeMessage(message, currentSensor);
 			currentSensor = currentSensor->next;
 		}
@@ -483,7 +493,7 @@ int ActionActuator(char id[13], float value){
 		{
 			/*printf("Actionneur présent dans la liste ! \n");*/
 			sem_post(&mutex_actuatorList);
-			p_currentActuator->action(value, p_currentActuator);
+			p_currentActuator->action(value, p_currentActuator,smq);
 			return OK;
 		}
 		else

@@ -1,0 +1,2 @@
+receptorIP=134.214.105.28
+receptorPort=5000

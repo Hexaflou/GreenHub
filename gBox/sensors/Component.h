@@ -43,7 +43,6 @@ typedef struct Actuator
 	char EEP[7];
 	float status;
 	int (*action)(float value, struct Actuator * actuator, mqd_t smq);
-	char idSensorAssociated[11];
 	struct Actuator * next;
 }Actuator;
 

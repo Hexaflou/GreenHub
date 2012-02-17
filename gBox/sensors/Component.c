@@ -107,10 +107,14 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor)
 {
 	int closed;
 	closed = getContact(message);
+
+	
 	if (closed == 1){
 		printf("Contact ferme. \n");
+		ActionActuator("0021CBE5aC00\0", B0);
 	}else{
 		printf("Contact ouvert. \n");
+		ActionActuator("0021CBE5aC00\0", B1);
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (closed != p_sensor->value){
@@ -243,17 +247,24 @@ int getContact(char* message)
 int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq){
 	char message[29];
 	int i_switch;
-	char switchHexa[3];
+	char valueHexa[3];
 	
-	sprintf(switchHexa,"%X",((int)value)<<5);		
+	/*printf("value : %f\n",value);
 	
-	strcpy(message, "A55A0B05");		
-	strcat(message, "50");
+	sprintf(valueHexa,"%X",(((int)value)<<1)|0x01);		
+	valueHexa[1] = '0';
+	valueHexa[2] = '\0';
+	
+	printf("ValueHexa : %s\n",valueHexa);
+	
+	strcpy(message, "A55A6B05");	
+	strcat(message, valueHexa);
 	strcat(message, "00");
 	strcat(message, "0000");
-	strcat(message, str_sub(p_actuator->id,0,7));
+	strcat(message, "FF9F1E03");
 	strcat(message, "30");
-	strcat(message, "61");
+	strcat(message, "00");	*/
+	strcpy(message,"A55A6B0550000000FF9F1E033000"); 					
 	printf("Message du capteur d'interrupteur : %s\n",message);
 	mq_send(smq, message, MAX_MQ_SIZE, 0);
 	return 0;

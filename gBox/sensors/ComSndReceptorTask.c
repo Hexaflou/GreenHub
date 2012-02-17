@@ -77,14 +77,16 @@ static void * comSndReceptorTask(void * attr)
 
 static int dataSend(char * msg)
 {
-	if(send(sock, msg, strlen(msg), 0) < 0)
+	int sendResult;
+	sendResult = send(sock, msg, strlen(msg), 0);
+	if(sendResult < 0)
 	{
 		perror("[ComSndReceptorTask] Error in message post.");
 		return SOCKET_ERROR;
 	}
 	else
 	{
-		printf("[ComSndReceptorTask] Send to EnOcean receptor : \n%s \n\n",msg);
+		printf("[ComSndReceptorTask] Sent to EnOcean receptor : \n%s \nNb of bytes sent : %i\n\n",msg,sendResult);
 	}
 	return 0;
 }

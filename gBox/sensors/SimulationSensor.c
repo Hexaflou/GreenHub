@@ -143,15 +143,15 @@ void * SimulationSensorSwitch(void * p_argSensor)
 
 char* CalculateCheckSum(char * message){
 	int nbChar, ii;
-	float byteSum;
+	int byteSum;
 	char byte[2];
 	char * byteSumHexa;
 	byteSumHexa =(char*)malloc(sizeof(char)*30);
 	nbChar = xtoi(str_sub(message,0,1));
 	for (ii = 0; ii<nbChar ; ii += 2){
 		/* TODO: MARCHE PAS */
-		byte[0] = str_sub(message,ii,ii);
-		byte[1] = str_sub(message,ii+1,ii+1);
+		byte[0] = message[ii];
+		byte[1] = message[ii+1];
 		byteSum = byteSum + xtoi(byte);		
 	}
 	sprintf(byteSumHexa,"%X",byteSum);

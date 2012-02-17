@@ -382,7 +382,7 @@ void ManageMessage(char* message)
 	{
 		if (strcmp(str_sub(currentSensor->id, 0, 7), str_sub(message, 10, 17)) == 0) /* Détecteur présent dans la liste */
 		{
-			printf("Détecteur présent dans la liste ! \n");
+			/*printf("Détecteur présent dans la liste ! \n");*/
 			currentSensor->decodeMessage(message, currentSensor);
 			currentSensor = currentSensor->next;
 		}

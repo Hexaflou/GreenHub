@@ -65,8 +65,6 @@ int gCommunicationInit(int userId)
 	free(msg);
 	cJSON_Delete(init);
 
-	/* TODO:Création des threads utiles */
-
 	return 0;
 }
 

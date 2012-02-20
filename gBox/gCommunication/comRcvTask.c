@@ -51,7 +51,7 @@ static void * comRcvTask(void * attr)
 	int index = 0;
 	int size = 0;
 	int length = 0;
-	
+
 	while(1)
 	{
 		/*Recuperation d'un datagramme a la suite de l'ancien*/
@@ -61,7 +61,7 @@ static void * comRcvTask(void * attr)
 		else
 		{
 			printf("erreur de socket : %s\n",strerror(errno));
-			
+
 			sleep(1);
 		}
 		if(size>0)
@@ -83,20 +83,20 @@ static void * comRcvTask(void * attr)
 				communicationParse(temp);
 				/* On lit la suite */
 				pch = strtok(NULL, "}");
-			}
-			
-			/* On conserve les donnees non traitee */
-			if(size > index)
-			{
-				strncpy(temp, data + index, 2040-index);
-				strncpy(data,temp,2040);
-				index = strlen(data);
-			}
-			else
-				index =0;
 		}
+
+		/* On conserve les donnees non traitee */
+		if(size > index)
+		{
+			strncpy(temp, data + index, 2040-index);
+			strncpy(data,temp,2040);
+			index = strlen(data);
+		}
+		else
+			index =0;
 	}
-	return (void *) NULL;
+}
+return (void *) NULL;
 }
 
 int communicationParse(char* trame)
@@ -107,7 +107,7 @@ int communicationParse(char* trame)
 	char* mac_address=NULL;
 	char* action=NULL;
 	int interval=0;
-	
+
 	if(data == NULL)
 	{
 		fprintf(stderr,"Unvalid json received.\n");
@@ -138,45 +138,44 @@ int communicationParse(char* trame)
 	}
 
 	cJSON_Delete(data);
-	
+
 	return 0;
 }
 
 void sensorAction(char* mac_address,char * action)
 {
-	printf("mac address : %s, Action : %s \n",mac_address,action);
-	
-	
+	printf("A faire ! : mac address : %s, Action : %s \n",mac_address,action);
+	/* TODO : ajouter l'action quand elle sera dispo */
 }
 void getValue(char * mac_address)
 {
-	
+
 	Sensor* tempSensor = NULL;
 	sem_t semSensorList;
-	
+
 	tempSensor=getSensorList();
 	/* TODO : Penser à passer aux mutex p_thread*/
 	semSensorList = getSemaphore() ;
 
-		sem_wait(&semSensorList);
-		
-		while(tempSensor != NULL)
+	sem_wait(&semSensorList);
+
+	while(tempSensor != NULL)
+	{
+		if ( strncmp(tempSensor->id , mac_address , 10) == 0 )
 		{
-			if ( strncmp(tempSensor->id , mac_address , 10) == 0 )
-		       {
 			gCommunicationSendValue(tempSensor->id,tempSensor->value);
-                        /* We can return from here (MAC address is unique) */
-                        sem_post(&semSensorList); 
+            /* We can return from here (MAC address is unique) */
+            sem_post(&semSensorList); 
 			return;
-		       }
-			else
-			{
-			tempSensor = tempSensor->next;
-		    }
 		}
-		
-		sem_post(&semSensorList);
-	
+		else
+		{
+			tempSensor = tempSensor->next;
+		}
+	}
+
+	sem_post(&semSensorList);
+
 }
 void activateRT(int interval)
 {

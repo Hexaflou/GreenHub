@@ -1,9 +1,11 @@
 /*
  * InterfaceComposant.c
  *
- * Created on: 4 janv. 2012
+ * Interface avec les peripheriques (capteurs/actionneurs) permettant au serveur de communiquer avec ceux-ci.
+ * 
  * Author: H4212
  */
+
 
 /* Inclusions internes */
 #include "ComponentInterface.h"
@@ -13,9 +15,9 @@
 #include "EEP.h"
 #include "SimulationSensor.h"
 #include "ComSndReceptorTask.h"
+#include "SimulationReceptorEnOcean.h"
 
 /* Inclusions externes */
-
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -43,6 +45,7 @@ int ComponentInterface(void* attr)
 	char *message2 = "Thread EnOcean";
 	int iret1=0, iret2=0;
 
+	/* Création des mutex pour la liste de capteurs et la liste d'actionneurs */
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
 		return (int)ERROR;
@@ -52,45 +55,47 @@ int ComponentInterface(void* attr)
 		return (int)ERROR;
 	}
 
+	/* Initialisation des listes de capteurs et d'actionneurs */
 	sem_wait(&mutex_sensorList);
-
 	p_sensorList = NULL;
 	p_actuatorList = NULL;	
 	p_EEPList = (EEP*)malloc(sizeof(EEP));
 	p_EEPList->next = NULL;
 	
-
-	/* Initialisation des capteurs et EEP */
+	/* Chargement des capteurs et EEP */
 	initializeConfig(&p_sensorList, &p_actuatorList, p_EEPList);
-
 	sem_post(&mutex_sensorList);
 
-	/* On va lancer 2 thread, un pour les SunSPOTs, un pour les capteurs EnOcean */
+	/* Mode Simulation (récepteur EnOcean, capteurs et actionneurs) */
+	{
+		pthread_t threadReceptor;
+		int iretReceptor;
+		mqd_t mqReceptor = comReceptorTaskInit();
+		iretReceptor = pthread_create(&threadReceptor, NULL, StartSimulationSensor, (void*) &mqReceptor); 
+		
+	}
 
-	/* on les créé, passe un argument on verra plus tard lequel exactement */
 
+	/* Lancement de 2 threads pour SunSPOTs et pour EnOcean */
 	 /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
 	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
 
 
-	/* on les attend
-	pthread_join(thread1, NULL);
-	pthread_join(thread2, NULL);*/
-	/*StartSimulationSensor();*/
 	return (iret1 || iret2);
 }
 
 
-/* Fonction permettant l'écoute de périphérique SunSpot.
-** Si un composant SunSpot non enregistré communique, il sera
-** automatiquement enregistré dans notre liste de capteurs.
-*/
+/*
+ * Fonction permettant l'écoute de périphérique SunSpot.
+ * Si un composant SunSpot non enregistré communique, il sera
+ * automatiquement enregistré dans notre liste de capteurs.
+ */
 void *ListenSunSpot(void *message1) {
 	int sFd;
 	char buffer[47], *message; /* on recevra le message en une seule fois */
-    	long n;
+    long n;
 	struct sockaddr_in serverAddr;
-    	socklen_t serverAddrLen = sizeof(serverAddr);
+    socklen_t serverAddrLen = sizeof(serverAddr);
 
 	/* Variable pour la trame a gerer, seront utilises bien plus tard */
 	char* idCapteur;
@@ -107,44 +112,44 @@ void *ListenSunSpot(void *message1) {
 	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1"); /* on assume que le serveur Java tournera sur la même machine */
 	serverAddr.sin_port = htons(1337);
 
-	/* On est en UDP (mode non connecté), création du socket */
+	/* Création du socket en UDP*/
 	if ((sFd = socket(AF_INET, SOCK_DGRAM, 0)) == ERROR)
 	{
-		perror("[ListenSunSpot] SunSPOT UDP Socket Creation Error \n");
+		perror("[ListenSunSpot] Erreur dans la creation du socket UDP SunSPOT ");
 		return (int*)ERROR;
 	}
 
     #if DEBUG > 0
-        printf("[ListenSunSpot] Binding with server...\n");
+        printf("[ListenSunSpot] Connection avec le serveur...\n");
     #endif
 
 	/* Pas de connect à faire, il faut juste se binder */
 	if (bind(sFd, (struct sockaddr*) &serverAddr, serverAddrLen) == SOCKET_ERROR)
 	{
-		perror("[ListenSunSpot] Socket bind Error \n");
+		perror("[ListenSunSpot] Erreur dans la connection avec le serveur ");
 		return (int*) SOCKET_ERROR;
 	}
 
     #if DEBUG > 0
-        printf("[ListenSunSpot] Bind with socket OK\n");
+        printf("[ListenSunSpot] Connection avec le serveur OK\n");
     #endif
 
 	while (1)
 	{
         #if DEBUG > 0
-            printf("[ListenSunSpot] Waiting for a message debut...\n");
+            printf("[ListenSunSpot] Attente d'un début de message...\n");
         #endif
 
-        /* on reçoit le message en une seule fois, comme un gros tableau de caractères */
+        /* on reçoit le message en une seule fois */
 		if ((n = recvfrom(sFd, buffer, sizeof(buffer)-1, 0, (struct sockaddr*) &serverAddr, &serverAddrLen)) < 0)
 		{
-			perror("[ListenSunSpot] Receive Error \n");
+			perror("[ListenSunSpot] Erreur dans la réception ");
 
 			break;
         }
 
         #if DEBUG > 0
-            printf("[ListenSunSpot] Sensor message received.\n");
+            printf("[ListenSunSpot] Message d'un capteur reçu..\n");
         #endif
 
         /*
@@ -161,13 +166,13 @@ void *ListenSunSpot(void *message1) {
         /* on regarde l'entête, vérifie que c'est bien "A55A" */
 	if (strcmp(strtok(message, ";"), "A55A") != 0)
         {
-            printf("[ListenSunSpot] Wrong header.\n");
+            printf("[ListenSunSpot] Mauvais header.\n");
         }
 
         /* on vérifie maintenant si on est bien sur un vrai capteur SunSpot : type "03" */
 	if (strcmp(strtok(NULL, ";"), "03") != 0)
         {
-            printf("[ListenSunSpot] Good sensor type.\n");
+            printf("[ListenSunSpot] Bon type de capteur.\n");
         }
 
         /*
@@ -264,10 +269,11 @@ void *ListenSunSpot(void *message1) {
 	return 0;
 }
 
-/* Fonction permettant l'écoute de périphériques EnOcean.
-** Elle reçoit des messages du récepteur EnOcean, enlève
-** l'en-tête et appelle le traitement de celui-ci.
-*/
+/* 
+ * Fonction permettant l'écoute de périphériques EnOcean.
+ * Elle reçoit des messages du récepteur EnOcean, enlève
+ * l'en-tête et appelle le traitement de celui-ci.
+ */
 void *ListenEnOcean(void *message2)
 {
 	int sFd;
@@ -279,13 +285,14 @@ void *ListenEnOcean(void *message2)
 
 	/* Protocole Internet */
 	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_addr.s_addr = inet_addr("134.214.105.28");
-	serverAddr.sin_port = htons(5000);
+	/*serverAddr.sin_addr.s_addr = inet_addr("134.214.105.28");*/
+	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	serverAddr.sin_port = htons(8888);
 
 	/* Creation d un socket TCP */
 	if ((sFd = socket(AF_INET, SOCK_STREAM, 0)) == ERROR)
 	{
-		perror("[ListenEnOcean] Erreur dans la creation du socket TCP.\n");
+		perror("[ListenEnOcean] Erreur dans la creation du socket TCP ");
 		return (int*)ERROR;
 	}
 
@@ -295,7 +302,7 @@ void *ListenEnOcean(void *message2)
 
 	if (connect(sFd, (struct sockaddr*) &serverAddr, serverAddrLen) == -1)
 	{
-		perror("[ListenEnOcean] Erreur dans la connection du socket\n");
+		perror("[ListenEnOcean] Erreur dans la connection du socket ");
 		return (int*)SOCKET_ERROR;
 	}
 
@@ -319,7 +326,7 @@ void *ListenEnOcean(void *message2)
 		{
 			if ((n = recv(sFd, buffer, sizeof(buffer - 1), 0)) < 0)
 			{
-				perror("[ListenEnOcean] Erreur dans la reception du message \n");
+				perror("[ListenEnOcean] Erreur dans la reception du message ");
 				break;
 			}
 			buffer[4] = '\0';
@@ -331,13 +338,13 @@ void *ListenEnOcean(void *message2)
 
 		if ((n = recv(sFd, buffer, 2, 0)) < 0)
 		{
-			perror("[ListenEnOcean] Erreur dans la reception des donnees.\n");
+			perror("[ListenEnOcean] Erreur dans la reception des donnees ");
 			break;
 		}
 		buffer[2] = '\0';
 
 #if DEBUG > 0
-		printf("[ListenEnOcean] Taille du buffer : %s \n", buffer);
+		printf("[ListenEnOcean] Taille du buffer : %i \n", xtoi(buffer));
 #endif
 
 		/* Convertit un tableau de caractere en hexadecimal en nombre decimal */
@@ -349,7 +356,7 @@ void *ListenEnOcean(void *message2)
 		/* Reception du message sans le header */
 		if ((n = recv(sFd, message, tailleTrame * 2, 0)) < 0)
 		{
-			perror("[ListenEnOcean] Data Reception Error \n");
+			perror("[ListenEnOcean] Data Reception Error ");
 			break;
 		}
 		message[tailleTrame * 2] = '\0';
@@ -361,16 +368,17 @@ void *ListenEnOcean(void *message2)
 	return 0;
 }
 
-/* Fonction traitant les messages EnOcean.
-** Si le capteur emettant le message est enregistre dans notre configuration
-** son message sera traite. Si le message est un message de Teach-In ce capteur pourra
-** etre integre dynamiquement a notre configuration, seulement si son EEP est connu de
-** l'application.
-*/
+/* 
+ * Fonction traitant les messages EnOcean.
+ * Si le capteur emettant le message est enregistre dans notre configuration
+ * son message sera traite. Si le message est un message de Teach-In ce capteur pourra
+ * etre integre dynamiquement a notre configuration, seulement si son EEP est connu de
+ * l'application.
+ */
 void ManageMessage(char* message)
 {
 	Sensor* currentSensor;
-	#if DEBUG == 0
+	#if DEBUG > 0
 		printf("Message : %s \n", message);
 	#endif
 
@@ -397,9 +405,10 @@ void ManageMessage(char* message)
 
 }
 
-/* Fonction permettant de retirer la valeur d un capteur. 
-** Cette valeur est retiree par le pointeur p_value, qui doit etre initialise au prealable.
-** Renvoie -1 si erreur, 0 si OK.
+/* 
+ * Fonction permettant de retirer la valeur d un capteur. 
+ * Cette valeur est retiree par le pointeur p_value, qui doit etre initialise au prealable.
+ * Renvoie -1 si erreur, 0 si OK.
 */
 int GetInfoFromSensor(char id[10], float * p_value){
 	char realId[8];
@@ -430,15 +439,20 @@ int GetInfoFromSensor(char id[10], float * p_value){
 	return ERROR;
 }
 
+/* 
+ * Permet d ajouter un capteur a partir de son EEP et son id 
+ * Sortie : Renvoie 0 si tout s'est bien passe, -1 si l EEP n est pas supporte et -2 si l EEP est inconnu.
+ */
 int AddSensor(char id[8], char org[2], char funct[2], char type[2])
 {
 	return AddComponentByEEP(id, (void**)&p_sensorList, p_EEPList, org, funct, type);	
 }
 
-/* Fonction permettant de retirer l etat d un actionneur. 
-** Cette valeur est retiree par le pointeur p_value, qui doit etre initialise au prealable.
-** Renvoie -1 si erreur, 0 si OK.
-*/
+/* 
+ * Fonction permettant de retirer l etat d un actionneur. 
+ * Cette valeur est retiree par le pointeur p_value, qui doit etre initialise au prealable.
+ * Renvoie -1 si erreur, 0 si OK.
+ */
 int GetStatusFromSensor(char id[10], float * p_value){
 	char realId[8];
 	Actuator* p_currentActuator;
@@ -467,20 +481,27 @@ int GetStatusFromSensor(char id[10], float * p_value){
 	sem_post(&mutex_actuatorList);	
 	return ERROR;
 }
-/*
-int AddActuator(char id[8], char org[2], char funct[2], char type[2])
-{
-	return AddActuatorByEEP(id, &p_actuatorList, p_EEPList, org, funct, type);	
-}*/
 
+/*
+ * Renvoie la liste de capteurs. 
+ */
 Sensor * getSensorList(){
 	return p_sensorList;
 }
 
+/* 
+ *Renvoie le mutex protegeant la liste de capteurs 
+ */
 sem_t getSemaphore(){
 	return mutex_sensorList;
 }
 
+/* 
+ * Agit sur un actionneur de notre liste d actionneurs.
+ * Entrees :
+ * 	id : id de notre actionneur.
+ * 	value : la valeur a donne dans l action
+ */
 int ActionActuator(char id[13], float value){
 	Actuator* p_currentActuator;
 	sem_wait(&mutex_actuatorList);

@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include "ComSndReceptorTask.h"
 #include "ComponentInterface.h"
+#include "comIncludes.h"
 
 #define QUEUE_NAME  "/GH_comSendReceptorQ"
 
@@ -86,7 +87,9 @@ static int dataSend(char * msg)
 	}
 	else
 	{
-		printf("[ComSndReceptorTask] Sent to EnOcean receptor : \n%s \nNb of bytes sent : %i\n\n",msg,sendResult);
+		#if DEBUG > 0
+			printf("[ComSndReceptorTask] Sent to EnOcean receptor : \n%s \nNb of bytes sent : %i\n\n",msg,sendResult);
+		#endif
 	}
 	return 0;
 }

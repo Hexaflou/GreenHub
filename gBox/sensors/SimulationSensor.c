@@ -16,50 +16,56 @@
 
 static mqd_t smq;
 
-void StartSimulationSensor(mqd_t arg_smq){
+/* Fonction permettant de lancer la simulation de plusieurs capteurs. */
+void* StartSimulationSensor(void* arg_smq){
 	pthread_t thread1, thread2,thread3;
-	/* Simulation d un capteur de temperature entre -30°C et 10°C */
+	
+	/* Simulation d un capteur de temperature entre 0°C et 40°C */
 	ArgSensor* argSensor,*argSensor2,*argSensor3;
 	
-	smq = arg_smq;
-	
+	smq = *((mqd_t*)arg_smq);
+
+	srand(time(NULL));
+
+	/* Ces structures seront désallouées par les tâches crées plus bas */
 	argSensor=(struct ArgSensor*)malloc(sizeof(struct ArgSensor));
 	argSensor2=(struct ArgSensor*)malloc(sizeof(struct ArgSensor));
 	argSensor3=(struct ArgSensor*)malloc(sizeof(struct ArgSensor));
 	strcpy(argSensor->id,"00893360");
-	strcpy(argSensor->eep,"070205");		
+	strcpy(argSensor->eep,"070205");
 	pthread_create(&thread1, NULL, SimulationSensorTemp, (void*) argSensor);
 	
 
 	/* Simulation d un capteur de contact */
 	strcpy(argSensor2->id,"0001B015");
-	strcpy(argSensor2->eep,"060001");		
+	strcpy(argSensor2->eep,"060001");
 	pthread_create(&thread2, NULL, SimulationSensorContact, (void*) argSensor2);
 
 	/* Simulation d un capteur d interrupteur */
 	strcpy(argSensor3->id,"0021CBE5");
-	strcpy(argSensor3->eep,"050201");		
+	strcpy(argSensor3->eep,"050201");
 	pthread_create(&thread3, NULL, SimulationSensorSwitch, (void*) argSensor3);
-	
-	pthread_join(thread1, NULL); 
-	pthread_join(thread2, NULL);
-	pthread_join(thread3, NULL); 
-
-
 }
 
+/* Tâche simulant un capteur de température, de l'ajout de celui-ci jusqu'à l'envoi de trames à partir de ces capteurs.
+ * p_argSensor : Structure argument contenant les informations ID et EEP du capteur.
+ */
 void * SimulationSensorTemp(void * p_argSensor)
 {
 	char message[29];
 	int temp;
 	char tempHexa[3];
+	char id[9];
+
+	strcpy(id,((struct ArgSensor*)p_argSensor)->id);
+	free(p_argSensor);
 	
-	srand(time(NULL));
-	AddSensor(((struct ArgSensor*)p_argSensor)->id, str_sub(((struct ArgSensor*)p_argSensor)->eep, 0, 1), str_sub(((struct ArgSensor*)p_argSensor)->eep, 2, 3), str_sub(((struct ArgSensor*)p_argSensor)->eep, 4, 5));
+/*	AddSensor(((struct ArgSensor*)p_argSensor)->id, str_sub(((struct ArgSensor*)p_argSensor)->eep, 0, 1), str_sub(((struct ArgSensor*)p_argSensor)->eep, 2, 3), str_sub(((struct ArgSensor*)p_argSensor)->eep, 4, 5));*/
 	while (1){
-		sleep(5);
-		temp = rand()%40 + 1;		
-		sprintf(tempHexa,"%X",temp);		
+		sleep(rand()%10);
+		temp = rand()%40 + 1;
+		sprintf(tempHexa,"%X",temp);
+		
 		/* Si la temperature est exprime sur un caractere en hexa il va falloir l etaler sur nos deux caracteres hexa */
 		if (temp < 16)
 		{
@@ -68,79 +74,93 @@ void * SimulationSensorTemp(void * p_argSensor)
 			tempHexa[2] = '\0';
 		}
 		strcpy(message, "A55A0B07");
-		strcat(message, "00");
-		strcat(message, tempHexa);
 		strcat(message, "0000");
-		printf("ID du simulateur de capteur de temerature : %s\n",((struct ArgSensor*)p_argSensor)->id);
-		strcat(message, ((struct ArgSensor*)p_argSensor)->id);
+		strcat(message, tempHexa);
 		strcat(message, "00");
-		strcat(message, "00\0");
-		printf("Message du capteur de température : %s\n",message);
+		strcat(message, id);
+		strcat(message, "00");
+		strcat(message, "00");
+/*		printf("Message du capteur de température : %s\n",message);*/
+
 		
 		mq_send(smq, message, MAX_MQ_SIZE, 0);
 	}
 }
 
+/* Tâche simulant un capteur de contact, de l'ajout de celui-ci jusqu'à l'envoi de trames à partir de ces capteurs.
+ * p_argSensor : Structure argument contenant les informations ID et EEP du capteur.
+ */
 void * SimulationSensorContact(void * p_argSensor)
 {
 	char message[29];
 	int contact;
 	char contactHexa[3];
+	char id[9];
 	
-	srand(time(NULL));
-	AddSensor(((struct ArgSensor*)p_argSensor)->id, str_sub(((struct ArgSensor*)p_argSensor)->eep, 0, 1), str_sub(((struct ArgSensor*)p_argSensor)->eep, 2, 3), str_sub(((struct ArgSensor*)p_argSensor)->eep, 4, 5));
+	strcpy(id,((struct ArgSensor*)p_argSensor)->id);
+
+	free(p_argSensor);
+	
+	/*AddSensor(((struct ArgSensor*)p_argSensor)->id, str_sub(((struct ArgSensor*)p_argSensor)->eep, 0, 1), str_sub(((struct ArgSensor*)p_argSensor)->eep, 2, 3), str_sub(((struct ArgSensor*)p_argSensor)->eep, 4, 5));*/
 	while (1){
-		sleep(5);
+		sleep(rand()%10);
 		contact = rand()%2;	
 		sprintf(contactHexa,"%X",contact);
 		contactHexa[1] = contactHexa[0];
 		contactHexa[0] = '0';
 		contactHexa[2] = '\0';
-		strcpy(message, "A55A0B07");		
+		strcpy(message, "A55A0B07");
 		strcat(message, contactHexa);
 		strcat(message, "00");
 		strcat(message, "0000");
-		strcat(message, ((struct ArgSensor*)p_argSensor)->id);
+		strcat(message, id);
 		strcat(message, "00");
 		strcat(message, "00");
-		printf("Message du capteur de contact : %s\n",message);
-		
+		/*printf("Message du capteur de contact : %s\n",message);*/
+
 		mq_send(smq, message, MAX_MQ_SIZE, 0);
 	}
 }
 
+
+/* Tâche simulant un interrupteur à 4 etats, de l'ajout de celui-ci jusqu'à l'envoi de trames à partir de ces capteurs.
+ * p_argSensor : Structure argument contenant les informations ID et EEP du capteur.
+ */
 void * SimulationSensorSwitch(void * p_argSensor)
 {
 	char message[29];
 	int i_switch;
 	char switchHexa[3];
+	char id[9];
 	
-	srand(time(NULL));
-	AddSensor(((struct ArgSensor*)p_argSensor)->id, str_sub(((struct ArgSensor*)p_argSensor)->eep, 0, 1), str_sub(((struct ArgSensor*)p_argSensor)->eep, 2, 3), str_sub(((struct ArgSensor*)p_argSensor)->eep, 4, 5));
+	strcpy(id,((struct ArgSensor*)p_argSensor)->id);
+	free(p_argSensor);
+
+/*	AddSensor(((struct ArgSensor*)p_argSensor)->id, str_sub(((struct ArgSensor*)p_argSensor)->eep, 0, 1), str_sub(((struct ArgSensor*)p_argSensor)->eep, 2, 3), str_sub(((struct ArgSensor*)p_argSensor)->eep, 4, 5));*/
 	while (1){
-		sleep(5);
-		i_switch = rand()%2;	
-		sprintf(switchHexa,"%X",i_switch);		
-		switchHexa[1] = switchHexa[0];
-		switchHexa[0] = '0';
+		sleep(rand()%10);
+		i_switch = (rand()%4)<<1;
+		sprintf(switchHexa,"%X",i_switch);
+		switchHexa[1] = '0';
 		switchHexa[2] = '\0';
-		strcpy(message, "A55A0B07");		
+		strcpy(message, "A55A0B07");
 		strcat(message, switchHexa);
 		strcat(message, "00");
 		strcat(message, "0000");
-		strcat(message, ((struct ArgSensor*)p_argSensor)->id);
+		strcat(message, id);
+		strcat(message, "30");
 		strcat(message, "00");
-		strcat(message, "00");
-		printf("Message du capteur d'interrupteur : %s\n",message);
+	/*	printf("Message du capteur d'interrupteur : %s\n",message);*/
+
+		mq_send(smq, message, MAX_MQ_SIZE, 0);
 		
-		/*mq_send(smq, message, MAX_MQ_SIZE, 0);*/
-		
-		ActionActuator("0021CBE5aC00\0", B0);		
 	}
 }
 
 
-
+/* Fonction permettant de calculer la checksum d'un message. Le champ checksum du message en paramètre sera mis à jour.
+ * Paramètre d'entrée :char * message : trame à traiter.
+ */
 char* CalculateCheckSum(char * message){
 	int nbChar, ii;
 	int byteSum;

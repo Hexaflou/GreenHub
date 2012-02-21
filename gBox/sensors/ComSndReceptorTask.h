@@ -12,8 +12,7 @@
  * ********************************************************************/
 
 #include <mqueue.h> 
- 
- typedef int SOCKET;
+
  
 /* Initialisation de la tache, retourne un pointeur sur la boite au lettre */
 mqd_t comSndReceptorTaskInit(int socket);

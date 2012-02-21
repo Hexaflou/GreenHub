@@ -8,6 +8,7 @@
 #ifndef SIMULATIONSENSOR_H_
 #define SIMULATIONSENSOR_H_
 
+#include <mqueue.h>
 
 typedef struct ArgSensor
 {
@@ -18,7 +19,7 @@ typedef struct ArgSensor
 /* Calcule la check sum d'un message. Les caractères "A55A" ne doivent être pas présents. */
 char* CalculateCheckSum(char * message);
 
-void StartSimulationSensor();
+void* StartSimulationSensor(void *);
 void* SimulationSensorTemp(void *);
 void* SimulationSensorSwitch(void *);
 void* SimulationSensorContact(void *);

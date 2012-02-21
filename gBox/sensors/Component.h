@@ -59,7 +59,7 @@ int decodeMessageOccupancy(char * message, struct Sensor *);
 int decodeMessageLight(char * message, struct Sensor *);
 
 /* Fonctions de retrait de donnees des trames en parametre */
-int getTempWithoutRange(char* message);
+int getTemp(char* message);
 int getLightLittleSensor(char* message);
 int getLightBigSensor(char* message);
 int getSwitch(char* message);

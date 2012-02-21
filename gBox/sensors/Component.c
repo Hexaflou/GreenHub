@@ -76,7 +76,7 @@ int decodeMessageOccupancy(char* message, struct Sensor* p_sensor)
 int decodeMessageTemp(char* message, struct Sensor* p_sensor)
 {
 	float temp, multiplier;
-	temp = (float) getTempWithoutRange(message);	/* Valeur entre rangeMin et rangeMax (en general 0..255) */
+	temp = (float) getTemp(message);	/* Valeur entre rangeMin et rangeMax (en general 0..255) */
 
 	/* Calcul du multiplicateur pour determiner la vraie valeur mesuree par le capteur */
 	multiplier = ( (((Range*) p_sensor->rangeData)->scaleMax - ((Range*) p_sensor->rangeData)->scaleMin)
@@ -111,10 +111,10 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor)
 	
 	if (closed == 1){
 		printf("Contact ferme. \n");
-		ActionActuator("0021CBE5aC00\0", B0);
+		/*ActionActuator("0021CBE5aC00\0", B0);*/
 	}else{
 		printf("Contact ouvert. \n");
-		ActionActuator("0021CBE5aC00\0", B1);
+		/*ActionActuator("0021CBE5aC00\0", B1);*/
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (closed != p_sensor->value){
@@ -134,12 +134,12 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor)
 int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
 {
 	int switch_button = getSwitch(message);	
-	if (switch_button == A0){
-		ActionActuator("0021CBE5aC00\0", B0);		
+/*	if (switch_button == A0){
+		ActionActuator("0021CBE5aC00\0", B0);
 	}
 	if (switch_button == A1){
 		ActionActuator("0021CBE5aC00\0", B1);
-	}
+	}*/
 	if (switch_button != NO_BUTTON){
 		printf("Valeur de l interrupteur : %i \n", switch_button);
 		/* Si la nouvelle valeur est differente de l ancienne */
@@ -162,7 +162,7 @@ int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
  * Retourne la temperature donnee par le message en parametre.
  * Le message doit correspondre a un message envoye par un capteur de temperature, auquel cas le message ne sera pas pertinent.
  */
-int getTempWithoutRange(char* message)
+int getTemp(char* message)
 {
 	int temp;
 	temp = xtoi(str_sub(message, 6, 7)); /* Extraction de la temperature a partir du message */
@@ -265,7 +265,7 @@ int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq){
 	strcat(message, "30");
 	strcat(message, "00");	*/
 	strcpy(message,"A55A6B0550000000FF9F1E033000"); 					
-	printf("Message du capteur d'interrupteur : %s\n",message);
+	/*printf("Message du capteur d'interrupteur : %s\n",message);*/
 	mq_send(smq, message, MAX_MQ_SIZE, 0);
 	return 0;
 }

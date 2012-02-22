@@ -23,7 +23,6 @@
 int ComponentInterface(void *);
 
 void *ListenSunSpot(void *ptr);
-void *ListenEnOcean(void *ptr);
 
 void ManageMessage(char* message);
 

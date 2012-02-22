@@ -8,16 +8,15 @@
  * EnOcean.
  * Utilisation réservé à sensors
  * 
- * 														Hexanome H4212
+ * 							Hexanome H4212
  * ********************************************************************/
 
 #include <mqueue.h> 
 
- 
-/* Initialisation de la tache, retourne un pointeur sur la boite au lettre */
-mqd_t comSndReceptorTaskInit(int socket);
+/* Initialisation des deux tâches, retourne un pointeur sur la boite au lettre */
+mqd_t comReceptorTaskInit();
 
-/* Destruction de la tache */
-int comSndReceptorTaskClose();
+/* Destruction des deux tâches */
+int comReceptorTaskClose();
 
 #endif /* COMRECEPTORTASK_H */

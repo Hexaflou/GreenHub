@@ -36,14 +36,16 @@ static Sensor* p_sensorList;
 static Actuator* p_actuatorList;
 static EEP* p_EEPList;
 
+/* Pour le mode simulation */
+static pthread_t threadReceptor;
+static mqd_t mqReceptor;
 
 /* Fonction lançant les deux connections d'écoute avec les périphériques EnOcean et SunSpot */
 int ComponentInterface(void* attr)
 {
-	pthread_t thread1, thread2;
-	char *message1 = "Thread SunSPOT";
-	char *message2 = "Thread EnOcean";
-	int iret1=0, iret2=0;
+	pthread_t thread1;
+	char *message1 = "Thread SunSPOT";	
+	int iret1=0;
 	/* Création des mutex pour la liste de capteurs et la liste d'actionneurs */
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
@@ -66,21 +68,19 @@ int ComponentInterface(void* attr)
 	sem_post(&mutex_sensorList);
 
 	/* Mode Simulation (récepteur EnOcean, capteurs et actionneurs) */
-	{
-		pthread_t threadReceptor;
-		int iretReceptor;
-		mqd_t mqReceptor = comReceptorTaskInit();
-		iretReceptor = pthread_create(&threadReceptor, NULL, StartSimulationSensor, (void*) &mqReceptor); 
-		
+	{		
+		mqReceptor = comSimulationReceptorTaskInit();
+		pthread_create(&threadReceptor, NULL, StartSimulationSensor, (void*) &mqReceptor);		
 	}
-
-
+	
+	/* Création et lancement des deux tâches permettant de communiquer avec le récepteur EnOcean */
+	smq = comReceptorTaskInit();
+	
 	/* Lancement de 2 threads pour SunSPOTs et pour EnOcean */
 	 /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
-	 iret2 = pthread_create(&thread2, NULL, ListenEnOcean, (void*) message2); 
 
 
-	return (iret1 || iret2);
+	return (iret1);
 }
 
 
@@ -265,105 +265,6 @@ void *ListenSunSpot(void *message1) {
 	free(message);
 	close(sFd);
     
-	return 0;
-}
-
-/* 
- * Fonction permettant l'écoute de périphériques EnOcean.
- * Elle reçoit des messages du récepteur EnOcean, enlève
- * l'en-tête et appelle le traitement de celui-ci.
- */
-void *ListenEnOcean(void *message2)
-{
-	int sFd;
-	char buffer[5], *message;
-	long n;
-	int tailleTrame;
-	struct sockaddr_in serverAddr;
-	socklen_t serverAddrLen = sizeof(serverAddr);
-
-	/* Protocole Internet */
-	serverAddr.sin_family = AF_INET;
-	/*serverAddr.sin_addr.s_addr = inet_addr("134.214.105.28");*/
-	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-	serverAddr.sin_port = htons(8888);
-
-	/* Creation d un socket TCP */
-	if ((sFd = socket(AF_INET, SOCK_STREAM, 0)) == ERROR)
-	{
-		perror("[ListenEnOcean] Erreur dans la creation du socket TCP ");
-		return (int*)ERROR;
-	}
-
-#if DEBUG > 0
-	printf("[ListenEnOcean] Connection avec le serveur...\n");
-#endif
-
-	if (connect(sFd, (struct sockaddr*) &serverAddr, serverAddrLen) == -1)
-	{
-		perror("[ListenEnOcean] Erreur dans la connection du socket ");
-		return (int*)SOCKET_ERROR;
-	}
-
-#if DEBUG > 0
-	printf("[ListenEnOcean] Connection avec le serveur OK\n");
-#endif
-
-	/* Creation et lancement de la tache permettant d envoyer des trames au recepteur EnOcean */
-	smq = comSndReceptorTaskInit(sFd);
-	
-	/* Creation et lancement de la tache de simulation */
-	/*StartSimulationSensor(smq);*/
-
-	while (1)
-	{
-#if DEBUG > 0
-		printf("[ListenEnOcean] Attente d un debut de message...\n");
-#endif
-
-		while (strcmp(buffer, "A55A") != 0)
-		{
-			if ((n = recv(sFd, buffer, sizeof(buffer - 1), 0)) < 0)
-			{
-				perror("[ListenEnOcean] Erreur dans la reception du message ");
-				break;
-			}
-			buffer[4] = '\0';
-		}
-
-#if DEBUG > 0
-		printf("[ListenEnOcean] Message recu.\n");
-#endif
-
-		if ((n = recv(sFd, buffer, 2, 0)) < 0)
-		{
-			perror("[ListenEnOcean] Erreur dans la reception des donnees ");
-			break;
-		}
-		buffer[2] = '\0';
-
-#if DEBUG > 0
-		printf("[ListenEnOcean] Taille du buffer : %i \n", xtoi(buffer));
-#endif
-
-		/* Convertit un tableau de caractere en hexadecimal en nombre decimal */
-		tailleTrame = xtoi(buffer);
-
-		/* Un octet correspond a deux caracteres */
-		message = (char*) malloc(tailleTrame * sizeof(char) * 2 + 1);
-
-		/* Reception du message sans le header */
-		if ((n = recv(sFd, message, tailleTrame * 2, 0)) < 0)
-		{
-			perror("[ListenEnOcean] Data Reception Error ");
-			break;
-		}
-		message[tailleTrame * 2] = '\0';
-		ManageMessage(message);
-	}
-	close(sFd);
-	comSndReceptorTaskClose();
-	free(message);
 	return 0;
 }
 

@@ -25,7 +25,7 @@ static struct sockaddr_in socketAddr; /* Socket address */
 
 /************************PUBLIC***************************************/
 /* Initialisation de la tache, retourne un pointeur sur la boite au lettre */
-mqd_t comReceptorTaskInit()
+mqd_t comSimulationReceptorTaskInit()
 {
   struct mq_attr attr;
   /* initialize the queue attributes */
@@ -45,17 +45,17 @@ mqd_t comReceptorTaskInit()
 }
 
 /* Destruction de la tache */
-int comReceptorTaskClose()
+int comSimulationReceptorTaskClose()
 {
-  /* close task */
-  int ret = pthread_cancel(comReceptorThread);
-  assert((mqd_t)-1 != mq_close(rmq));
-  /* cleanup */
-  assert((mqd_t)-1 != mq_close(smq));
-  assert((mqd_t)-1 != mq_unlink(QUEUE_NAME_RECEPTOR));
+	/* close task */
+	int ret = pthread_cancel(comReceptorThread);
+	assert((mqd_t)-1 != mq_close(rmq));
+	/* cleanup */
+	assert((mqd_t)-1 != mq_close(smq));
+	assert((mqd_t)-1 != mq_unlink(QUEUE_NAME_RECEPTOR));
 	close(sock);
 	close(newSock);
-  return ret;
+	return ret;
 }
 
 /************************PRIVATE***************************************/
@@ -86,7 +86,7 @@ static void * comReceptorTask(void * attr)
   if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
   {
 	  perror("[SimulationReceptorEnOcean] Erreur dans la création du socket ");
-	  comReceptorTaskClose();
+	  comSimulationReceptorTaskClose();
 	  exit(0);
   }
 
@@ -94,14 +94,14 @@ static void * comReceptorTask(void * attr)
 	if (bind(sock,(struct sockaddr*)&socketAddr, sizeof(socketAddr) )  == SOCKET_ERROR)
 	{
 		perror("[SimulationReceptorEnOcean] Erreur dans la liaison du socket ");
-		comReceptorTaskClose();
+		comSimulationReceptorTaskClose();
 		exit(0);
 	}
 
 	/* Mise en écoute du socket */
 	if (listen(sock,10) == SOCKET_ERROR) {
 		perror("[SimulationReceptorEnOcean] Erreur dans l'écoute du socket ");
-		comReceptorTaskClose();
+		comSimulationReceptorTaskClose();
 		exit(0);
 	}
 
@@ -109,7 +109,7 @@ static void * comReceptorTask(void * attr)
 	if ((newSock = accept (sock, (struct sockaddr *) &sockClient, &sockClientLen)) == ERROR)
 	{	
 		perror("[SimulationReceptorEnOcean] Erreur dans l'acceptation de la requête de connexion.");
-		comReceptorTaskClose();
+		comSimulationReceptorTaskClose();
 		exit(0);
 	}
   

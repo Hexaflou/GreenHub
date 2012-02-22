@@ -11,11 +11,11 @@
 #include "ComponentInterface.h"
 #include "Utility.h"
 #include "Component.h"
-#include "Test.h"
 #include "EEP.h"
 #include "SimulationSensor.h"
-#include "ComSndReceptorTask.h"
+#include "ComReceptorTask.h"
 #include "SimulationReceptorEnOcean.h"
+#include "Configuration.h"
 
 /* Inclusions externes */
 #include <sys/socket.h>
@@ -44,7 +44,6 @@ int ComponentInterface(void* attr)
 	char *message1 = "Thread SunSPOT";
 	char *message2 = "Thread EnOcean";
 	int iret1=0, iret2=0;
-
 	/* Création des mutex pour la liste de capteurs et la liste d'actionneurs */
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
@@ -63,7 +62,7 @@ int ComponentInterface(void* attr)
 	p_EEPList->next = NULL;
 	
 	/* Chargement des capteurs et EEP */
-	initializeConfig(&p_sensorList, &p_actuatorList, p_EEPList);
+	readConfig("sensors.txt", "eep.txt", "actuators.txt", &p_sensorList, &p_actuatorList, p_EEPList);
 	sem_post(&mutex_sensorList);
 
 	/* Mode Simulation (récepteur EnOcean, capteurs et actionneurs) */

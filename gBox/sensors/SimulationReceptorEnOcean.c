@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 
 
-#include "comIncludes.h"
+#include "../gCommunication/comIncludes.h"
 #include "SimulationReceptorEnOcean.h"
 #include "ComponentInterface.h"
 

@@ -4,7 +4,6 @@
  * 
  */
 
-#include "Test.h"
 #include "Component.h"
 #include "ComponentInterface.h"
 #include "EEP.h"

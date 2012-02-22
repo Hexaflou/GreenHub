@@ -5,9 +5,9 @@
 #include <pthread.h>
 #include <assert.h>
 #include <sys/socket.h>
-#include "ComSndReceptorTask.h"
+#include "ComReceptorTask.h"
 #include "ComponentInterface.h"
-#include "comIncludes.h"
+#include "../gCommunication/comIncludes.h"
 
 #define QUEUE_NAME  "/GH_comSendReceptorQ"
 
@@ -82,13 +82,13 @@ static int dataSend(char * msg)
 	sendResult = send(sock, msg, strlen(msg), 0);
 	if(sendResult < 0)
 	{
-		perror("[ComSndReceptorTask] Error in message post.");
+		perror("[ComReceptorTask] Error in message post.");
 		return SOCKET_ERROR;
 	}
 	else
 	{
 		#if DEBUG > 0
-			printf("[ComSndReceptorTask] Sent to EnOcean receptor : \n%s \nNb of bytes sent : %i\n\n",msg,sendResult);
+			printf("[ComReceptorTask] Sent to EnOcean receptor : \n%s \nNb of bytes sent : %i\n\n",msg,sendResult);
 		#endif
 	}
 	return 0;

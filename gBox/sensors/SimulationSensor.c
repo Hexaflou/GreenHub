@@ -3,7 +3,7 @@
 #include "ComponentInterface.h"
 #include "Component.h"
 #include "Utility.h"
-#include "ComSndReceptorTask.h"
+#include "ComReceptorTask.h"
 
 /* Inclusions externes */
 #include <string.h>

@@ -1,7 +1,7 @@
-#ifndef COMSNDRECEPTORTASK_H
-#define COMSNDRECEPTORTASK_H
+#ifndef COMRECEPTORTASK_H
+#define COMRECEPTORTASK_H
 /***********************************************************************
- * 	Tache GreenHub dédié à l'envoi des données vers le récepteur EnOcean
+ * Tache GreenHub dédié à l'échange des données vers le récepteur EnOcean
  * 
  * Permet la création d'une tache et d'une boite au lettre, tous les 
  * messages placés dans la boite au lettre sont envoyé au récepteur 
@@ -20,4 +20,4 @@ mqd_t comSndReceptorTaskInit(int socket);
 /* Destruction de la tache */
 int comSndReceptorTaskClose();
 
-#endif /* COMSNDRECEPTORTASK_H */
+#endif /* COMRECEPTORTASK_H */

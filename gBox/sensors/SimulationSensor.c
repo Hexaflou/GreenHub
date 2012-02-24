@@ -1,7 +1,8 @@
 /* Inclusions internes */
 #include "SimulationSensor.h"
 #include "ComponentInterface.h"
-#include "Component.h"
+#include "Sensor.h"
+#include "Actuator.h"
 #include "Utility.h"
 #include "ComReceptorTask.h"
 
@@ -45,6 +46,7 @@ void* StartSimulationSensor(void* arg_smq){
 	strcpy(argSensor3->id,"0021CBE5");
 	strcpy(argSensor3->eep,"050201");
 	pthread_create(&thread3, NULL, SimulationSensorSwitch, (void*) argSensor3);
+	return (void *) NULL;
 }
 
 /* Tâche simulant un capteur de température, de l'ajout de celui-ci jusqu'à l'envoi de trames à partir de ces capteurs.

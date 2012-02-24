@@ -48,7 +48,7 @@ int gLogThreadInit()
 	position = 0;
 	wLogFile = fopen(LOG_FILENAME,"a");
 	fclose(wLogFile);
-	rLogFile = fopen(LOG_FILENAME,"r"); // TODO: CHECK IF ITS WORKING (!= NULL)
+	rLogFile = fopen(LOG_FILENAME,"r"); /* TODO: CHECK IF ITS WORKING (!= NULL) */
 	/*Si l'etat de lecture existe on le recupere */
 	stateFile = fopen(LOG_STATE_FILENAME,"r");
 	if(stateFile!=NULL)
@@ -117,7 +117,7 @@ static void * gLogFunc(void * attr)
 		fseek(rLogFile, 0, SEEK_CUR);
 		while (!feof(rLogFile))
 		{
-			printf("We are at the %d nth character.\n", ftell(rLogFile));
+			printf("We are at the %i nth character.\n", ftell(rLogFile));
 			printf("Youuuuuuuuouuuuh\n");
 			if(fgets(data,1024,rLogFile) != NULL)
 			{				

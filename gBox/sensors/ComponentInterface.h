@@ -16,7 +16,8 @@
 
 
 #include "Utility.h"
-#include "Component.h"
+#include "Sensor.h"
+#include "Actuator.h"
 #include "EEP.h"
 #include <semaphore.h>
 

@@ -1,12 +1,12 @@
 /*
- * Component.h
+ * Sensor.h
  *
  *  Created on: 11 janv. 2012
  *      Author: H4212
  */
 
-#ifndef COMPONENT_H_
-#define COMPONENT_H_
+#ifndef SENSOR_H_
+#define SENSOR_H_
 
 #include <mqueue.h>
 
@@ -19,36 +19,23 @@
 #define VALUE_CHANGE 0
 #define NO_CHANGE 1
 
-typedef struct Range{
+typedef struct SensorRange{
 	/* Set the range of the measure (ex : from -40°C to 0°C, from -30°C to 10°C, ...) */
 	float scaleMin;
 	float scaleMax;
 	float rangeMin;
 	float rangeMax;
-}Range;
+}SensorRange;
 
 typedef struct Sensor
 {
 	char id[11];
 	char EEP[7];
-	Range * rangeData;
-	float value;	
+	SensorRange * rangeData;
+	float value;
 	int (*decodeMessage)(char*, struct Sensor*);
 	struct Sensor* next;
 }Sensor;
-
-typedef struct Actuator
-{
-	char id[13];
-	char EEP[7];
-	float status;
-	int (*action)(float value, struct Actuator * actuator, mqd_t smq);
-	struct Actuator * next;
-}Actuator;
-
-/* Add sensor to the sensors' list. If the sensor can get several measures, the function creates as many sensors as measures. 
-** Returns 0 if the addition is successful, 1 if there's an error	
-*/
 
 /* Fonctions de decodage pour les capteurs */
 int decodeMessageTemp(char* message, struct Sensor *);
@@ -66,7 +53,4 @@ int getSwitch(char* message);
 int getOccupancy(char* message);
 int getContact(char* message);
 
-/* Fonctions d actions pour les actionneurs */
-int actionCurrent(float value, struct Actuator * actuator, mqd_t smq);
-
-#endif /* COMPONENT_H_ */
+#endif /* SENSOR_H_ */

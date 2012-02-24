@@ -9,7 +9,8 @@
 #define CONFIGURATION_H_
 
 #include "../lib/cJSON.h"
-#include "Component.h"
+#include "Sensor.h"
+#include "Actuator.h"
 
 cJSON* createCSON(char* id, char* EEP);
 void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, Sensor ** pp_sensorList, Actuator ** pp_actuatorList, EEP* EEPList);

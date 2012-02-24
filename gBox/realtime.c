@@ -2,7 +2,7 @@
 #include <semaphore.h>
 #include "gCommunication/gCommunication.h"
 #include "sensors/ComponentInterface.h"
-#include "sensors/Component.h"
+#include "sensors/Sensor.h"
 #include <pthread.h>
 
 /********************* LOCAL functions and variables *****************/

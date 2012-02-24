@@ -10,7 +10,8 @@
 /* Inclusions internes */
 #include "ComponentInterface.h"
 #include "Utility.h"
-#include "Component.h"
+#include "Sensor.h"
+#include "Actuator.h"
 #include "EEP.h"
 #include "SimulationSensor.h"
 #include "ComReceptorTask.h"

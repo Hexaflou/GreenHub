@@ -1,15 +1,22 @@
 /*
- * Component.c
+ * Sensor.c
  *
  *  Created on: 19 janv. 2012
  *      Author: nikuya
  */
 
-#include "Component.h"
+#include "Sensor.h"
 #include "Utility.h"
 #include "../gLogs.h"
 #include "ComponentInterface.h"
 
+
+
+/*******************************************************
+ *
+ *		FONCTIONS DE DECODAGE
+ *
+ ******************************************************/
 
 /*
 **	Fonction de decodage d une mesure lumineuse (en lx)
@@ -18,17 +25,17 @@
 */
 int decodeMessageLight(char * message, struct Sensor* p_sensor){
 	float light;
-	float multiplier;	
+	float multiplier;
 
 	light = (float) getLightLittleSensor(message);	/* Valeur entre rangeMin et rangeMax (en general 0..255) */
 
 	/* Calcul du multiplicateur pour determiner la vraie valeur mesuree par le capteur */
-	multiplier = ( (((Range*) p_sensor->rangeData)->scaleMax - ((Range*) p_sensor->rangeData)->scaleMin)
-		/ (((Range*) p_sensor->rangeData)->rangeMax - ((Range*) p_sensor->rangeData)->rangeMin));
+	multiplier = ( (((SensorRange*) p_sensor->rangeData)->scaleMax - ((SensorRange*) p_sensor->rangeData)->scaleMin)
+		/ (((SensorRange*) p_sensor->rangeData)->rangeMax - ((SensorRange*) p_sensor->rangeData)->rangeMin));
 	if (multiplier < 0){
-		light = light * multiplier + ((Range*) p_sensor->rangeData)->scaleMax;	
+		light = light * multiplier + ((SensorRange*) p_sensor->rangeData)->scaleMax;
 	}else{
-		light = light * multiplier + ((Range*) p_sensor->rangeData)->scaleMin;
+		light = light * multiplier + ((SensorRange*) p_sensor->rangeData)->scaleMin;
 	}
 
 	/* Si la nouvelle valeur est differente de l ancienne */
@@ -50,7 +57,7 @@ int decodeMessageLight(char * message, struct Sensor* p_sensor){
 */
 int decodeMessageOccupancy(char* message, struct Sensor* p_sensor)
 {
-	int occupancy;	
+	int occupancy;
 	occupancy = getOccupancy(message);
 	printf("Mesure de presence : %i \n", occupancy);
 	if (occupancy == 1){
@@ -79,12 +86,12 @@ int decodeMessageTemp(char* message, struct Sensor* p_sensor)
 	temp = (float) getTemp(message);	/* Valeur entre rangeMin et rangeMax (en general 0..255) */
 
 	/* Calcul du multiplicateur pour determiner la vraie valeur mesuree par le capteur */
-	multiplier = ( (((Range*) p_sensor->rangeData)->scaleMax - ((Range*) p_sensor->rangeData)->scaleMin)
-		/ (((Range*) p_sensor->rangeData)->rangeMax - ((Range*) p_sensor->rangeData)->rangeMin));
+	multiplier = ( (((SensorRange*) p_sensor->rangeData)->scaleMax - ((SensorRange*) p_sensor->rangeData)->scaleMin)
+		/ (((SensorRange*) p_sensor->rangeData)->rangeMax - ((SensorRange*) p_sensor->rangeData)->rangeMin));
 	if (multiplier < 0){
-		temp = temp * multiplier + ((Range*) p_sensor->rangeData)->scaleMax;	
+		temp = temp * multiplier + ((SensorRange*) p_sensor->rangeData)->scaleMax;
 	}else{
-		temp = temp * multiplier + ((Range*) p_sensor->rangeData)->scaleMin;
+		temp = temp * multiplier + ((SensorRange*) p_sensor->rangeData)->scaleMin;
 	}
 	printf("Valeur du capteur de temperature : %f \n", temp);
 
@@ -92,7 +99,7 @@ int decodeMessageTemp(char* message, struct Sensor* p_sensor)
 	if (p_sensor->value != temp)
 	{
 		p_sensor->value = temp;
-		gLogsLog (p_sensor->id, p_sensor->value);				
+		gLogsLog (p_sensor->id, p_sensor->value);
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -108,7 +115,7 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor)
 	int closed;
 	closed = getContact(message);
 
-	
+
 	if (closed == 1){
 		printf("Contact ferme. \n");
 		/*ActionActuator("0021CBE5aC00\0", B0);*/
@@ -133,7 +140,7 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor)
 */
 int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
 {
-	int switch_button = getSwitch(message);	
+	int switch_button = getSwitch(message);
 /*	if (switch_button == A0){
 		ActionActuator("0021CBE5aC00\0", B0);
 	}
@@ -144,7 +151,7 @@ int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
 		printf("Valeur de l interrupteur : %i \n", switch_button);
 		/* Si la nouvelle valeur est differente de l ancienne */
 		if (switch_button != p_sensor->value)
-		{		
+		{
 			p_sensor->value = switch_button;
 			gLogsLog (p_sensor->id, p_sensor->value);
 			return VALUE_CHANGE;
@@ -157,6 +164,12 @@ int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
 	return NO_BUTTON;
 }
 
+
+/*******************************************************
+ *
+ *	FONCTIONS DE TRAITEMENT DE MESSAGE
+ *
+ ******************************************************/
 
 /*
  * Retourne la temperature donnee par le message en parametre.
@@ -242,30 +255,4 @@ int getContact(char* message)
 	byte = xtoi(str_sub(message, 8, 9)); /* Extraction de l octet de donnee a partir du message */
 	closed = byte & 0x01; /* Extraction du bit 0 de l octet */
 	return closed;
-}
-
-int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq){
-	char message[29];
-	int i_switch;
-	char valueHexa[3];
-	
-	/*printf("value : %f\n",value);
-	
-	sprintf(valueHexa,"%X",(((int)value)<<1)|0x01);		
-	valueHexa[1] = '0';
-	valueHexa[2] = '\0';
-	
-	printf("ValueHexa : %s\n",valueHexa);
-	
-	strcpy(message, "A55A6B05");	
-	strcat(message, valueHexa);
-	strcat(message, "00");
-	strcat(message, "0000");
-	strcat(message, "FF9F1E03");
-	strcat(message, "30");
-	strcat(message, "00");	*/
-	strcpy(message,"A55A6B0550000000FF9F1E033000"); 					
-	/*printf("Message du capteur d'interrupteur : %s\n",message);*/
-	mq_send(smq, message, MAX_MQ_SIZE, 0);
-	return 0;
 }

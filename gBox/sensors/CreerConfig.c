@@ -4,7 +4,7 @@
 *
 */
 
-#include "Component.h"
+#include "Sensor.h"
 #include "ComponentInterface.h"
 #include "EEP.h"
 #include "../lib/cJSON.h"

@@ -12,7 +12,7 @@
 #include "ComponentInterface.h"
 
 /***************************PRIVATE DECLARATION***********************/
-static void * comReceptorTask(void * attr);
+static void * comSimulationReceptorTask(void * attr);
 static int dataSend(char * msg);
 static mqd_t smq;
 static mqd_t rmq;
@@ -39,7 +39,7 @@ mqd_t comSimulationReceptorTaskInit()
   assert((mqd_t)-1 != smq);
   
   /* lancement de la tache */
-  pthread_create(&comReceptorThread, NULL, &comReceptorTask,NULL);
+  pthread_create(&comReceptorThread, NULL, &comSimulationReceptorTask,NULL);
   
   return smq;
 }
@@ -59,7 +59,7 @@ int comSimulationReceptorTaskClose()
 }
 
 /************************PRIVATE***************************************/
-static void * comReceptorTask(void * attr)
+static void * comSimulationReceptorTask(void * attr)
 {
 	char buffer[MAX_MQ_SIZE + 1];
 	ssize_t bytes_read;
@@ -106,7 +106,7 @@ static void * comReceptorTask(void * attr)
 	}
 
 	/* Acceptation une requête de connexion */
-	if ((newSock = accept (sock, (struct sockaddr *) &sockClient, &sockClientLen)) == ERROR)
+	if ((newSock = accept (sock, (struct sockaddr *) &sockClient, (socklen_t*) &sockClientLen)) == ERROR)
 	{	
 		perror("[SimulationReceptorEnOcean] Erreur dans l'acceptation de la requête de connexion.");
 		comSimulationReceptorTaskClose();

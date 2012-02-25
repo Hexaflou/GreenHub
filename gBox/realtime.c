@@ -61,7 +61,7 @@ void * gRealTimeLog( void * attr)
 	Sensor* tempSensor = NULL;
 
 	tempSensor=getSensorList();
-	semSensorList = getSemaphore() ;
+	semSensorList = getSemSensor() ;
 
 
 

@@ -155,7 +155,7 @@ void getValue(char * mac_address)
 
 	tempSensor=getSensorList();
 	/* TODO : Penser à passer aux mutex p_thread*/
-	semSensorList = getSemaphore() ;
+	semSensorList = getSemSensor() ;
 
 	sem_wait(&semSensorList);
 

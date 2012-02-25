@@ -116,11 +116,15 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 	while (c!=EOF){
 		memset (actuator, 0, sizeof (actuator));
 		/* Lecture jusqu'au debut de l'objet json :*/
-		while (c != '{') {
+		while (c != '{' && c != EOF) {
 			c=fgetc(f);
 		}
+		if (c == EOF)
+		{
+			break;
+		}
 		sprintf(actuator, "%s%c", actuator, c);
-		
+
 		/* Lecture de l'objet JSON : */
 		nbOpenedAccolade = 1;
 		while (nbOpenedAccolade > 0) {
@@ -151,7 +155,7 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 				printf("error 2\n");
 			/* Ajout du capteur */			
 			AddComponentByEEP(id, (void**) pp_actuatorList, EEPList, org, funct, type);
-			cJSON_Delete(root);
+			cJSON_Delete(root);			
 		}
 		c=fgetc(f);
 	} /* Fin while */

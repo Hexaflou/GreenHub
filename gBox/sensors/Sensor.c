@@ -118,10 +118,10 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor)
 
 	if (closed == 1){
 		printf("Contact ferme. \n");
-		/*ActionActuator("0021CBE5aC00\0", B0);*/
+		ActionActuator("0021CBE5a00\0", 0);
 	}else{
 		printf("Contact ouvert. \n");
-		/*ActionActuator("0021CBE5aC00\0", B1);*/
+		ActionActuator("0021CBE5a00\0", 1);
 	}
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (closed != p_sensor->value){

@@ -37,7 +37,12 @@ int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq){
 	strcat(message, "30");
 	strcat(message, "00");	*/
 	strcpy(message,"A55A6B0550000000FF9F1E033000\0");
-	/*printf("Message du capteur d'interrupteur : %s\n",message);*/
+	p_actuator->status = value;
+	if (value == 0){
+		printf("Action sur l'actionneur de courant : Mise en marche.\n");
+	}else{
+		printf("Action sur l'actionneur de courant : Extinction.\n");
+	}
 	mq_send(smq, message, MAX_MQ_SIZE, 0);
 	return 0;
 }
@@ -62,8 +67,9 @@ int actionTemp(float value, struct Actuator * p_actuator, mqd_t smq){
 	strcat(message, "FF9F1E03");
 	strcat(message, "30");
 	strcat(message, "00");	*/
-	strcpy(message,"A55A6B0550000000FF9F1E033000\0");
-	/*printf("Message du capteur d'interrupteur : %s\n",message);*/
+	strcpy(message,"A55A6B0550000000FF9F1EFF3000\0");
+	p_actuator->status = value;
+	printf("Action sur le thermostat au niveau : %f\n",value);
 	mq_send(smq, message, MAX_MQ_SIZE, 0);
 	return 0;
 }

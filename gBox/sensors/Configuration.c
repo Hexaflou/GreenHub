@@ -163,6 +163,27 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 	fclose(f);	
 }
 
+int destroyComponentList(Sensor* p_sensorList, Actuator* p_actuatorList){
+	Sensor* p_sensorCurrent, *p_sensorDelete;
+	Actuator* p_actuatorCurrent, *p_actuatorDelete;
+	p_sensorCurrent = p_sensorList;
+	p_sensorDelete = p_sensorList;
+	while (p_sensorCurrent!= NULL){
+		p_sensorCurrent = p_sensorDelete->next;
+		free(p_sensorDelete);
+		p_sensorDelete = p_sensorCurrent;
+	}
+	p_actuatorCurrent = p_actuatorList;
+	p_sensorDelete = p_actuatorList;
+	while (p_actuatorCurrent!= NULL){
+		p_actuatorCurrent = p_sensorDelete->next;
+		free(p_sensorDelete);
+		p_sensorDelete = p_actuatorCurrent;
+	}
+	return 0;
+	
+}
+
 /*
 ** Enregistre la configuration du systeme : la liste des eep et la liste des capteurs
 ** 

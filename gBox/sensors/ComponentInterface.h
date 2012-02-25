@@ -23,7 +23,8 @@
 #include "EEP.h"
 #include <semaphore.h>
 
-int ComponentInterface(void *);
+int ComponentInterfaceInit();
+int ComponentInterfaceClose();
 
 void ManageMessage(char* message);
 

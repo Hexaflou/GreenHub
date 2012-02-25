@@ -28,8 +28,8 @@ typedef struct EEP
 }EEP;
 
 int initializeEEPList(char*,EEP*);
+int destroyEEPList(EEP* p_EEPList);
 int writeEEPList(char* fileNameEEP, EEP* p_EEPList);
-
 
 int AddComponentByEEP(char * id, void ** pp_componentList, EEP* p_EEPList, char org[3], char funct[3], char type[3]);
 

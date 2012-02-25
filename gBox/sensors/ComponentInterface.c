@@ -17,6 +17,7 @@
 #include "ComReceptorTask.h"
 #include "SimulationReceptorEnOcean.h"
 #include "Configuration.h"
+#include "ComSunSpotTask.h"
 
 /* Inclusions externes */
 #include <sys/socket.h>
@@ -38,15 +39,11 @@ static Actuator* p_actuatorList;
 static EEP* p_EEPList;
 
 /* Pour le mode simulation */
-static pthread_t threadReceptor;
 static mqd_t mqReceptor;
 
 /* Fonction lançant les deux connections d'écoute avec les périphériques EnOcean et SunSpot */
-int ComponentInterface(void* attr)
+int ComponentInterfaceInit()
 {
-	pthread_t thread1;
-	char *message1 = "Thread SunSPOT";	
-	int iret1=0;
 	/* Création des mutex pour la liste de capteurs et la liste d'actionneurs */
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
@@ -71,7 +68,7 @@ int ComponentInterface(void* attr)
 	/* Mode Simulation (récepteur EnOcean, capteurs et actionneurs) */
 	{		
 		mqReceptor = comSimulationReceptorTaskInit();
-		pthread_create(&threadReceptor, NULL, StartSimulationSensor, (void*) &mqReceptor);		
+		StartSimulationSensor(mqReceptor);
 	}
 	
 	/* Création et lancement des deux tâches permettant de communiquer avec le récepteur EnOcean */
@@ -81,7 +78,18 @@ int ComponentInterface(void* attr)
 	 /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
 
 
-	return (iret1);
+	return 0;
+}
+
+int ComponentInterfaceClose()
+{
+	comReceptorTaskClose();
+	comSunSpotTaskClose();
+	comSimulationReceptorTaskClose();	
+	StopSimulationSensor();
+	destroyEEPList(p_EEPList); /* Désalloue p_EEPList */
+	destroyComponentList(p_sensorList, p_actuatorList); /* Désalloue p_EEPList */
+	return 0;
 }
 
 

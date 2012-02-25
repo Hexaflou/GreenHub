@@ -15,8 +15,9 @@ int main ()
 	/* initialize random seed: */
 	srand ( time(NULL) );
 	gLogThreadInit();
-	ComponentInterface((void*) NULL);
+	ComponentInterfaceInit();
 	getchar();
+	ComponentInterfaceClose();
 	gLogThreadClose();
 	gCommunicationClose();
 	return 0;

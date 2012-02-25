@@ -15,8 +15,8 @@
 /***************************PRIVATE DECLARATION***********************/
 static void * comSimulationReceptorTask(void * attr);
 static int dataSend(char * msg);
-static mqd_t smq;
-static mqd_t rmq;
+static mqd_t smq = 0;
+static mqd_t rmq = 0;
 static pthread_t comReceptorThread;
 static SOCKET sock;
 static SOCKET newSock;
@@ -48,14 +48,17 @@ mqd_t comSimulationReceptorTaskInit()
 /* Destruction de la tache */
 int comSimulationReceptorTaskClose()
 {
-	/* close task */
-	int ret = pthread_cancel(comReceptorThread);
-	assert((mqd_t)-1 != mq_close(rmq));
-	/* cleanup */
-	assert((mqd_t)-1 != mq_close(smq));
-	assert((mqd_t)-1 != mq_unlink(QUEUE_NAME_RECEPTOR));
+	/* close task and sockets */
+	int ret = pthread_cancel(comReceptorThread);	
 	close(sock);
 	close(newSock);
+	/* cleanup */
+	if (rmq != -1)	
+		assert((mqd_t)-1 != mq_close(rmq));
+	if (smq != -1)
+		assert((mqd_t)-1 != mq_close(smq));
+	
+	assert((mqd_t)-1 != mq_unlink(QUEUE_NAME_RECEPTOR));
 	return ret;
 }
 

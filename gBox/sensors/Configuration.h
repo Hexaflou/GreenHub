@@ -15,6 +15,7 @@
 cJSON* createCSON(char* id, char* EEP);
 void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, Sensor ** pp_sensorList, Actuator ** pp_actuatorList, EEP* EEPList);
 void writeConfig(char* fileNameSensor,char* fileNameEEP, Sensor * p_sensorList,EEP* p_EEPList);
+int destroyComponentList(Sensor*, Actuator*);
 
 #endif /* CONFIGURATION_H_ */
  

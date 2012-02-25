@@ -376,31 +376,13 @@ int writeEEPList(char* fileNameEEP, EEP* p_EEPList){
 **
 */
 int destroyEEPList(EEP* p_EEPList){
-	char reponse;
-	int ok = 0;
-	printf("Etes-vous sur de vouloir supprimer la liste d EEP? Ceux non sauvegardes dans le fichier de configuration ne pourront etre recupere (y/n) :\n");
-	while (!ok){
-	
-		/*retour = */scanf("%c%*[^\n]", &reponse);
-		if (reponse!= 'y' && reponse != 'Y' && reponse !='n' && reponse != 'N' ){
-			/* erreur de saisie, on vide le flux */
-			int c;
-			while ( ((c = getchar()) != '\n') && c != EOF);
-			
-			printf("Saisie invalide.\n");
-			printf("Veuillez recommencer :\n");
-		}
-		else {
-			/* reussite de la saisie */
-			getchar(); /* on enleve le '\n' restant */
-			
-			printf("saisie acceptee\n");
-			break;  /* sort de la boucle */
-		}
-	}
-	if (reponse == 'y' || reponse == 'Y'){
-		printf("Suppression EEP\n");
-		/* TODO : supprimer VRAIMENT la liste ! */
+	EEP* p_EEPCurrent, *p_EEPDelete;	
+	p_EEPCurrent = p_EEPList;
+	p_EEPDelete = p_EEPList;
+	while (p_EEPCurrent != NULL){
+		p_EEPCurrent = p_EEPDelete->next;
+		free(p_EEPDelete);
+		p_EEPDelete = p_EEPCurrent;
 	}
 	return 0;
 }
@@ -698,7 +680,6 @@ int AddActuatorCurrent(char* id, void ** pp_actuatorList, char eep[7], float sca
 	p_actuator->status = 0;
 	p_actuator->action = actionCurrent;
 	p_actuator->next = NULL;
-	printf("GROS PROUT\n");
 	return OK;
 }
 

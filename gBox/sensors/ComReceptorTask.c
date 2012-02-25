@@ -46,7 +46,7 @@ mqd_t comReceptorTaskInit()
 }
 
 /* Destruction de la tache */
-int comSndReceptorTaskClose()
+int comReceptorTaskClose()
 {
 	/* close task */
 	int ret, ret2;

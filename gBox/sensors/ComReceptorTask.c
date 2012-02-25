@@ -21,7 +21,7 @@ static mqd_t rmq;
 static pthread_t comSndReceptorThread;
 static pthread_t comRcvReceptorThread;
 static SOCKET sock = 0;
-static char * message;
+static char * message = NULL;
 
 /************************PUBLIC***************************************/
 /* Initialisation de la tache, retourne un pointeur sur la boite au lettre */
@@ -150,6 +150,8 @@ void *ListenEnOcean(void *message2)
 		}
 		message[tailleTrame * 2] = '\0';
 		ManageMessage(message);
+		free(message);
+		message = NULL;
 	}
 	return 0;
 }

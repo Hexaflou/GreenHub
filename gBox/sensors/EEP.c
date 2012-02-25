@@ -20,9 +20,8 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 	struct EEP* EEPCurrent;
 	char eep[TAILLE_EEP+TAILLE_NAME + 30]; 
 	cJSON* root;
-	int funct;
-	int org;
-	int type;
+	int funct, org, type;
+	char * functChar, *orgChar, *typeChar;
 	char c;
 	int nbOpenedAccolade = 0;
 
@@ -59,9 +58,12 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 
 		
 		/* Création des données org, funct, et type */
-		org = xtoi(str_sub(EEPCurrent->eep,0,1));
-		funct = xtoi(str_sub(EEPCurrent->eep,2,3));
-		type = xtoi(str_sub(EEPCurrent->eep,4,5));
+		orgChar = str_sub(EEPCurrent->eep,0,1);
+		functChar = str_sub(EEPCurrent->eep,2,3);
+		typeChar = str_sub(EEPCurrent->eep,4,5);
+		org = xtoi(orgChar);
+		funct = xtoi(functChar);
+		type = xtoi(typeChar);
 		/* Récupération de la fonction et des arguments associés */
 		switch(org){
 			case 5:{
@@ -315,6 +317,9 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 			EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
 			EEPCurrent = EEPCurrent->next;
 		}
+		free(orgChar);
+		free(functChar);
+		free(typeChar);
 		cJSON_Delete(root);
 	} /* Fin while */
 	/* Fermeture du fichier */
@@ -376,7 +381,7 @@ int writeEEPList(char* fileNameEEP, EEP* p_EEPList){
 **
 */
 int destroyEEPList(EEP* p_EEPList){
-	EEP* p_EEPCurrent, *p_EEPDelete;	
+	EEP* p_EEPCurrent, *p_EEPDelete;
 	p_EEPCurrent = p_EEPList;
 	p_EEPDelete = p_EEPList;
 	while (p_EEPCurrent != NULL){
@@ -448,6 +453,7 @@ int AddSensorContact(char* id, void ** pp_sensorList, char eep[7], float scaleMi
 	p_sensor->id[10] = '\0';
 	strncpy(p_sensor->EEP, eep, 7);
 	p_sensor->value = 0;
+	p_sensor->rangeData = NULL;
 	p_sensor->decodeMessage = decodeMessageContact;
 	p_sensor->next = NULL;
 	return OK;
@@ -486,6 +492,7 @@ int AddSensorSwitch(char* id, void ** pp_sensorList, char eep[7], float scaleMin
 	p_sensor->id[10] = '\0';
 	strncpy(p_sensor->EEP, eep, 7);
 	p_sensor->value = 0;
+	p_sensor->rangeData = NULL;
 	p_sensor->decodeMessage = decodeMessageSwitch;
 	p_sensor->next = NULL;
 	return OK;
@@ -579,7 +586,8 @@ int AddSensorLightOccupancy(char* id, void ** pp_sensorList, char eep[7], float 
 	p_sensor->id[9] = 'O';
 	p_sensor->id[10] = '\0';	
 	strncpy(p_sensor->EEP, eep, 7);
-	p_sensor->value = 0;	
+	p_sensor->value = 0;
+	p_sensor->rangeData = NULL;
 	p_sensor->decodeMessage = decodeMessageOccupancy;
 	p_sensor->next = NULL;
 
@@ -610,6 +618,7 @@ int AddSensorTempLightSunSpot(char* id, void ** pp_sensorList, char eep[7], floa
 	p_sensor->id[10] = '\0';	
 	strncpy(p_sensor->EEP, eep, 7);
 	p_sensor->value = 0;
+	p_sensor->rangeData = NULL;
 	p_sensor->decodeMessage = decodeMessageLight;
 
 	p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
@@ -678,6 +687,7 @@ int AddActuatorCurrent(char* id, void ** pp_actuatorList, char eep[7], float sca
 	strncpy(p_actuator->id, id, 12);
 	strncpy(p_actuator->EEP, eep, 7);
 	p_actuator->status = 0;
+	p_actuator->rangeData = NULL;
 	p_actuator->action = actionCurrent;
 	p_actuator->next = NULL;
 	return OK;
@@ -706,7 +716,10 @@ int AddActuatorTemp(char* id, void ** pp_actuatorList, char eep[7], float scaleM
 	strncpy(p_actuator->id, id, 12);
 	strncpy(p_actuator->EEP, eep, 7);
 	p_actuator->status = 0;
-	p_actuator->action = actionCurrent;
+	p_actuator->rangeData = (ActuatorRange*)malloc(sizeof(ActuatorRange));
+	p_actuator->rangeData->rangeMin = scaleMin;
+	p_actuator->rangeData->rangeMax = scaleMax;
+	p_actuator->action = actionTemp;
 	p_actuator->next = NULL;	
 	return OK;
 }

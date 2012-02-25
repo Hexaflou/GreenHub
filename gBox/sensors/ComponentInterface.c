@@ -103,29 +103,31 @@ int ComponentInterfaceClose()
 void ManageMessage(char* message)
 {
 	Sensor* currentSensor;
+	char * sensorRealId,* messageId;	
+	messageId = str_sub(message, 10, 17);
 	#if DEBUG > 0
 		printf("Message : %s \n", message);
 	#endif
 
 	sem_wait(&mutex_sensorList);
 	currentSensor = p_sensorList;
+	sensorRealId = str_sub(currentSensor->id, 0, 7);
 
 	/* Recherche du capteur dans la liste de capteurs */
 	while (currentSensor != NULL)
 	{
-		if (strcmp(str_sub(currentSensor->id, 0, 7), str_sub(message, 10, 17)) == 0) /* Détecteur présent dans la liste */
+		if (strcmp(sensorRealId, messageId) == 0) /* Détecteur présent dans la liste */
 		{
-			/*printf("Détecteur présent dans la liste ! \n");*/
+			/*printf("Détecteur présent dans la liste ! ID : %s \n", sensorRealId);*/
 			currentSensor->decodeMessage(message, currentSensor);
-			currentSensor = currentSensor->next;
 		}
-		else
-		{
-			currentSensor = currentSensor->next;
-		}
+		currentSensor = currentSensor->next;
+		sensorRealId = str_sub(currentSensor->id, 0, 7);
 	}
 	sem_post(&mutex_sensorList);	
 
+	free(sensorRealId);
+	free(messageId);
 	/* If the sensor isn't in the sensors' list */
 
 }
@@ -201,9 +203,9 @@ sem_t getSemSensor(){
  * Renvoie -1 si erreur, 0 si OK.
 */
 int GetInfoFromSensor(char id[10], float * p_value){
-	char realId[8];
+	char* realId;
 	Sensor* currentSensor;
-	strcpy(realId,str_sub(id, 0, 7));	/* L'ID reel d un peripherique est compose de 8 caracteres */
+	realId = str_sub(id, 0, 7);	/* L'ID reel d un peripherique est compose de 8 caracteres */
 	*p_value = 0;
 
 	sem_wait(&mutex_sensorList);
@@ -224,7 +226,8 @@ int GetInfoFromSensor(char id[10], float * p_value){
 			currentSensor = currentSensor->next;
 		}
 	}
-	sem_post(&mutex_sensorList);	
+	sem_post(&mutex_sensorList);
+	free(realId);
 	return ERROR;
 }
 

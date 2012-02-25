@@ -124,15 +124,15 @@ void * SimulationSensorContact(void * p_argSensor)
 	/*AddSensor(((struct ArgSensor*)p_argSensor)->id, str_sub(((struct ArgSensor*)p_argSensor)->eep, 0, 1), str_sub(((struct ArgSensor*)p_argSensor)->eep, 2, 3), str_sub(((struct ArgSensor*)p_argSensor)->eep, 4, 5));*/
 	while (1){
 		sleep(rand()%10);
-		contact = rand()%2;	
+		contact = rand()%2;
 		sprintf(contactHexa,"%X",contact);
 		contactHexa[1] = contactHexa[0];
 		contactHexa[0] = '0';
 		contactHexa[2] = '\0';
-		strcpy(message, "A55A0B07");
-		strcat(message, contactHexa);
+		strcpy(message, "A55A0B07");		
 		strcat(message, "00");
 		strcat(message, "0000");
+		strcat(message, contactHexa);
 		strcat(message, id);
 		strcat(message, "00");
 		strcat(message, "00");
@@ -197,5 +197,6 @@ char* CalculateCheckSum(char * message){
 	}
 	sprintf(byteSumHexa,"%X",byteSum);
 	printf("ByteSumHexa : %s \n",byteSumHexa);
+	free(byteSumHexa);
 	return byteSumHexa;
 }

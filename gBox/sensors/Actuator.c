@@ -38,12 +38,14 @@ int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq){
 	strcat(message, "00");	*/
 	strcpy(message,"A55A6B0550000000FF9F1E033000\0");
 	p_actuator->status = value;
-	if (value == 0){
+	printf("Value : %f\n",value);
+	if (value == (float) 0){
 		printf("Action sur l'actionneur de courant : Mise en marche.\n");
 	}else{
 		printf("Action sur l'actionneur de courant : Extinction.\n");
 	}
 	mq_send(smq, message, MAX_MQ_SIZE, 0);
+	gLogsLog (p_actuator->id, p_actuator->status);
 	return 0;
 }
 
@@ -71,5 +73,6 @@ int actionTemp(float value, struct Actuator * p_actuator, mqd_t smq){
 	p_actuator->status = value;
 	printf("Action sur le thermostat au niveau : %f\n",value);
 	mq_send(smq, message, MAX_MQ_SIZE, 0);
+	gLogsLog (p_actuator->id, p_actuator->status);
 	return 0;
 }

@@ -30,12 +30,12 @@ int decodeMessageLight(char * message, struct Sensor* p_sensor){
 	light = (float) getLightLittleSensor(message);	/* Valeur entre rangeMin et rangeMax (en general 0..255) */
 
 	/* Calcul du multiplicateur pour determiner la vraie valeur mesuree par le capteur */
-	multiplier = ( (((SensorRange*) p_sensor->rangeData)->scaleMax - ((SensorRange*) p_sensor->rangeData)->scaleMin)
-		/ (((SensorRange*) p_sensor->rangeData)->rangeMax - ((SensorRange*) p_sensor->rangeData)->rangeMin));
+	multiplier = (p_sensor->rangeData->scaleMax - p_sensor->rangeData->scaleMin)
+		/ (p_sensor->rangeData->rangeMax - p_sensor->rangeData->rangeMin);
 	if (multiplier < 0){
-		light = light * multiplier + ((SensorRange*) p_sensor->rangeData)->scaleMax;
+		light = light * multiplier + p_sensor->rangeData->scaleMax;
 	}else{
-		light = light * multiplier + ((SensorRange*) p_sensor->rangeData)->scaleMin;
+		light = light * multiplier + p_sensor->rangeData->scaleMin;
 	}
 
 	/* Si la nouvelle valeur est differente de l ancienne */
@@ -178,7 +178,10 @@ int decodeMessageSwitch(char* message, struct Sensor * p_sensor)
 int getTemp(char* message)
 {
 	int temp;
-	temp = xtoi(str_sub(message, 6, 7)); /* Extraction de la temperature a partir du message */
+	char * byte;
+	byte = str_sub(message,6,7);
+	temp = xtoi(byte); /* Extraction de la temperature a partir du message */
+	free(byte);
 	return temp;
 }
 
@@ -189,7 +192,10 @@ int getTemp(char* message)
 int getLightLittleSensor(char* message)
 {
 	int light;
-	light = xtoi(str_sub(message, 4, 5)); /* Extraction de la luminosite a partir du message */
+	char* byte;
+	byte = str_sub(message, 4, 5);
+	light = xtoi(byte); /* Extraction de la luminosite a partir du message */
+	free(byte);
 	return light;
 }
 
@@ -200,7 +206,10 @@ int getLightLittleSensor(char* message)
 int getLightBigSensor(char* message)
 {
 	int light;
-	light = xtoi(str_sub(message, 4, 7)); /* Extraction de la luminosite a partir du message */
+	char * byte;
+	byte = str_sub(message, 4, 7);
+	light = xtoi(byte); /* Extraction de la luminosite a partir du message */
+	free(byte);
 	return light;
 }
 
@@ -210,10 +219,12 @@ int getLightBigSensor(char* message)
  */
 int getOccupancy(char* message)
 {
-	int occupancy, byte;
-	byte = xtoi(str_sub(message, 8, 9)); /* Extraction de l octet de donnee a partir du message */
-	occupancy = (byte & 0x02)>>1; /* Extraction du bit 1 de l octet */
+	int occupancy, byteInt;
+	char * byte = str_sub(message, 8, 9);
+	byteInt = xtoi(byte); /* Extraction de l octet de donnee a partir du message */
+	occupancy = (byteInt & 0x02)>>1; /* Extraction du bit 1 de l octet */
 	printf("Resultat : %i\n", occupancy);
+	free(byte);
 	return occupancy;
 }
 
@@ -224,24 +235,29 @@ int getOccupancy(char* message)
 int getSwitch(char* message)
 {
 	int result;
-	int byte, status;
-	byte = xtoi(str_sub(message, 2, 3)); /* Extraction de l octet de donnee a partir du message */
-	status = xtoi(str_sub(message, 18, 19)); /* Extraction de l octet de statut a partir du message */
-	if (status & (1u << 4))
+	int byteInt, statusInt;
+	char * byte,*status;
+	byte = str_sub(message, 2, 3);
+	status = str_sub(message, 18, 19);
+	byteInt = xtoi(byte); /* Extraction de l octet de donnee a partir du message */
+	statusInt = xtoi(status); /* Extraction de l octet de statut a partir du message */
+	if (statusInt & (1u << 4))
 	{ /* Si le message est de type N */
-		result = ((byte & 0xE0) >> 5); /* Extraction du bit 5 à 7 de l octet */
+		result = ((byteInt & 0xE0) >> 5); /* Extraction du bit 5 à 7 de l octet */
 	}
 	else
 	{ /* Si le message est de type U */
-		if (((byte & 0xE0) >> 5) == 0)
+		if (((byteInt & 0xE0) >> 5) == 0)
 		{
 			result = NO_BUTTON;
 		}
-		else if (((byte & 0xE0) >> 5) == 3)
+		else if (((byteInt & 0xE0) >> 5) == 3)
 		{
 			result = THREE_FOUR;
 		}
 	}
+	free(byte);
+	free(status);
 	return (int)result;
 }
 
@@ -251,8 +267,11 @@ int getSwitch(char* message)
  */
 int getContact(char* message)
 {
-	int closed, byte;
-	byte = xtoi(str_sub(message, 8, 9)); /* Extraction de l octet de donnee a partir du message */
-	closed = byte & 0x01; /* Extraction du bit 0 de l octet */
+	int closed, byteInt;
+	char * byte;
+	byte = str_sub(message, 8, 9);
+	byteInt = xtoi(byte); /* Extraction de l octet de donnee a partir du message */
+	closed = byteInt & 0x01; /* Extraction du bit 0 de l octet */
+	free(byte);
 	return closed;
 }

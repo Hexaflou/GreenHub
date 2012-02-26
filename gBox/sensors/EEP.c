@@ -1,4 +1,5 @@
-#include "Component.h" 
+#include "Sensor.h"
+#include "Actuator.h"
 #include "ComponentInterface.h"
 #include "EEP.h"
 #include "string.h"
@@ -19,9 +20,8 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 	struct EEP* EEPCurrent;
 	char eep[TAILLE_EEP+TAILLE_NAME + 30]; 
 	cJSON* root;
-	int funct;
-	int org;
-	int type;
+	int funct, org, type;
+	char * functChar, *orgChar, *typeChar;
 	char c;
 	int nbOpenedAccolade = 0;
 
@@ -58,9 +58,12 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 
 		
 		/* Création des données org, funct, et type */
-		org = xtoi(str_sub(EEPCurrent->eep,0,1));
-		funct = xtoi(str_sub(EEPCurrent->eep,2,3));
-		type = xtoi(str_sub(EEPCurrent->eep,4,5));
+		orgChar = str_sub(EEPCurrent->eep,0,1);
+		functChar = str_sub(EEPCurrent->eep,2,3);
+		typeChar = str_sub(EEPCurrent->eep,4,5);
+		org = xtoi(orgChar);
+		funct = xtoi(functChar);
+		type = xtoi(typeChar);
 		/* Récupération de la fonction et des arguments associés */
 		switch(org){
 			case 5:{
@@ -283,7 +286,7 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 				} /* Fin switch funct*/
 				break;
 			} /* Fin case 7 */
-			case 255:{
+			case 255:{ /* Capteurs SunSpot */
 				switch(funct){
 					case 255:{
 						EEPCurrent->AddComponent =AddSensorTempLightSunSpot;	
@@ -291,11 +294,20 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 					}
 				}
 			}
-			case 238 :{ /* EE */
+			case 238 :{ /* EE : Actionneurs */
 				switch(funct){
-					case 238:{
+					case 238:{	/* EE : Current Actuator */
 						EEPCurrent->AddComponent = AddActuatorCurrent;
 						break;
+					}
+					case 239:{	/* EF : Thermostat actuator */
+						EEPCurrent->AddComponent = AddActuatorTemp;
+						switch(type){
+							case 0:{	/* Number of states : 7 */
+								EEPCurrent->scaleMin = 0;
+								EEPCurrent->scaleMax = 6;
+							}
+						}
 					}
 				}
 			}
@@ -305,6 +317,9 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 			EEPCurrent->next = (EEP*)malloc(sizeof(EEP));
 			EEPCurrent = EEPCurrent->next;
 		}
+		free(orgChar);
+		free(functChar);
+		free(typeChar);
 		cJSON_Delete(root);
 	} /* Fin while */
 	/* Fermeture du fichier */
@@ -366,31 +381,13 @@ int writeEEPList(char* fileNameEEP, EEP* p_EEPList){
 **
 */
 int destroyEEPList(EEP* p_EEPList){
-	char reponse;
-	int ok = 0;
-	printf("Etes-vous sur de vouloir supprimer la liste d EEP? Ceux non sauvegardes dans le fichier de configuration ne pourront etre recupere (y/n) :\n");
-	while (!ok){
-	
-		/*retour = */scanf("%c%*[^\n]", &reponse);
-		if (reponse!= 'y' && reponse != 'Y' && reponse !='n' && reponse != 'N' ){
-			/* erreur de saisie, on vide le flux */
-			int c;
-			while ( ((c = getchar()) != '\n') && c != EOF);
-			
-			printf("Saisie invalide.\n");
-			printf("Veuillez recommencer :\n");
-		}
-		else {
-			/* reussite de la saisie */
-			getchar(); /* on enleve le '\n' restant */
-			
-			printf("saisie acceptee\n");
-			break;  /* sort de la boucle */
-		}
-	}
-	if (reponse == 'y' || reponse == 'Y'){
-		printf("Suppression EEP\n");
-		/* TODO : supprimer VRAIMENT la liste ! */
+	EEP* p_EEPCurrent, *p_EEPDelete;
+	p_EEPCurrent = p_EEPList;
+	p_EEPDelete = p_EEPList;
+	while (p_EEPCurrent != NULL){
+		p_EEPCurrent = p_EEPDelete->next;
+		free(p_EEPDelete);
+		p_EEPDelete = p_EEPCurrent;
 	}
 	return 0;
 }
@@ -416,8 +413,7 @@ int AddComponentByEEP(char* id, void ** pp_componentList, EEP* EEPList, char org
 			if (EEPList->AddComponent == NULL){
 				return NOT_SUPPORTED;	/* L EEP n est pas encore supporte */
 			}			
-			EEPList->AddComponent(id, pp_componentList, eep,EEPList->scaleMin, EEPList->scaleMax, EEPList->rangeMin, EEPList->rangeMax); 
-			return OK;
+			return EEPList->AddComponent(id, pp_componentList, eep,EEPList->scaleMin, EEPList->scaleMax, EEPList->rangeMin, EEPList->rangeMax); 			
 		}
 	}
 	return NOT_FOUND;	/* EEP introuvable */
@@ -429,7 +425,6 @@ int AddComponentByEEP(char* id, void ** pp_componentList, EEP* EEPList, char org
 ** Ajoute un capteur de contact à la liste de capteurs
 **
 */
-
 int AddSensorContact(char* id, void ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){	
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */
@@ -458,9 +453,10 @@ int AddSensorContact(char* id, void ** pp_sensorList, char eep[7], float scaleMi
 	p_sensor->id[10] = '\0';
 	strncpy(p_sensor->EEP, eep, 7);
 	p_sensor->value = 0;
+	p_sensor->rangeData = NULL;
 	p_sensor->decodeMessage = decodeMessageContact;
 	p_sensor->next = NULL;
-	return 0;
+	return OK;
 }
 
 /*
@@ -496,16 +492,16 @@ int AddSensorSwitch(char* id, void ** pp_sensorList, char eep[7], float scaleMin
 	p_sensor->id[10] = '\0';
 	strncpy(p_sensor->EEP, eep, 7);
 	p_sensor->value = 0;
+	p_sensor->rangeData = NULL;
 	p_sensor->decodeMessage = decodeMessageSwitch;
 	p_sensor->next = NULL;
-	return 0;
+	return OK;
 }
 
 /*
 ** Ajoute un capteur de temperature à la liste de capteurs
 **
 */
-
 int AddSensorTemp(char* id, void ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */
@@ -533,21 +529,20 @@ int AddSensorTemp(char* id, void ** pp_sensorList, char eep[7], float scaleMin, 
 	p_sensor->id[10] = '\0';	
 	strncpy(p_sensor->EEP, eep, 7);
 	p_sensor->value = 0;
-	p_sensor->rangeData = (Range*)malloc(sizeof(Range));
+	p_sensor->rangeData = (SensorRange*)malloc(sizeof(SensorRange));
 	p_sensor->rangeData->scaleMax = scaleMax;
 	p_sensor->rangeData->scaleMin = scaleMin;
 	p_sensor->rangeData->rangeMax = rangeMax;
 	p_sensor->rangeData->rangeMin = rangeMin;	
 	p_sensor->decodeMessage = decodeMessageTemp;
 	p_sensor->next = NULL;
-	return 0;	
+	return OK;
 }
 
 /*
 ** Ajoute un capteur de presence et de luminosite à la liste de capteurs
 **
 */
-
 int AddSensorLightOccupancy(char* id, void ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */
@@ -575,7 +570,7 @@ int AddSensorLightOccupancy(char* id, void ** pp_sensorList, char eep[7], float 
 	p_sensor->id[10] = '\0';	
 	strncpy(p_sensor->EEP, eep, 7);
 	p_sensor->value = 0;
-	p_sensor->rangeData = (Range*)malloc(sizeof(Range));
+	p_sensor->rangeData = (SensorRange*)malloc(sizeof(SensorRange));
 	p_sensor->rangeData->scaleMax = scaleMax;
 	p_sensor->rangeData->scaleMin = scaleMin;
 	p_sensor->rangeData->rangeMax = rangeMax;
@@ -591,12 +586,14 @@ int AddSensorLightOccupancy(char* id, void ** pp_sensorList, char eep[7], float 
 	p_sensor->id[9] = 'O';
 	p_sensor->id[10] = '\0';	
 	strncpy(p_sensor->EEP, eep, 7);
-	p_sensor->value = 0;	
+	p_sensor->value = 0;
+	p_sensor->rangeData = NULL;
 	p_sensor->decodeMessage = decodeMessageOccupancy;
 	p_sensor->next = NULL;
 
-	return 0;
+	return OK;
 }
+
 int AddSensorTempLightSunSpot(char* id, void ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
 	Sensor* p_sensor;	
 	if (*pp_sensorList == NULL){
@@ -621,6 +618,7 @@ int AddSensorTempLightSunSpot(char* id, void ** pp_sensorList, char eep[7], floa
 	p_sensor->id[10] = '\0';	
 	strncpy(p_sensor->EEP, eep, 7);
 	p_sensor->value = 0;
+	p_sensor->rangeData = NULL;
 	p_sensor->decodeMessage = decodeMessageLight;
 
 	p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
@@ -634,42 +632,40 @@ int AddSensorTempLightSunSpot(char* id, void ** pp_sensorList, char eep[7], floa
 	p_sensor->value = 0;	
 	p_sensor->decodeMessage = decodeMessageTemp;
 	p_sensor->next = NULL;
-	return 0;
+	return OK;
 }
 
 int AddActuatorCurrent(char* id, void ** pp_actuatorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
 	Actuator* p_actuator;
-	char * newId;
-	newId = id;
-	/* Test si on ajoute un actionneur n est pas deja enregistre dans le fichier de configuration actuators.txt */
-	if (strlen(id) <= 8){
-		/* Recherche a partir de la liste d actionneurs  d un id unique*/
+	/*char * newId;
+	newId = id;*/
+	/* Test si on ajoute un actionneur n'est pas deja enregistré dans le fichier de configuration actuators.txt */
+	/*if (strlen(id) <= 8){		
 		Actuator *p_actuatorCurrent;
 		newId[8] = 'a';
-		newId[9] = 'C';		
-		
+	*/	
 		/* Si la liste d actionneurs est vide */
-		if (pp_actuatorList == NULL){
+	/*	if (pp_actuatorList == NULL){
+			newId[9] = '0';
 			newId[10] = '0';
-			newId[11] = '0';
-			newId[12] = '\0';
+			newId[11] = '\0';
 		}else{
 			int actuatorIdInt;
 			char actuatorId[2] = "00";
 			p_actuatorCurrent = (Actuator*)*pp_actuatorList;
-			/* Parcours de la liste d actionneurs pour cherche un id unique */
-			while ( (p_actuatorCurrent != NULL) && (p_actuatorCurrent->next != NULL) ){
+	*/		/* Recherche a partir de la liste d actionneurs  d'un id unique pour l'actionneur*/
+	/*		while ( (p_actuatorCurrent != NULL) && (p_actuatorCurrent->next != NULL) ){
 				if (strcmp(p_actuatorCurrent->id,newId) == 0)
 				{
 					actuatorIdInt = xtoi(actuatorId) + 1;
 					sprintf(actuatorId,"%X",actuatorIdInt);
 				}
-				newId[10] = actuatorId[0];
-				newId[11] = actuatorId[0];
+				newId[9] = actuatorId[0];
+				newId[10] = actuatorId[1];
 				p_actuatorCurrent = p_actuatorCurrent->next;
 			}
 		}		
-	}
+	}*/
 	
 	if (*pp_actuatorList == NULL){
 		*pp_actuatorList = (Actuator*)malloc(sizeof(Actuator));
@@ -688,10 +684,42 @@ int AddActuatorCurrent(char* id, void ** pp_actuatorList, char eep[7], float sca
 		}
 	}	
 
-	strncpy(p_actuator->id, newId, 13);
+	strncpy(p_actuator->id, id, 12);
 	strncpy(p_actuator->EEP, eep, 7);
 	p_actuator->status = 0;
+	p_actuator->rangeData = NULL;
 	p_actuator->action = actionCurrent;
+	p_actuator->next = NULL;
+	return OK;
+}
+
+int AddActuatorTemp(char* id, void ** pp_actuatorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){
+	Actuator* p_actuator;
+
+	if (*pp_actuatorList == NULL){
+		*pp_actuatorList = (Actuator*)malloc(sizeof(Actuator));
+		((Actuator*)(*pp_actuatorList))->next = NULL;
+		p_actuator = ((Actuator*)*pp_actuatorList);
+	}else{
+		p_actuator = *pp_actuatorList;
+		while ( (p_actuator != NULL) && (p_actuator->next != NULL) ){
+			p_actuator = p_actuator->next;
+		}
+		if (p_actuator != NULL){
+			p_actuator->next = (Actuator*)malloc(sizeof(Actuator));
+			p_actuator = p_actuator->next;
+		}else{
+			p_actuator = (Actuator*)malloc(sizeof(Actuator));
+		}
+	}
+
+	strncpy(p_actuator->id, id, 12);
+	strncpy(p_actuator->EEP, eep, 7);
+	p_actuator->status = 0;
+	p_actuator->rangeData = (ActuatorRange*)malloc(sizeof(ActuatorRange));
+	p_actuator->rangeData->rangeMin = scaleMin;
+	p_actuator->rangeData->rangeMax = scaleMax;
+	p_actuator->action = actionTemp;
 	p_actuator->next = NULL;	
-	return 0;
+	return OK;
 }

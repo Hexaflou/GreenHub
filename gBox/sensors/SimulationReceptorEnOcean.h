@@ -15,9 +15,9 @@
 #include <mqueue.h> 
 
 /* Initialisation de la tache, retourne un pointeur sur la boite au lettre */
-mqd_t comReceptorTaskInit();
+mqd_t comSimulationReceptorTaskInit();
 
 /* Destruction de la tache */
-int comReceptorTaskClose();
+int comSimulationReceptorTaskClose();
 
 #endif /* SIMULATION_RECEPTOR_ENOCEAN_H_ */

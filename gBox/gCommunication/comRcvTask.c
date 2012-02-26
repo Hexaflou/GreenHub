@@ -11,7 +11,7 @@
 #include <semaphore.h>
 #include "gCommunication.h"
 #include "../sensors/ComponentInterface.h"
-#include "../sensors/Component.h"
+#include "../sensors/Sensor.h"
 
 /****************************PRIVATE DECLARATION***********************/
 static void * comRcvTask(void * attr);
@@ -155,7 +155,7 @@ void getValue(char * mac_address)
 
 	tempSensor=getSensorList();
 	/* TODO : Penser à passer aux mutex p_thread*/
-	semSensorList = getSemaphore() ;
+	semSensorList = getSemSensor() ;
 
 	sem_wait(&semSensorList);
 

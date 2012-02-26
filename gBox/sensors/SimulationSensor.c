@@ -1,9 +1,10 @@
 /* Inclusions internes */
 #include "SimulationSensor.h"
 #include "ComponentInterface.h"
-#include "Component.h"
+#include "Sensor.h"
+#include "Actuator.h"
 #include "Utility.h"
-#include "ComSndReceptorTask.h"
+#include "ComReceptorTask.h"
 
 /* Inclusions externes */
 #include <string.h>
@@ -14,17 +15,24 @@
 #include <pthread.h>
 #include <mqueue.h>
 
+
+/***************************PRIVATE DECLARATION***********************/
+static void *SimulationSensorTemp(void *ptr);
+static void *SimulationSensorContact(void *ptr);
+static void *SimulationSensorSwitch(void *ptr);
+
 static mqd_t smq;
+static pthread_t thread1,thread2,thread3;
+static ArgSensor* argSensor,*argSensor2,*argSensor3;
+
+/************************PUBLIC***************************************/
 
 /* Fonction permettant de lancer la simulation de plusieurs capteurs. */
-void* StartSimulationSensor(void* arg_smq){
-	pthread_t thread1, thread2,thread3;
+int StartSimulationSensor(mqd_t arg_smq){
+	/* Simulation d un capteur de temperature entre 0°C et 40°C */	
+	/*smq = *((mqd_t*)arg_smq);*/
+	smq = arg_smq;
 	
-	/* Simulation d un capteur de temperature entre 0°C et 40°C */
-	ArgSensor* argSensor,*argSensor2,*argSensor3;
-	
-	smq = *((mqd_t*)arg_smq);
-
 	srand(time(NULL));
 
 	/* Ces structures seront désallouées par les tâches crées plus bas */
@@ -45,6 +53,16 @@ void* StartSimulationSensor(void* arg_smq){
 	strcpy(argSensor3->id,"0021CBE5");
 	strcpy(argSensor3->eep,"050201");
 	pthread_create(&thread3, NULL, SimulationSensorSwitch, (void*) argSensor3);
+	return 0;
+}
+
+int StopSimulationSensor()
+{
+	int ret1,ret2,ret3;
+	ret1 = pthread_cancel(thread1);
+	ret2 = pthread_cancel(thread2);
+	ret3 = pthread_cancel(thread3);
+	return (ret1||ret2||ret3);
 }
 
 /* Tâche simulant un capteur de température, de l'ajout de celui-ci jusqu'à l'envoi de trames à partir de ces capteurs.
@@ -85,6 +103,8 @@ void * SimulationSensorTemp(void * p_argSensor)
 		
 		mq_send(smq, message, MAX_MQ_SIZE, 0);
 	}
+
+	return (void*)NULL;
 }
 
 /* Tâche simulant un capteur de contact, de l'ajout de celui-ci jusqu'à l'envoi de trames à partir de ces capteurs.
@@ -104,15 +124,15 @@ void * SimulationSensorContact(void * p_argSensor)
 	/*AddSensor(((struct ArgSensor*)p_argSensor)->id, str_sub(((struct ArgSensor*)p_argSensor)->eep, 0, 1), str_sub(((struct ArgSensor*)p_argSensor)->eep, 2, 3), str_sub(((struct ArgSensor*)p_argSensor)->eep, 4, 5));*/
 	while (1){
 		sleep(rand()%10);
-		contact = rand()%2;	
+		contact = rand()%2;
 		sprintf(contactHexa,"%X",contact);
 		contactHexa[1] = contactHexa[0];
 		contactHexa[0] = '0';
 		contactHexa[2] = '\0';
-		strcpy(message, "A55A0B07");
-		strcat(message, contactHexa);
+		strcpy(message, "A55A0B07");		
 		strcat(message, "00");
 		strcat(message, "0000");
+		strcat(message, contactHexa);
 		strcat(message, id);
 		strcat(message, "00");
 		strcat(message, "00");
@@ -120,6 +140,7 @@ void * SimulationSensorContact(void * p_argSensor)
 
 		mq_send(smq, message, MAX_MQ_SIZE, 0);
 	}
+	return (void*)NULL;
 }
 
 
@@ -152,9 +173,9 @@ void * SimulationSensorSwitch(void * p_argSensor)
 		strcat(message, "00");
 	/*	printf("Message du capteur d'interrupteur : %s\n",message);*/
 
-		mq_send(smq, message, MAX_MQ_SIZE, 0);
-		
+		mq_send(smq, message, MAX_MQ_SIZE, 0);		
 	}
+	return (void*)NULL;
 }
 
 
@@ -176,5 +197,6 @@ char* CalculateCheckSum(char * message){
 	}
 	sprintf(byteSumHexa,"%X",byteSum);
 	printf("ByteSumHexa : %s \n",byteSumHexa);
+	free(byteSumHexa);
 	return byteSumHexa;
 }

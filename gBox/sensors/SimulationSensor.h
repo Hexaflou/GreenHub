@@ -19,12 +19,8 @@ typedef struct ArgSensor
 /* Calcule la check sum d'un message. Les caractères "A55A" ne doivent être pas présents. */
 char* CalculateCheckSum(char * message);
 
-void* StartSimulationSensor(void *);
-void* SimulationSensorTemp(void *);
-void* SimulationSensorSwitch(void *);
-void* SimulationSensorContact(void *);
-void* SimulationSensorLight(void *);
-void* SimulationSensorOccupancy(void *);
+int StartSimulationSensor(mqd_t);
+int StopSimulationSensor();
 
 
 #endif /* SIMULATIONSENSOR_H_ */

@@ -1,4 +1,4 @@
-#include "Component.h" 
+#include "Sensor.h"
 #include "EEP.h"
 #include "string.h"
 #include <stdlib.h>

@@ -15,8 +15,8 @@
 /***************************PRIVATE DECLARATION***********************/
 static void * comSimulationReceptorTask(void * attr);
 static int dataSend(char * msg);
-static mqd_t smq = 0;
-static mqd_t rmq = 0;
+static mqd_t smq = -1;
+static mqd_t rmq = -1;
 static pthread_t comReceptorThread;
 static SOCKET sock;
 static SOCKET newSock;

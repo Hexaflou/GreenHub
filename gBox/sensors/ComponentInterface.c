@@ -1,12 +1,3 @@
-/*
- * InterfaceComposant.c
- *
- * Interface avec les peripheriques (capteurs/actionneurs) permettant au serveur de communiquer avec ceux-ci.
- * 
- * Author: H4212
- */
-
-
 /* Inclusions internes */
 #include "ComponentInterface.h"
 #include "Utility.h"
@@ -30,6 +21,7 @@
 #include <semaphore.h>
 #include <mqueue.h> 
 
+/***************************PRIVEE***********************/
 /* Déclaration de variables */
 static mqd_t smq;
 static sem_t mutex_sensorList;
@@ -37,13 +29,19 @@ static sem_t mutex_actuatorList;
 static Sensor* p_sensorList;
 static Actuator* p_actuatorList;
 static EEP* p_EEPList;
+static int alreadyInitialized = 0;
 
 /* Pour le mode simulation */
 static mqd_t mqReceptor;
 
+/************************PUBLIC***************************************/
+
 /* Fonction lançant les deux connections d'écoute avec les périphériques EnOcean et SunSpot */
 int ComponentInterfaceInit()
 {
+	if (alreadyInitialized){
+		return ERROR;
+	}
 	/* Création des mutex pour la liste de capteurs et la liste d'actionneurs */
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
@@ -77,10 +75,12 @@ int ComponentInterfaceInit()
 	/* Lancement de 2 threads pour SunSPOTs et pour EnOcean */
 	 /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
 
-
+	alreadyInitialized = 1;
+	 
 	return 0;
 }
 
+/* Destruction des composants et des tâches */
 int ComponentInterfaceClose()
 {
 	comReceptorTaskClose();
@@ -191,7 +191,7 @@ Sensor * getSensorList(){
 }
 
 /*
- *Renvoie le mutex protegeant la liste de capteurs
+ * Renvoie le mutex protegeant la liste de capteurs
  */
 sem_t getSemSensor(){
 	return mutex_sensorList;
@@ -242,7 +242,7 @@ Actuator * getActuatorList(){
 }
 
 /*
- *Renvoie le mutex protegeant la liste de capteurs
+ * Renvoie le mutex protegeant la liste de capteurs
  */
 sem_t getSemActuator(){
 	return mutex_actuatorList;

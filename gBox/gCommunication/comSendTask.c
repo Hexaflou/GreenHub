@@ -12,8 +12,8 @@
 /***************************PRIVATE DECLARATION***********************/
 static void * comSendTask(void * attr);
 static int dataSend(char * msg);
-static mqd_t smq;
-static mqd_t rmq;
+static mqd_t smq = -1;
+static mqd_t rmq = -1;
 static pthread_t comSendThread;
 static SOCKET sock;
 
@@ -44,9 +44,11 @@ int comSendTaskClose()
 {
 	/* close task */
 	int ret = pthread_cancel(comSendThread);
-	assert((mqd_t)-1 != mq_close(rmq));
+	if (rmq != -1)
+		assert((mqd_t)-1 != mq_close(rmq));
 	/* cleanup */
-	assert((mqd_t)-1 != mq_close(smq));
+	if (smq != -1)
+		assert((mqd_t)-1 != mq_close(smq));
 	assert((mqd_t)-1 != mq_unlink(QUEUE_NAME));
 	return ret;
 }

@@ -1,3 +1,4 @@
+/* Inclusions externes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,19 +6,22 @@
 #include <pthread.h>
 #include <assert.h>
 #include <sys/socket.h>
+
+/* Inclusions internes */
 #include "ComReceptorTask.h"
 #include "ComponentInterface.h"
 #include "../gCommunication/comIncludes.h"
 
+/* Définition de constante */
 #define QUEUE_NAME  "/GH_comSendReceptorQ"
 
-/***************************PRIVATE DECLARATION***********************/
+/***************************PRIVEE***********************/
 static void * comSndReceptorTask(void * attr);
 static void *ListenEnOcean(void *ptr);
 static int dataSend(char * msg);
 
-static mqd_t smq;
-static mqd_t rmq;
+static mqd_t smq = -1;
+static mqd_t rmq = -1;
 static pthread_t comSndReceptorThread;
 static pthread_t comRcvReceptorThread;
 static SOCKET sock = 0;
@@ -52,9 +56,12 @@ int comReceptorTaskClose()
 	int ret, ret2;
 	ret = pthread_cancel(comSndReceptorThread);
 	ret2 = pthread_cancel(comRcvReceptorThread);
-	assert((mqd_t)-1 != mq_close(rmq));
+
 	/* cleanup */
-	assert((mqd_t)-1 != mq_close(smq));
+	if (smq != -1)
+		assert((mqd_t)-1 != mq_close(smq));
+	if (rmq != -1)
+		assert((mqd_t)-1 != mq_close(rmq));
 	assert((mqd_t)-1 != mq_unlink(QUEUE_NAME));
 
 	if (sock != 0)
@@ -156,7 +163,9 @@ void *ListenEnOcean(void *message2)
 	return 0;
 }
 
-
+/*
+ * Tâche scrutant la boîte aux lettres pour envoyer les messages au récepteur EnOcean.
+ */
 static void * comSndReceptorTask(void * attr)
 {
 	    char buffer[MAX_MQ_SIZE + 1];
@@ -179,6 +188,9 @@ static void * comSndReceptorTask(void * attr)
 	    return (void *) NULL;
 }
 
+/*
+ * Envoi le message en paramètre au récepteur EnOcean.
+ */
 static int dataSend(char * msg)
 {
 	int sendResult;

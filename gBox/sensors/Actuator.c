@@ -38,7 +38,6 @@ int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq){
 	strcat(message, "00");	*/
 	strcpy(message,"A55A6B0550000000FF9F1E033000\0");
 	p_actuator->status = value;
-	printf("Value : %f\n",value);
 	if (value == (float) 0){
 		printf("Action sur l'actionneur de courant : Mise en marche.\n");
 	}else{

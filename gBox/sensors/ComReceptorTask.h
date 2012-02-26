@@ -1,5 +1,6 @@
 #ifndef COMRECEPTORTASK_H
 #define COMRECEPTORTASK_H
+
 /***********************************************************************
  * Tache GreenHub dédié à l'échange des données vers le récepteur EnOcean
  * 
@@ -11,6 +12,7 @@
  * 							Hexanome H4212
  * ********************************************************************/
 
+/* Inclusions externes */
 #include <mqueue.h> 
 
 /* Initialisation des deux tâches, retourne un pointeur sur la boite au lettre */

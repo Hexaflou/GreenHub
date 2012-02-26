@@ -1,15 +1,8 @@
-/*
- * Sensor.c
- *
- *  Created on: 19 janv. 2012
- *      Author: nikuya
- */
-
+/* Inclusions internes */
 #include "Sensor.h"
 #include "Utility.h"
 #include "../gLogs.h"
 #include "ComponentInterface.h"
-
 
 
 /*******************************************************

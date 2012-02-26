@@ -1,15 +1,19 @@
-/*
- * Sensor.h
- *
- *  Created on: 11 janv. 2012
- *      Author: H4212
- */
-
 #ifndef SENSOR_H_
 #define SENSOR_H_
 
+/***********************************************************************
+ *				Sensor.h
+ *
+ * Interface utilisateur permettant d'exploiter les
+ * capteurs SunSpot/EnOcean.
+ *
+ * 							Hexanome H4212
+ * ********************************************************************/
+
+/* Inclusions externes */
 #include <mqueue.h>
 
+/* Définition de constantes */
 #define A1 0
 #define A0 1
 #define B1 2
@@ -29,7 +33,7 @@ typedef struct SensorRange{
 
 typedef struct Sensor
 {
-	char id[11];
+	char id[11];	/* Real ID of the sensor + 's'|'e'(SunSpot|EnOcean) + 'L'|'T'|... (Light|Temperature|...) + '\0'*/
 	char EEP[7];
 	SensorRange * rangeData;
 	float value;

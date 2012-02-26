@@ -1,5 +1,6 @@
 #ifndef COMSUNSPOTTASK_H
 #define COMSUNSPOTTASK_H
+
 /***********************************************************************
  * Tache GreenHub dédié à l'échange des données avec les composants SunSpot
  *

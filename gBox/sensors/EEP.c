@@ -1,3 +1,4 @@
+/* Inclusions internes */
 #include "Sensor.h"
 #include "Actuator.h"
 #include "ComponentInterface.h"
@@ -5,17 +6,19 @@
 #include "string.h"
 #include <stdlib.h>
 #include "../lib/cJSON.h"
-#include <stdio.h>
 #include "Utility.h"
 
+/* Inclusions externes */
+#include <stdio.h>
+
+/* Déclaration de constantes*/
 #define TAILLE_EEP 8
 #define TAILLE_NAME 70 
 
 
 /*
-** Initialise la liste des EEP à partir d'un fichier .txt de configuration contenant les informations des capteurs : EEP et nom 
-**
-*/
+ * Initialise la liste des EEP à partir d'un fichier .txt de configuration contenant les informations des capteurs : EEP et nom
+ */
 int initializeEEPList(char* fileNameEEP, EEP* EEPList){	
 	struct EEP* EEPCurrent;
 	char eep[TAILLE_EEP+TAILLE_NAME + 30]; 
@@ -329,9 +332,10 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 }
 
 /*
-** Fonction retournant le cJSON cree a partir des parametres EEP et name
-**
-*/
+ * Fonction retournant le cJSON créé a partir des parametres EEP et name
+ * L'objet renvoyé devra être supprimé par l'intermédiaire de la méthode
+ * cJSON_Delete()
+ */
 cJSON* createCJSONEEP(char* EEP, char* name){
 
 	cJSON *root ; 
@@ -342,9 +346,8 @@ cJSON* createCJSONEEP(char* EEP, char* name){
 }
 
 /*
-** Fonction permettant l ecriture dans un fichier de l EEPList
-**
-*/
+ * Fonction permettant l'écriture dans un fichier de l'EEPList
+ */
 int writeEEPList(char* fileNameEEP, EEP* p_EEPList){	
 	struct EEP* p_EEPCurrent;
 	cJSON* root;
@@ -377,9 +380,8 @@ int writeEEPList(char* fileNameEEP, EEP* p_EEPList){
 
 
 /*
-** Supprime la liste d EEP passee en parametres
-**
-*/
+ * Supprime la liste d'EEP passée en paramètres
+ */
 int destroyEEPList(EEP* p_EEPList){
 	EEP* p_EEPCurrent, *p_EEPDelete;
 	p_EEPCurrent = p_EEPList;
@@ -392,18 +394,18 @@ int destroyEEPList(EEP* p_EEPList){
 	return 0;
 }
 
-/* Fonction permettant d ajouter un composant(capteur/actionneur) a la liste de composants a partir de son EEP 
-** L EEP est compose de 6 caracteres, provenant de org-funct-type.
-** Renvoie 0 si OK, -1 si l EEP n est pas supporte, et -2 si l EEP correspondant est introuvable.
+/*
+ * Fonction permettant d'ajouter un composant(capteur/actionneur) a la liste de composants a partir de son EEP
+ * L EEP est compose de 6 caractères, provenant de org-funct-type.
+ * Renvoie 0 si OK, -1 si l EEP n est pas supporte, et -2 si l EEP correspondant est introuvable.
 */
 int AddComponentByEEP(char* id, void ** pp_componentList, EEP* EEPList, char org[3], char funct[3], char type[3]){
 	char eep[7];
 
-	/* Concatenation de org, funct et type dans eep */
+	/* Concaténation de org, funct et type dans eep */
 	strcpy(eep,org);
 	strcat(eep,funct);
-	strcat(eep,type);
-	
+	strcat(eep,type);	
 
 	while (EEPList != NULL){
 		if (strcmp(EEPList->eep,eep) != 0)	/* Si l EEP courant est different de l EEP du capteur */
@@ -422,9 +424,8 @@ int AddComponentByEEP(char* id, void ** pp_componentList, EEP* EEPList, char org
 
 
 /*
-** Ajoute un capteur de contact à la liste de capteurs
-**
-*/
+ * Ajoute un capteur de contact à la liste de capteurs
+ */
 int AddSensorContact(char* id, void ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax){	
 	Sensor* p_sensor;
 	if (*pp_sensorList == NULL){ /* Liste vide */
@@ -438,13 +439,10 @@ int AddSensorContact(char* id, void ** pp_sensorList, char eep[7], float scaleMi
 
 			p_sensor = p_sensor->next;
 		}
-		/* Creation du capteur en fin de liste */
-		if (p_sensor != NULL){
-			p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
-			p_sensor = p_sensor->next;
-		}else{
-			p_sensor = (Sensor*)malloc(sizeof(Sensor));
-		}
+		/* Creation du capteur en fin de liste */		
+		p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
+		p_sensor = p_sensor->next;
+		p_sensor->next = NULL;
 	}
 	/* Ajout des parametres du capteur */
 	strncpy(p_sensor->id,id,8);
@@ -478,12 +476,9 @@ int AddSensorSwitch(char* id, void ** pp_sensorList, char eep[7], float scaleMin
 			p_sensor = p_sensor->next;
 		}
 		/* Creation du capteur en fin de liste */
-		if (p_sensor != NULL){
-			p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
-			p_sensor = p_sensor->next;
-		}else{
-			p_sensor = (Sensor*)malloc(sizeof(Sensor));
-		}
+		p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
+		p_sensor = p_sensor->next;
+		p_sensor->next = NULL;
 	}
 	/* Ajout des parametres du capteur */
 	strncpy(p_sensor->id,id,8);
@@ -515,12 +510,9 @@ int AddSensorTemp(char* id, void ** pp_sensorList, char eep[7], float scaleMin, 
 			p_sensor = p_sensor->next;
 		}
 		/* Creation du capteur en fin de liste */
-		if (p_sensor != NULL){
-			p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
-			p_sensor = p_sensor->next;
-		}else{
-			p_sensor = (Sensor*)malloc(sizeof(Sensor));
-		}
+		p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
+		p_sensor = p_sensor->next;
+		p_sensor->next = NULL;
 	}
 	/* Ajout des parametres du capteur */
 	strncpy(p_sensor->id,id,8);
@@ -555,13 +547,10 @@ int AddSensorLightOccupancy(char* id, void ** pp_sensorList, char eep[7], float 
 		while ( (p_sensor != NULL) && (p_sensor->next != NULL) ){ /* Parcours de la liste jusqu a l avant dernier*/
 			p_sensor = p_sensor->next;
 		}
-		/* Creation du capteur de luminosite en fin de liste */
-		if (p_sensor != NULL){
-			p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
-			p_sensor = p_sensor->next;
-		}else{
-			p_sensor = (Sensor*)malloc(sizeof(Sensor));
-		}
+		/* Creation du capteur en fin de liste */
+		p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
+		p_sensor = p_sensor->next;
+		p_sensor->next = NULL;
 	}	
 	/* Ajout des parametres du capteur de luminosite */
 	strncpy(p_sensor->id,id,8);
@@ -605,12 +594,10 @@ int AddSensorTempLightSunSpot(char* id, void ** pp_sensorList, char eep[7], floa
 		while ( (p_sensor != NULL) && (p_sensor->next != NULL) ){
 			p_sensor = p_sensor->next;
 		}
-		if (p_sensor != NULL){
-			p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
-			p_sensor = p_sensor->next;
-		}else{
-			p_sensor = (Sensor*)malloc(sizeof(Sensor));
-		}
+		/* Creation du capteur en fin de liste */
+		p_sensor->next = (Sensor*)malloc(sizeof(Sensor));
+		p_sensor = p_sensor->next;
+		p_sensor->next = NULL;
 	}	
 	strncpy(p_sensor->id,id,8);
 	p_sensor->id[8] = 's';
@@ -676,12 +663,10 @@ int AddActuatorCurrent(char* id, void ** pp_actuatorList, char eep[7], float sca
 		while ( (p_actuator != NULL) && (p_actuator->next != NULL) ){
 			p_actuator = p_actuator->next;
 		}
-		if (p_actuator != NULL){
-			p_actuator->next = (Actuator*)malloc(sizeof(Actuator));
-			p_actuator = p_actuator->next;
-		}else{
-			p_actuator = (Actuator*)malloc(sizeof(Actuator));
-		}
+		/* Insertion de l'actionneur en fin de liste */
+		p_actuator->next = (Actuator*)malloc(sizeof(Actuator));
+		p_actuator = p_actuator->next;
+		p_actuator->next = NULL;
 	}	
 
 	strncpy(p_actuator->id, id, 12);
@@ -705,12 +690,10 @@ int AddActuatorTemp(char* id, void ** pp_actuatorList, char eep[7], float scaleM
 		while ( (p_actuator != NULL) && (p_actuator->next != NULL) ){
 			p_actuator = p_actuator->next;
 		}
-		if (p_actuator != NULL){
-			p_actuator->next = (Actuator*)malloc(sizeof(Actuator));
-			p_actuator = p_actuator->next;
-		}else{
-			p_actuator = (Actuator*)malloc(sizeof(Actuator));
-		}
+		/* Insertion de l'actionneur en fin de liste */
+		p_actuator->next = (Actuator*)malloc(sizeof(Actuator));
+		p_actuator = p_actuator->next;
+		p_actuator->next = NULL;
 	}
 
 	strncpy(p_actuator->id, id, 12);

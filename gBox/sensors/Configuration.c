@@ -1,24 +1,21 @@
-/*
- * Ce fichier permet de lire et r��crire la configuration du syst�me � partir d'un fichier .txt
- *
- * 
- */
-
+/* Inclusions internes */
 #include "Sensor.h"
 #include "Actuator.h"
 #include "ComponentInterface.h"
 #include "EEP.h"
 #include "../lib/cJSON.h"
+
+/* Inclusions externes */
 #include <stdio.h>
 
+/* Définitions de constantes */
 #define TAILLE_ID_SENSOR 8
 #define TAILLE_ID_ACTUATOR 13
 #define TAILLE_EEP 6
 
- /*
-* Retourne le cJSON contenant les donnees passees en parametre : l'id et l'EEP
-*
-*/
+/*
+ * Retourne le cJSON contenant les donnees passees en parametre : l'id et l'EEP
+ */
 cJSON* createCSON(char* id, char* EEP){
 	cJSON *root ; 
 	root=cJSON_CreateObject();
@@ -30,10 +27,8 @@ cJSON* createCSON(char* id, char* EEP){
 
 
 /*
-* Charge la configuration du systeme a partir de la lecture d'un fichier contenant l'EEP et l'id des capteurs
-* 
-*
-*/
+ * Charge la configuration du systeme a partir de la lecture d'un fichier contenant l'EEP et l'id des capteurs
+ */
 void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, Sensor ** pp_sensorList, Actuator ** pp_actuatorList, EEP* EEPList){
 	
 	char sensor[TAILLE_ID_SENSOR+TAILLE_EEP+40];
@@ -167,6 +162,9 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 	fclose(f);	
 }
 
+/*
+ * Détruit la liste de composants (actionneurs/capteurs).
+ */
 int destroyComponentList(Sensor* p_sensorList, Actuator* p_actuatorList){
 	Sensor* p_sensorCurrent, *p_sensorDelete;
 	Actuator* p_actuatorCurrent, *p_actuatorDelete;
@@ -202,9 +200,8 @@ int destroyComponentList(Sensor* p_sensorList, Actuator* p_actuatorList){
 }
 
 /*
-** Enregistre la configuration du systeme : la liste des eep et la liste des capteurs
-** 
-*/
+ * Enregistre la configuration du systeme : la liste des eep et la liste des capteurs
+ */
 void writeConfig(char* fileNameSensor,char* fileNameEEP, Sensor * p_sensorList,EEP* p_EEPList){
 	Sensor * pCurrent;
 	cJSON * root;
@@ -238,8 +235,6 @@ void writeConfig(char* fileNameSensor,char* fileNameEEP, Sensor * p_sensorList,E
 		}
 		
 	}
-
 	/* Fermeture du fichier */
 	fclose(f);
-
 }

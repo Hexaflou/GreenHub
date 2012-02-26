@@ -101,25 +101,6 @@ void yield()
 	}
 }
 
-void first_launch(ctx_s* to_save, ctx_s* to_load)
-{
-	printf("first launch of thread number %d\n",to_load->id);
-	asm("movl %%esp, %0" "\n" 
-	    "movl %%ebp, %1"
-       :"=r"(to_save->esp),
-        "=r"(to_save->ebp) );
-	asm("movl %0, %%esp" "\n"
-	    "movl %1, %%ebp"
-		:
-		:"r"(to_load->esp),
-		 "r"(to_load->ebp ));
-	
-	current_thread->func(current_thread->attr);
-	
-	/* if we are here...*/
-	delete_current_thread();
-}
-
 void gSleep(int sec)
 {
 
@@ -153,10 +134,27 @@ void delete_current_thread()
 	yield();
 }
 
+void first_launch(ctx_s* to_save, ctx_s* to_load)
+{
+	printf("first launch of thread number %d\n",to_load->id);
+	asm("movl %%esp, %0" "\n" 
+	    "movl %%ebp, %1"
+       :"=r"(to_save->esp),
+        "=r"(to_save->ebp) );
+	asm("movl %0, %%esp" "\n"
+	    "movl %1, %%ebp"
+		:
+		:"r"(to_load->esp),
+		 "r"(to_load->ebp ));
+	
+	current_thread->func(current_thread->attr);
+	
+	/* if we are here...*/
+	delete_current_thread();
+}
 
 void switch_ctx(ctx_s* to_save, ctx_s* to_load)
 {
-	printf("launch of thread number %d\n",to_load->id);
 	asm("mov %%ebp, %0" :"=r"(to_save->ebp));
 	asm("mov %%esp, %0" :"=r"(to_save->esp));
 	asm("mov %0, %%esp" ::"r"(to_load->esp));

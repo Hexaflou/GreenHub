@@ -22,6 +22,8 @@ static void *SimulationSensorTemp(void *ptr);
 static void *SimulationSensorContact(void *ptr);
 static void *SimulationSensorSwitch(void *ptr);
 static void *SimulationSensorLight(void *ptr);
+static void *SimulationSensorOccupancy(void *ptr);
+static void *SimulationSensorLightOccupancy(void *ptr);
 
 static char* CalculateCheckSum(char * message);
 
@@ -40,8 +42,8 @@ int StartSimulationSensor(mqd_t arg_smq){
 	/* Capteur de température entre 0 et 40°C : salon */
 	launchSimulationSensor("00893360", 10, &p_simuThreadList, SIMU_TEMP);
 
-	/* Capteur de luminosité entre 0 et 520Lux : salon */
-	launchSimulationSensor("00054155", 3, &p_simuThreadList, SIMU_LIGHT);
+	/* Capteur de luminosité entre 0 et 510Lux : salon */
+	launchSimulationSensor("00054122", 3, &p_simuThreadList, SIMU_LIGHT);
 	
 	/* Capteur de contact : fenêtre salon */
 	launchSimulationSensor("0001B015", 6, &p_simuThreadList, SIMU_CONTACT);
@@ -49,8 +51,13 @@ int StartSimulationSensor(mqd_t arg_smq){
 	/* Interrupteur : grande lumière salon */
 	launchSimulationSensor("0021CBE5", 2, &p_simuThreadList, SIMU_SWITCH);
 
+	/*************************** SALLE DE BAIN ***************************/
+	/* Capteur de température entre 0 et 40°C : salle de bain */
+	launchSimulationSensor("FFEA0321", 10, &p_simuThreadList, SIMU_TEMP);
+
+	/* Capteur de luminosité (entre 0 et 510Lux) et de présence : salle de bain */
+	launchSimulationSensor("00054155", 6, &p_simuThreadList, SIMU_LIGHT_OCCUPANCY);
 	
-		
 	return 0;
 }
 
@@ -88,6 +95,12 @@ int launchSimulationSensor(char * id, int sleepingTime, SimuThreadList ** pp_sim
 			break;
 		case SIMU_LIGHT:
 			SimulationSensorFunction = SimulationSensorLight;
+			break;
+		case SIMU_OCCUPANCY:
+			SimulationSensorFunction = SimulationSensorOccupancy;
+			break;
+		case SIMU_LIGHT_OCCUPANCY:
+			SimulationSensorFunction = SimulationSensorLightOccupancy;
 			break;			
 		default:
 			printf("[launchSimulationSensor] Capteur non supporté pour la simulation.\n");
@@ -234,7 +247,7 @@ void * SimulationSensorContact(void * p_argSensor)
 
 
 /* Tâche simulant un interrupteur à 4 etats, de l'ajout de celui-ci jusqu'à l'envoi de trames à partir de ces capteurs.
- * p_argSensor : Structure argument contenant les informations ID et EEP du capteur.
+ * p_argSensor : Structure argument contenant les informations ID du capteur.
  */
 void * SimulationSensorSwitch(void * p_argSensor)
 {
@@ -343,7 +356,126 @@ void * SimulationSensorLight(void * p_argSensor)
 
 		mq_send(smq, message, MAX_MQ_SIZE, 0);
 	}
+	return (void*)NULL;
+}
 
+/* Tâche simulant un capteur de présence, de l'ajout de celui-ci jusqu'à l'envoi de trames à partir de ces capteurs.
+ * p_argSensor : Structure argument contenant les informations ID du capteur.
+ */
+void * SimulationSensorOccupancy(void * p_argSensor)
+{
+	char message[29];
+	int occupancy, sleepingTime;
+	char occupancyHexa[3];
+	char id[9];
+
+	sleepingTime = ((struct ArgSensor*)p_argSensor)->sleepingTime;
+	strcpy(id,((struct ArgSensor*)p_argSensor)->id);
+	free(p_argSensor);
+
+	while (1){
+		sleep(sleepingTime);
+		occupancy = (rand()%2)<<1;
+		sprintf(occupancyHexa,"%X",occupancy);
+		occupancyHexa[1] = occupancyHexa[0];
+		occupancyHexa[0] = '0';
+		occupancyHexa[2] = '\0';
+
+		/******* HEADER *******/
+		strcpy(message, "A55A");	/* Début d'un message */
+		strcat(message, "0B");		/* SYNC_BYTE */
+		strcat(message, "07");		/* LENGTH_BYTE */
+		/***** FIN HEADER *****/
+
+		/******* DATA BYTE *******/
+		strcat(message, "000000");	/* BYTE 3 à 1 */
+		strcat(message, occupancyHexa);	/* BYTE 0 */
+		/***** FIN DATA BYTE *****/
+
+		/******* ID *******/
+		strcat(message, id);		/* 4 octets */
+		/***** FIN ID *****/
+
+		strcat(message, "00");		/* STATUS BYTE */
+		strcat(message, "00");		/* CHECKSUM */
+
+		/*printf("Message du capteur de présence : %s\n",message);*/
+
+		mq_send(smq, message, MAX_MQ_SIZE, 0);
+	}
+	return (void*)NULL;
+}
+
+/* Tâche simulant un capteur de luminosité et de présence, de l'ajout de celui-ci jusqu'à l'envoi de trames à partir de ces capteurs.
+ * La luminosité a un intervalle de 0 à 510Lux.
+ * p_argSensor : Structure argument contenant les informations ID du capteur.
+ */
+void * SimulationSensorLightOccupancy(void * p_argSensor)
+{
+	char message[29];
+	int occupancy, sleepingTime;
+	float light, multiplier;
+	char occupancyHexa[3], lightHexa[3];
+	char id[9];
+
+	sleepingTime = ((struct ArgSensor*)p_argSensor)->sleepingTime;
+	strcpy(id,((struct ArgSensor*)p_argSensor)->id);
+	free(p_argSensor);
+
+	/*
+	 * Les valeurs de luminosité émises par un capteur doivent être décodés en calculant un multiplicateur.
+	 * D'après la documentation EnOcean multiplier = (scaleMax-scaleMin)/(rangeMax-rangeMin)
+	 * Ici scaleMax = 510; scaleMin = 0; rangeMax = 255; rangeMin = 0
+	 */
+	multiplier = ((float)510)/((float)255);
+	
+	while (1){
+		sleep(sleepingTime);
+		occupancy = (rand()%2)<<1;
+		sprintf(occupancyHexa,"%X",occupancy);
+		occupancyHexa[1] = occupancyHexa[0];
+		occupancyHexa[0] = '0';
+		occupancyHexa[2] = '\0';
+
+		light = rand()%510 + 1;
+
+		/* Dans ce cas présent multiplier > 0 donc on applique une formule tirée de la documentation EnOcean */
+		light = light/multiplier;
+
+		sprintf(lightHexa,"%X",(int)light);
+
+		/* Si la luminosité est exprimé sur un caractère en hexa il va falloir l'étaler sur nos deux caractères hexa */
+		if (light < 16)
+		{
+			lightHexa[1] = lightHexa[0];
+			lightHexa[0] = '0';
+			lightHexa[2] = '\0';
+		}
+		
+		/******* HEADER *******/
+		strcpy(message, "A55A");	/* Début d'un message */
+		strcat(message, "0B");		/* SYNC_BYTE */
+		strcat(message, "07");		/* LENGTH_BYTE */
+		/***** FIN HEADER *****/
+
+		/******* DATA BYTE *******/
+		strcat(message, "00");		/* BYTE 3 */
+		strcat(message, lightHexa);	/* BYTE 2 */
+		strcat(message, "00");		/* BYTE 1 */
+		strcat(message, occupancyHexa);	/* BYTE 0 */
+		/***** FIN DATA BYTE *****/
+
+		/******* ID *******/
+		strcat(message, id);		/* 4 octets */
+		/***** FIN ID *****/
+
+		strcat(message, "00");		/* STATUS BYTE */
+		strcat(message, "00");		/* CHECKSUM */
+
+		/*printf("Message du capteur de luminosité et de présence : %s\n",message);*/
+
+		mq_send(smq, message, MAX_MQ_SIZE, 0);
+	}
 	return (void*)NULL;
 }
 

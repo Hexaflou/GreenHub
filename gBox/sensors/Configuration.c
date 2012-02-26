@@ -55,15 +55,19 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 	while (c!=EOF){
 		memset (sensor, 0, sizeof (sensor));
 		/* Lecture jusqu'au debut de l'objet json :*/
-		while (c != '{') {
+		while (c != '{' && c != EOF) {
 			c=fgetc(f);
 		}
+		if (c == EOF)
+			break;
 		sprintf(sensor, "%s%c", sensor, c);
 		
 		/* Lecture de l'objet JSON : */
 		nbOpenedAccolade = 1;
 		while (nbOpenedAccolade > 0) {
 			c=fgetc(f);
+			if (c == EOF)
+				break;
 			sprintf(sensor, "%s%c", sensor, c);	
 			if (c=='{') {
 				nbOpenedAccolade++;
@@ -71,7 +75,9 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 			else if (c=='}') {
 				nbOpenedAccolade--;
 			}
-		}	
+		}
+		if (c == EOF)
+			break;
 		sprintf(sensor, "%s%c", sensor, '\0');	
 		/* Recuperation des donnees du json */
 		root = cJSON_Parse(sensor);
@@ -125,6 +131,8 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 		nbOpenedAccolade = 1;
 		while (nbOpenedAccolade > 0) {
 			c=fgetc(f);
+			if (c == EOF)
+				break;
 			sprintf(actuator, "%s%c", actuator, c);	
 			if (c=='{') {
 				nbOpenedAccolade++;
@@ -132,7 +140,9 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 			else if (c=='}') {
 				nbOpenedAccolade--;
 			}
-		}	
+		}
+		if (c == EOF)
+			break;
 		sprintf(actuator, "%s%c", actuator, '\0');	
 		/* Recuperation des donnees du json */
 		root = cJSON_Parse(actuator);

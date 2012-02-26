@@ -12,6 +12,10 @@
  *********************************************************************/
 #include "context.h"
 
+/* demarre le scheduler avec les taches cree. Rend la main que si toutes
+ * les taches meurent. */
+void gThread_start();
+
 /*create a gThread with the specified stack size and parameters*/
 GThread gThread_create(int stack_size, gfct* func, void * attr);
 

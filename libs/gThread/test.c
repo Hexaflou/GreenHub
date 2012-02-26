@@ -60,11 +60,12 @@ int main()
 	gThread_create(10000, f2, NULL);
 	gThread_create(10000, f3, NULL);
 	
-	while(getchar()!='q')
+	gThread_start();
+	
+	while(1)
 	{
-		sleep(1);
-		yield();
 	}
+		
 	go = 0;
 	printf("Fin de l'application de test\n");
 	return 0;

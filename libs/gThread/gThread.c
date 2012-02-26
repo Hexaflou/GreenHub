@@ -1,5 +1,6 @@
 #include "context.h"
 #include "gThread.h"
+#include <hw.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,6 +13,13 @@ void switch_ctx(ctx_s* to_save, ctx_s* to_load);
 void first_launch(ctx_s* to_save, ctx_s* to_load);
 
 /*****************************PUBLIC FUNCTIONS********************************/
+void gThread_start()
+{
+	start_hw();
+	setup_irq(TIMER_IRQ, yield);
+	yield();
+}
+
 GThread gThread_create(int stack_size, gfct* func, void * attr)
 {
 	static int id = 0;
@@ -69,6 +77,7 @@ int gThread_cancel(GThread athread)
 
 void yield()
 {
+	irq_disable();
 	ctx_s * old = current_thread;
 	if(current_thread==NULL)
 	{
@@ -99,6 +108,7 @@ void yield()
 	{
 		switch_ctx(old,current_thread);
 	}
+	irq_enable();
 }
 
 void gSleep(int sec)
@@ -121,7 +131,7 @@ void active(GThread thread)
 void delete_current_thread()
 {
 	ctx_s * todelete = current_thread;
-	
+	irq_disable();
 	if(current_thread == NULL)
 		return;
 	
@@ -146,7 +156,7 @@ void first_launch(ctx_s* to_save, ctx_s* to_load)
 		:
 		:"r"(to_load->esp),
 		 "r"(to_load->ebp ));
-	
+	irq_enable();
 	current_thread->func(current_thread->attr);
 	
 	/* if we are here...*/
@@ -159,5 +169,6 @@ void switch_ctx(ctx_s* to_save, ctx_s* to_load)
 	asm("mov %%esp, %0" :"=r"(to_save->esp));
 	asm("mov %0, %%esp" ::"r"(to_load->esp));
 	asm("mov %0, %%ebp" ::"r"(to_load->ebp));
+	irq_enable();
 	return;
 }

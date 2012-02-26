@@ -36,17 +36,20 @@ int StartSimulationSensor(mqd_t arg_smq){
 	p_simuThreadList = NULL;
 	srand(time(NULL));
 
-	/* Capteur de température entre 0 et 40°C : capteur du salon */
+	/*************************** SALON ***************************/
+	/* Capteur de température entre 0 et 40°C : salon */
 	launchSimulationSensor("00893360", 10, &p_simuThreadList, SIMU_TEMP);
 
-	/* Capteur de contact */
+	/* Capteur de luminosité entre 0 et 520Lux : salon */
+	launchSimulationSensor("00054155", 3, &p_simuThreadList, SIMU_LIGHT);
+	
+	/* Capteur de contact : fenêtre salon */
 	launchSimulationSensor("0001B015", 6, &p_simuThreadList, SIMU_CONTACT);
 	
-	/* Interrupteur */
+	/* Interrupteur : grande lumière salon */
 	launchSimulationSensor("0021CBE5", 2, &p_simuThreadList, SIMU_SWITCH);
 
-	/* Capteur de luminosité entre 0 et 520Lux : capteur du salon */
-	launchSimulationSensor("00054155", 3, &p_simuThreadList, SIMU_LIGHT);
+	
 		
 	return 0;
 }

@@ -18,88 +18,250 @@
 	"Name":	"Capteur de poignee de fenetre"
 }{
 	"EEP":	"070201",
-	"Name":	"Capteur de temperature, entre -40°C et 0°C"
+	"Name":	"Capteur de temperature, entre -40°C et 0°C",
+  "RangeData": {
+    "scaleMin":      -40, 
+    "scaleMax":      0, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070202",
-	"Name":	"Capteur de temperature, entre -30°C et 10°C"
+	"Name":	"Capteur de temperature, entre -30°C et 10°C",
+  "RangeData": {
+    "scaleMin":      -30, 
+    "scaleMax":      10, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070203",
-	"Name":	"Capteur de temperature, entre -20°C et 20°C"
+	"Name":	"Capteur de temperature, entre -20°C et 20°C",
+  "RangeData": {
+    "scaleMin":      -20, 
+    "scaleMax":      20, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}	
 }{
 	"EEP":	"070204",
-	"Name":	"Capteur de temperature, entre -10°C et 30°C"
+	"Name":	"Capteur de temperature, entre -10°C et 30°C",
+  "RangeData": {
+    "scaleMin":      -10, 
+    "scaleMax":      30, 
+    "rangeMin":      255, 
+    "rangeMax":      0 
+	}
 }{
 	"EEP":	"070205",
-	"Name":	"Capteur de temperature, entre 0°C et 40°C"
+	"Name":	"Capteur de temperature, entre 0°C et 40°C",
+  "RangeData": {
+    "scaleMin":      0, 
+    "scaleMax":      40, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070206",
-	"Name":	"Capteur de temperature, entre 10°C et 50°C"
+	"Name":	"Capteur de temperature, entre 10°C et 50°C",
+  "RangeData": {
+    "scaleMin":      10, 
+    "scaleMax":      50, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070207",
-	"Name":	"Capteur de temperature, entre 20°C et 60°C"
+	"Name":	"Capteur de temperature, entre 20°C et 60°C",
+  "RangeData": {
+    "scaleMin":      20, 
+    "scaleMax":      60, 
+    "rangeMin":      255, 
+    "rangeMax":      0 
+	}
 }{
 	"EEP":	"070208",
-	"Name":	"Capteur de temperature, entre 30°C et 70°C"
+	"Name":	"Capteur de temperature, entre 30°C et 70°C",
+  "RangeData": {
+    "scaleMin":      30, 
+    "scaleMax":      70, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070209",
-	"Name":	"Capteur de temperature, entre 40°C et 80°C"
+	"Name":	"Capteur de temperature, entre 40°C et 80°C",
+  "RangeData": {
+    "scaleMin":      40, 
+    "scaleMax":      80, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"07020A",
-	"Name":	"Capteur de temperature, entre 50°C et 90°C"
+	"Name":	"Capteur de temperature, entre 50°C et 90°C",
+  "RangeData": {
+    "scaleMin":      50, 
+    "scaleMax":      90, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"07020B",
-	"Name":	"Capteur de temperature, entre 60°C et 100°C"
+	"Name":	"Capteur de temperature, entre 60°C et 100°C",
+  "RangeData": {
+    "scaleMin":      60, 
+    "scaleMax":      100, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070210",
-	"Name":	"Capteur de temperature, entre -60°C et 20°C"
+	"Name":	"Capteur de temperature, entre -60°C et 20°C",
+  "RangeData": {
+    "scaleMin":      -60, 
+    "scaleMax":      20, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070211",
-	"Name":	"Capteur de temperature, entre -50°C et 30°C"
+	"Name":	"Capteur de temperature, entre -50°C et 30°C",
+  "RangeData": {
+    "scaleMin":      -50, 
+    "scaleMax":      30, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070212",
-	"Name":	"Capteur de temperature, entre -40°C et 40°C"
+	"Name":	"Capteur de temperature, entre -40°C et 40°C",
+  "RangeData": {
+    "scaleMin":      -40, 
+    "scaleMax":      40, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070213",
-	"Name":	"Capteur de temperature, entre -30°C et 50°C"
+	"Name":	"Capteur de temperature, entre -30°C et 50°C",
+  "RangeData": {
+    "scaleMin":      -30, 
+    "scaleMax":      50, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070214",
-	"Name":	"Capteur de temperature, entre -20°C et 60°C"
+	"Name":	"Capteur de temperature, entre -20°C et 60°C",
+  "RangeData": {
+    "scaleMin":      -20, 
+    "scaleMax":      60, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070215",
-	"Name":	"Capteur de temperature, entre -10°C et 70°C"
+	"Name":	"Capteur de temperature, entre -10°C et 70°C",
+  "RangeData": {
+    "scaleMin":      -10, 
+    "scaleMax":      70, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070216",
-	"Name":	"Capteur de temperature, entre 0°C et 80°C"
+	"Name":	"Capteur de temperature, entre 0°C et 80°C",
+  "RangeData": {
+    "scaleMin":      0, 
+    "scaleMax":      80, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070217",
-	"Name":	"Capteur de temperature, entre 10°C et 90°C"
+	"Name":	"Capteur de temperature, entre 10°C et 90°C",
+  "RangeData": {
+    "scaleMin":      10, 
+    "scaleMax":      90, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070215",
-	"Name":	"Capteur de temperature, entre 20°C et 100°C"
+	"Name":	"Capteur de temperature, entre 20°C et 100°C",
+  "RangeData": {
+    "scaleMin":      20, 
+    "scaleMax":      100, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070219",
-	"Name":	"Capteur de temperature, entre 30°C et 110°C"
+	"Name":	"Capteur de temperature, entre 30°C et 110°C",
+  "RangeData": {
+    "scaleMin":      30, 
+    "scaleMax":      110, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"07021A",
-	"Name":	"Capteur de temperature, entre 40°C et 120°C"
+	"Name":	"Capteur de temperature, entre 40°C et 120°C",
+  "RangeData": {
+    "scaleMin":      40, 
+    "scaleMax":      120, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"07021B",
-	"Name":	"Capteur de temperature, entre 50°C et 130°C"
+	"Name":	"Capteur de temperature, entre 50°C et 130°C",
+  "RangeData": {
+    "scaleMin":      50, 
+    "scaleMax":      130, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070401",
-	"Name":	"Capteur de temperature et d'humidité [0-40°C] [0-100%]"
+	"Name":	"Capteur de temperature et d'humidité [0-40°C] [0-100%]",
+  "RangeData": {
+    "scaleMin":      0, 
+    "scaleMax":      40, 
+    "rangeMin":      255, 
+    "rangeMax":      0
+	}
 }{
 	"EEP":	"070601",
-	"Name":	"Capteur de luminosité, entre 300 et 60000lx"
+	"Name":	"Capteur de luminosité, entre 300 et 60000lx",
+  "RangeData": {
+    "scaleMin":      300, 
+    "scaleMax":      60000, 
+    "rangeMin":      0, 
+    "rangeMax":      255
+	}
 }{
 	"EEP":	"070602",
-	"Name":	"Capteur de luminosité, entre 0 et 1024lx"
+	"Name":	"Capteur de luminosité, entre 0 et 1024lx",
+  "RangeData": {
+    "scaleMin":      0, 
+    "scaleMax":      1024, 
+    "rangeMin":      0, 
+    "rangeMax":      255
+  }
 }{
 	"EEP":	"070701",
 	"Name":	"Capteur de présence"
 }{
 	"EEP":	"070801",
-	"Name":	"Capteur de lumière, temperature et présence [0-510lx][0-51°C]"
+	"Name":	"Capteur de lumière, temperature et présence [0-510lx][0-51°C]",
+  "RangeData": {
+    "scaleMin":      0, 
+    "scaleMax":      510, 
+    "rangeMin":      0, 
+    "rangeMax":      255
+  }
 }{
 	"EEP":	"070802",
 	"Name":	"Capteur de lumière, temperature et présence [0-1020lx][0-51°C]"
@@ -126,5 +288,11 @@
 	"Name":	"Actionneur courant EnOcean"
 }{
 	"EEP":	"EEEF00",
-	"Name":	"Actionneur thermostat EnOcean"
+	"Name":	"Actionneur thermostat EnOcean",
+  "RangeData": {
+    "scaleMin":      0, 
+    "scaleMax":      6, 
+    "rangeMin":      0, 
+    "rangeMax":      0
+  }
 }

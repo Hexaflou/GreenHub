@@ -13,7 +13,8 @@
 
 /* Déclaration de constantes*/
 #define TAILLE_EEP 8
-#define TAILLE_NAME 70 
+#define TAILLE_NAME 70
+#define TAILLE_RANGE 200
 
 
 /*
@@ -21,25 +22,27 @@
  */
 int initializeEEPList(char* fileNameEEP, EEP* EEPList){	
 	struct EEP* EEPCurrent;
-	char eep[TAILLE_EEP+TAILLE_NAME + 30]; 
-	cJSON* root;
-	int funct, org, type;
-	char * functChar, *orgChar, *typeChar;
+	char eep[TAILLE_EEP+TAILLE_NAME + TAILLE_RANGE +30]; 
+	cJSON* root,*rangeData;
+	int funct, org;
+	char * functChar, *orgChar;
 	char c;
 	int nbOpenedAccolade = 0;
-
+	
 	/* Ouverture du fichier en lecture */
 	FILE *f = fopen(fileNameEEP, "r");
-	
+
 	EEPCurrent = EEPList;
-	/* Pour chaque "capteur" dans le fichier */
+	/* Pour chaque "eep" dans le fichier */
 	c=fgetc(f);
 	while (c!=EOF){
 		memset(eep, 0, sizeof (eep));
 		/* Lecture jusqu'au début de l'objet json :*/
-		while (c != '{') {
-			c=fgetc(f);
+		while (c != '{'  && c !=EOF) {
+			c=fgetc(f);			
 		}
+		if (c == EOF)
+			break;
 		sprintf(eep, "%s%c", eep, c);
 		
 		/* Lecture de l'objet JSON : */
@@ -58,15 +61,29 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 		root = cJSON_Parse(eep);
 		strcpy(EEPCurrent->eep,cJSON_GetObjectItem(root,"EEP")->valuestring);
 		strcpy(EEPCurrent->name,cJSON_GetObjectItem(root,"Name")->valuestring);
-
+		rangeData = cJSON_GetObjectItem(root,"RangeData");
 		
-		/* Création des données org, funct, et type */
+		/* Création des données org, funct */
 		orgChar = str_sub(EEPCurrent->eep,0,1);
 		functChar = str_sub(EEPCurrent->eep,2,3);
-		typeChar = str_sub(EEPCurrent->eep,4,5);
 		org = xtoi(orgChar);
 		funct = xtoi(functChar);
-		type = xtoi(typeChar);
+
+		if (rangeData != NULL)
+		{
+			cJSON * range;
+			EEPCurrent->scaleMin = cJSON_GetObjectItem(rangeData,"scaleMin")->valueint;
+			EEPCurrent->scaleMax = cJSON_GetObjectItem(rangeData,"scaleMax")->valueint;
+			range = cJSON_GetObjectItem(rangeData,"scaleMin");
+			if (range != NULL)
+			{
+				EEPCurrent->rangeMin = cJSON_GetObjectItem(rangeData,"rangeMin")->valueint;
+				EEPCurrent->rangeMax = cJSON_GetObjectItem(rangeData,"rangeMax")->valueint;
+			}
+			
+
+		}
+
 		/* Récupération de la fonction et des arguments associés */
 		switch(org){
 			case 5:{
@@ -93,193 +110,10 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 				switch(funct){
 					case 2:{						
 						EEPCurrent->AddComponent =AddSensorTemp;	
-						switch(type){
-							case 1:{
-								EEPCurrent->scaleMin = -40;
-								EEPCurrent->scaleMax = 0;
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 2:{
-								EEPCurrent->scaleMin = -30;
-								EEPCurrent->scaleMax = 10;		
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 3:{
-								EEPCurrent->scaleMin = -20;
-								EEPCurrent->scaleMax = 20;		
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 4:{
-								EEPCurrent->scaleMin = -10;
-								EEPCurrent->scaleMax = 30;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 5:{
-								EEPCurrent->scaleMin = 0;
-								EEPCurrent->scaleMax = 40;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 6:{
-								EEPCurrent->scaleMin = 10;
-								EEPCurrent->scaleMax = 50;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 7:{
-								EEPCurrent->scaleMin = 20;
-								EEPCurrent->scaleMax = 60;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 8:{
-								EEPCurrent->scaleMin = 30;
-								EEPCurrent->scaleMax = 70;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 9:{
-								EEPCurrent->scaleMin = 40;
-								EEPCurrent->scaleMax = 80;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 16:{
-								EEPCurrent->scaleMin = -60;
-								EEPCurrent->scaleMax = 20;		
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;	
-								break;
-							}
-							case 17:{
-								EEPCurrent->scaleMin = -50;
-								EEPCurrent->scaleMax = 30;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 18:{
-								EEPCurrent->scaleMin = -40;
-								EEPCurrent->scaleMax = 40;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;	
-								break;
-							}
-							case 19:{
-								EEPCurrent->scaleMin = -30;
-								EEPCurrent->scaleMax = 50;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 20:{
-								EEPCurrent->scaleMin = -20;
-								EEPCurrent->scaleMax = 60;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 21:{
-								EEPCurrent->scaleMin = -10;
-								EEPCurrent->scaleMax = 70;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 22:{
-								EEPCurrent->scaleMin = 0;
-								EEPCurrent->scaleMax = 80;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 23:{
-								EEPCurrent->scaleMin = 10;
-								EEPCurrent->scaleMax = 90;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 24:{
-								EEPCurrent->scaleMin = 20;
-								EEPCurrent->scaleMax = 100;		
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 25:{
-								EEPCurrent->scaleMin = 30;
-								EEPCurrent->scaleMax = 110;		
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 10:{ /* 0A */
-								EEPCurrent->scaleMin = 50;
-								EEPCurrent->scaleMax = 90;		
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;	
-								break;
-							}
-							case 11:{ /* 0B */
-								EEPCurrent->scaleMin = 60;
-								EEPCurrent->scaleMax = 100;		
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}
-							case 26:{ /* 1A */
-								EEPCurrent->scaleMin = 40;
-								EEPCurrent->scaleMax = 120;	
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;			
-								break;
-							}
-							case 27:{ /*1B */
-								EEPCurrent->scaleMin = 50;
-								EEPCurrent->scaleMax = 130;		
-								EEPCurrent->rangeMin = 255;
-								EEPCurrent->rangeMax = 0;		
-								break;
-							}										
-						} /* Fin switch type */
 						break;
 					} /* Fin case 2 */
 					case 8 :{
 						EEPCurrent->AddComponent =AddSensorLightOccupancy;	
-						switch(type){
-							case 1 :
-								EEPCurrent->scaleMin = 0;
-								EEPCurrent->scaleMax = 510;
-								EEPCurrent->rangeMin = 0;
-								EEPCurrent->rangeMax = 255;
-								break;
-							case 2 :
-								EEPCurrent->scaleMin = 0;
-								EEPCurrent->scaleMax = 1020;
-								EEPCurrent->rangeMin = 0;
-								EEPCurrent->rangeMax = 255;
-								break;
-							case 3 :
-								EEPCurrent->scaleMin = 0;
-								EEPCurrent->scaleMax = 1530;
-								EEPCurrent->rangeMin = 0;
-								EEPCurrent->rangeMax = 255;
-								break;
-						}
 						break;
 					}
 					default:{
@@ -305,12 +139,7 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 					}
 					case 239:{	/* EF : Thermostat actuator */
 						EEPCurrent->AddComponent = AddActuatorTemp;
-						switch(type){
-							case 0:{	/* Number of states : 7 */
-								EEPCurrent->scaleMin = 0;
-								EEPCurrent->scaleMax = 6;
-							}
-						}
+						break;
 					}
 				}
 			}
@@ -322,7 +151,6 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList){
 		}
 		free(orgChar);
 		free(functChar);
-		free(typeChar);
 		cJSON_Delete(root);
 	} /* Fin while */
 	/* Fermeture du fichier */

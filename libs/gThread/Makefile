@@ -5,10 +5,10 @@ RMFLAGS	= -f
 SH	= @bash
 ECHO	= @echo
 CC	= gcc
-CCFLAGS	= -Wall -pedantic -m32 -g
+CCFLAGS	= -I ../libhw/include -Wall -pedantic -m32 -g
 EDL	= gcc
-LDFLAGS	= -m32 -g
-LIBS = -lm -lpthread -lrt
+LDFLAGS	= -m32 -g 
+LIBS = ../libhw/lib/libhw.a -lm -lpthread -lrt 
 SRC	= $(wildcard *.c) 
 OBJS	= $(SRC:.c=.o)
 EXE     = test

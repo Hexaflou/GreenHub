@@ -23,23 +23,22 @@
 #define VALUE_CHANGE 0
 #define NO_CHANGE 1
 
-typedef struct SensorRange{
-	/* Set the range of the measure (ex : from -40°C to 0°C, from -30°C to 10°C, ...) */
-	float scaleMin;
-	float scaleMax;
-	float rangeMin;
-	float rangeMax;
-}SensorRange;
+typedef struct SensorRange {
+    /* Set the range of the measure (ex : from -40°C to 0°C, from -30°C to 10°C, ...) */
+    float scaleMin;
+    float scaleMax;
+    float rangeMin;
+    float rangeMax;
+} SensorRange;
 
-typedef struct Sensor
-{
-	char id[11];	/* Real ID of the sensor + 's'|'e'(SunSpot|EnOcean) + 'L'|'T'|... (Light|Temperature|...) + '\0'*/
-	char EEP[7];
-	SensorRange * rangeData;
-	float value;
-	int (*decodeMessage)(char*, struct Sensor*);
-	struct Sensor* next;
-}Sensor;
+typedef struct Sensor {
+    char id[11]; /* Real ID of the sensor + 's'|'e'(SunSpot|EnOcean) + 'L'|'T'|... (Light|Temperature|...) + '\0'*/
+    char EEP[7];
+    SensorRange * rangeData;
+    float value;
+    int (*decodeMessage)(char*, struct Sensor*);
+    struct Sensor* next;
+} Sensor;
 
 /* Fonctions de decodage pour les capteurs */
 int decodeMessageTemp(char* message, struct Sensor *);

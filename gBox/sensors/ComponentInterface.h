@@ -75,27 +75,27 @@ int GetStatusFromActuator(char *id, float * p_value);
  * Cette fonction va chercher dans notre liste d’actionneurs le bon, pour lancer l’action.
  * L’ID ici doit être de 10 caractères comme il a été convenu + ‘\0’.
  * “value” représente la valeur à faire passer à l’actionneur.
-*/
+ */
 int ActionActuator(char *id, float value);
 
 /*
  * Renvoie la liste de capteurs.
- */ 
+ */
 Sensor * getSensorList();
 
 /*
  * Renvoie la liste d'actionneurs.
- */ 
+ */
 Actuator * getActuatorList();
 
 /*
  * Renvoie le sémaphore mutex protégeant la liste de capteurs.
- */ 
+ */
 sem_t getSemSensor();
 
 /*
  * Renvoie le sémaphore mutex protégeant la liste d'actionneurs.
- */ 
+ */
 sem_t getSemActuator();
 
 #endif /* COMPONENTINTERFACE_H_ */

@@ -12,32 +12,29 @@
 /* Innclusions externes */
 #include <mqueue.h>
 
-
-enum SIMU_TYPE{
-	SIMU_TEMP,
-	SIMU_SWITCH,
-	SIMU_CONTACT,
-	SIMU_LIGHT,
-	SIMU_OCCUPANCY,
-	SIMU_LIGHT_OCCUPANCY
+enum SIMU_TYPE {
+    SIMU_TEMP,
+    SIMU_SWITCH,
+    SIMU_CONTACT,
+    SIMU_LIGHT,
+    SIMU_OCCUPANCY,
+    SIMU_LIGHT_OCCUPANCY
 };
 
-typedef struct ArgSensor
-{
-	char id[9];
-	int sleepingTime;
-}ArgSensor;
+typedef struct ArgSensor {
+    char id[9];
+    int sleepingTime;
+} ArgSensor;
 
-typedef struct SimuThreadList
-{
-	pthread_t thread;
-	struct SimuThreadList * next;
-}SimuThreadList;
+typedef struct SimuThreadList {
+    pthread_t thread;
+    struct SimuThreadList * next;
+} SimuThreadList;
 
 /* Lance la simulation de capteurs */
 int StartSimulationSensor(mqd_t);
 
-/* Détruit les composants utilisés pour la simulation */
+/* Dï¿½truit les composants utilisï¿½s pour la simulation */
 int StopSimulationSensor();
 
 

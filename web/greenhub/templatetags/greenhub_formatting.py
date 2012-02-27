@@ -33,7 +33,7 @@ def format_msg(value, data):
 
             try:
                 return msgs[value] % data_obj
-            except IndexError:
+            except KeyError:
                 return msgs[value]
 
         else:

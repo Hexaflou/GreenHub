@@ -5,7 +5,14 @@
     <link href='http://fonts.googleapis.com/css?family=Lora:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800,400italic,600italic,700italic,800italic,300,300italic' rel='stylesheet' type='text/css'>
     <link href="/public/main.css" rel="stylesheet" media="screen" />
-
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}jquery.jqplot.min.css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.jqplot.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jqplot.dateAxisRenderer.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jqplot.logAxisRenderer.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jqplot.canvasTextRenderer.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jqplot.highlighter.min.js"></script>
     <title>GreenHub - Bienvenue</title>
 </head>
     <body id="{% block bodyname %}generic{% endblock %}">

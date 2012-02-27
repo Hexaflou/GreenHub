@@ -2,12 +2,12 @@
 #define COMRECEPTORTASK_H
 
 /***********************************************************************
- * Tache GreenHub dédié à l'échange des données vers le récepteur EnOcean
+ * Tache GreenHub dÃ©diÃ© Ã  l'Ã©change des donnÃ©es vers le rÃ©cepteur EnOcean
  * 
- * Permet la création d'une tache et d'une boite au lettre, tous les 
- * messages placés dans la boite au lettre sont envoyé au récepteur 
+ * Permet la crÃ©ation d'une tache et d'une boite au lettre, tous les
+ * messages placÃ©s dans la boite au lettre sont envoyÃ©e au rÃ©cepteur
  * EnOcean.
- * Utilisation réservé à sensors
+ * Utilisation rÃ©servÃ©e Ã  sensors
  * 
  * 							Hexanome H4212
  * ********************************************************************/
@@ -15,10 +15,10 @@
 /* Inclusions externes */
 #include <mqueue.h> 
 
-/* Initialisation des deux tâches, retourne un pointeur sur la boite au lettre */
+/* Initialisation des deux tï¿½ches, retourne un pointeur sur la boite au lettre */
 mqd_t comReceptorTaskInit();
 
-/* Destruction des deux tâches */
+/* Destruction des deux tï¿½ches */
 int comReceptorTaskClose();
 
 #endif /* COMRECEPTORTASK_H */

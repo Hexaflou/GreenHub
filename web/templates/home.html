@@ -20,6 +20,7 @@
                     <dd>{{ sensor.last_state.value|format_state:sensor.type }}</dd>
                 {% endfor %}
             </dl>
+            <p>(Debug) Passer en mode <a href="/send-command/real-fast">realtime</a> - <a href="/send-command/real-off">log</a></p>
         </section>
 
         <section>
@@ -35,17 +36,44 @@
         </section>
     </aside>
     <section id="graph-score">
-        <img src="/public/images/graph/score-{{ user.username }}.png" alt="Graphique du score" />
+        <!-- <img src="/public/images/graph/score-{{ user.username }}.png" alt="Graphique du score" /> -->
+        <div id="chart1"></div>
+<script type="text/javascript">
+$(document).ready(function () {
+    $.jqplot._noToImageButton = true;
+    var scores = [
+        {% for score in scores %}
+          [ {{ score.calculated_at|date:"U" }} * 1000, {{ score.value|floatformat }} ],
+        {% endfor %}
+    ];
+ 
+  var plot1 = $.jqplot('chart1', [scores], {
+      seriesColors: ["rgb(59, 115, 72)"],
+      title:'Votre score GreenHub',
+      gridPadding:{right:35},
+      axes:{
+        xaxis:{
+          renderer:$.jqplot.DateAxisRenderer,
+          tickOptions:{formatString:'%b %#d, %y'},
+          min: {{ seven_days_ago|date:"U" }} * 1000,
+          max: {% now "U" %} * 1000 + 24*60*6000,
+          tickInterval:'1 day'
+        }
+      },
+      series:[{lineWidth:4, markerOptions:{style:'diamond'}}]
+  });
+});
+</script>
     </section>
     <section id="graph-states">
-        <ul>
+        <!--<ul>
             <li><a href="#temperature">Température</a></li>
             <li><a href="#lumonisity">Luminosité</a></li>
             <li><a href="#lights">Allumage des lampes</a></li>
-        </ul>
+        </ul>-->
 
         <div class="temp-sensors">
-            <img src="/public/images/graph-temp.png" alt="Graphique des températures" />
+            <!--<img src="/public/images/graph-temp.png" alt="Graphique des températures" />-->
         </div>
     </section>
 {% endblock %}

@@ -22,7 +22,9 @@ static SOCKET sock;
 static SOCKET newSock;
 static struct sockaddr_in socketAddr; /* Socket address */
 
+
 #define QUEUE_NAME_RECEPTOR "/GH_comReceptorQ"
+
 
 /************************PUBLIC***************************************/
 
@@ -34,7 +36,7 @@ mqd_t comSimulationReceptorTaskInit() {
     attr.mq_maxmsg = 10;
     attr.mq_msgsize = MAX_MQ_SIZE;
     attr.mq_curmsgs = 0;
-
+    
     /* create the message queue */
     smq = mq_open(QUEUE_NAME_RECEPTOR, O_WRONLY | O_CREAT, 0644, &attr);
     assert((mqd_t) - 1 != smq);
@@ -56,7 +58,7 @@ int comSimulationReceptorTaskClose() {
         assert((mqd_t) - 1 != mq_close(rmq));
     if (smq != -1)
         assert((mqd_t) - 1 != mq_close(smq));
-
+    
     assert((mqd_t) - 1 != mq_unlink(QUEUE_NAME_RECEPTOR));
     return ret;
 }

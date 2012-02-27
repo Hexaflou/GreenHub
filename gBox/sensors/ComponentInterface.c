@@ -10,6 +10,7 @@
 #include "Configuration.h"
 #include "ComSunSpotTask.h"
 #include "../lib/cJSON.h"
+#include <../../libs/gMemory/gMemory.h>
 
 /* Inclusions externes */
 #include <sys/socket.h>
@@ -46,8 +47,8 @@ int ComponentInterfaceInit() {
     cJSON * root, * receptorIP, * receptorPort, *eepConfig, *sensorConfig, *actuatorConfig;
     char c;
     char txt[CONFIG_CJSON_LENGTH];
-    char * receptorIPTxt, * receptorPortTxt, *eepConfigTxt, *sensorConfigTxt, *actuatorConfigTxt;
-    int nbOpenedAccolade;
+    char * receptorIPTxt, *eepConfigTxt, *sensorConfigTxt, *actuatorConfigTxt;    
+    int nbOpenedAccolade, receptorPortInt;
     FILE *f;
 
     if (alreadyInitialized) {
@@ -106,7 +107,7 @@ int ComponentInterfaceInit() {
                 printf("[ComponentInterfaceInit] Port du récepteur incorrect dans le fichier configuration.txt\n");
                 return ERROR;
             }
-            receptorPortTxt = receptorPort->valueint;
+            receptorPortInt = receptorPort->valueint;
 
             /* Fichier de config. EEP */
             eepConfig = cJSON_GetObjectItem(root, "eepConfig");
@@ -149,7 +150,7 @@ int ComponentInterfaceInit() {
     sem_wait(&mutex_sensorList);
     p_sensorList = NULL;
     p_actuatorList = NULL;
-    p_EEPList = (EEP*) malloc(sizeof (EEP));
+    p_EEPList = (EEP*) gmalloc(sizeof (EEP));
     p_EEPList->next = NULL;
 
     /* Chargement des capteurs et EEP */
@@ -158,13 +159,17 @@ int ComponentInterfaceInit() {
     sem_post(&mutex_sensorList);
 
     /* Mode Simulation (récepteur EnOcean, capteurs et actionneurs) */
+/*
     {
         mqReceptor = comSimulationReceptorTaskInit();
         StartSimulationSensor(mqReceptor);
     }
-
+*/
     /* Création et lancement des deux tâches permettant de communiquer avec le récepteur EnOcean */
-    smq = comReceptorTaskInit();
+    smq = comReceptorTaskInit(receptorIPTxt, receptorPortInt);
+
+    /* Mode Hors Simulation*/
+    StartSimulationSensor(smq);
 
     /* Lancement de 2 threads pour SunSPOTs et pour EnOcean */
     /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
@@ -211,13 +216,15 @@ void ManageMessage(char* message) {
             /*printf("Détecteur présent dans la liste ! ID : %s \n", sensorRealId);*/
             currentSensor->decodeMessage(message, currentSensor);
         }
+        gfree(sensorRealId);	
         currentSensor = currentSensor->next;
-        sensorRealId = str_sub(currentSensor->id, 0, 7);
+	sensorRealId = str_sub(currentSensor->id, 0, 7);	
     }
+    if (sensorRealId != NULL)
+	gfree(sensorRealId);
     sem_post(&mutex_sensorList);
-
-    free(sensorRealId);
-    free(messageId);
+    
+    gfree(messageId);
     /* If the sensor isn't in the sensors' list */
 
 }
@@ -307,7 +314,7 @@ int GetInfoFromSensor(char id[10], float * p_value) {
         }
     }
     sem_post(&mutex_sensorList);
-    free(realId);
+    gfree(realId);
     return ERROR;
 }
 

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "../lib/cJSON.h"
 #include "Utility.h"
+#include <../../libs/gMemory/gMemory.h>
 
 /* Inclusions externes */
 #include <stdio.h>
@@ -155,11 +156,12 @@ int initializeEEPList(char* fileNameEEP, EEP* EEPList) {
         } /* Fin switch org */
         c = fgetc(f);
         if (c != EOF) {
-            EEPCurrent->next = (EEP*) malloc(sizeof (EEP));
+            EEPCurrent->next = (EEP*) gmalloc(sizeof (EEP));
             EEPCurrent = EEPCurrent->next;
+	    EEPCurrent->next = NULL;
         }
-        free(orgChar);
-        free(functChar);
+        gfree(orgChar);
+        gfree(functChar);
         cJSON_Delete(root);
     } /* Fin while */
     /* Fermeture du fichier */
@@ -223,7 +225,7 @@ int destroyEEPList(EEP* p_EEPList) {
     p_EEPDelete = p_EEPList;
     while (p_EEPCurrent != NULL) {
         p_EEPCurrent = p_EEPDelete->next;
-        free(p_EEPDelete);
+        gfree(p_EEPDelete);
         p_EEPDelete = p_EEPCurrent;
     }
     return 0;
@@ -262,7 +264,7 @@ int AddSensorContact(char* id, void ** pp_sensorList, char eep[7], float scaleMi
     Sensor* p_sensor;
     if (*pp_sensorList == NULL) { /* Liste vide */
         /* Creation du premier de la liste */
-        *pp_sensorList = (Sensor*) malloc(sizeof (Sensor));
+        *pp_sensorList = (Sensor*) gmalloc(sizeof (Sensor));
         ((Sensor*) (*pp_sensorList))->next = NULL;
         p_sensor = (Sensor*) * pp_sensorList;
     } else {
@@ -272,7 +274,7 @@ int AddSensorContact(char* id, void ** pp_sensorList, char eep[7], float scaleMi
             p_sensor = p_sensor->next;
         }
         /* Creation du capteur en fin de liste */
-        p_sensor->next = (Sensor*) malloc(sizeof (Sensor));
+        p_sensor->next = (Sensor*) gmalloc(sizeof (Sensor));
         p_sensor = p_sensor->next;
         p_sensor->next = NULL;
     }
@@ -299,7 +301,7 @@ int AddSensorSwitch(char* id, void ** pp_sensorList, char eep[7], float scaleMin
     Sensor* p_sensor;
     if (*pp_sensorList == NULL) { /* Liste vide */
         /* Creation du premier de la liste */
-        *pp_sensorList = (Sensor*) malloc(sizeof (Sensor));
+        *pp_sensorList = (Sensor*) gmalloc(sizeof (Sensor));
         ((Sensor*) (*pp_sensorList))->next = NULL;
         p_sensor = ((Sensor*) * pp_sensorList);
     } else {
@@ -308,7 +310,7 @@ int AddSensorSwitch(char* id, void ** pp_sensorList, char eep[7], float scaleMin
             p_sensor = p_sensor->next;
         }
         /* Creation du capteur en fin de liste */
-        p_sensor->next = (Sensor*) malloc(sizeof (Sensor));
+        p_sensor->next = (Sensor*) gmalloc(sizeof (Sensor));
         p_sensor = p_sensor->next;
         p_sensor->next = NULL;
     }
@@ -333,7 +335,7 @@ int AddSensorTemp(char* id, void ** pp_sensorList, char eep[7], float scaleMin, 
     Sensor* p_sensor;
     if (*pp_sensorList == NULL) { /* Liste vide */
         /* Creation du premier de la liste */
-        *pp_sensorList = (Sensor*) malloc(sizeof (Sensor));
+        *pp_sensorList = (Sensor*) gmalloc(sizeof (Sensor));
         ((Sensor*) (*pp_sensorList))->next = NULL;
         p_sensor = ((Sensor*) * pp_sensorList);
     } else {
@@ -342,7 +344,7 @@ int AddSensorTemp(char* id, void ** pp_sensorList, char eep[7], float scaleMin, 
             p_sensor = p_sensor->next;
         }
         /* Creation du capteur en fin de liste */
-        p_sensor->next = (Sensor*) malloc(sizeof (Sensor));
+        p_sensor->next = (Sensor*) gmalloc(sizeof (Sensor));
         p_sensor = p_sensor->next;
         p_sensor->next = NULL;
     }
@@ -353,7 +355,7 @@ int AddSensorTemp(char* id, void ** pp_sensorList, char eep[7], float scaleMin, 
     p_sensor->id[10] = '\0';
     strncpy(p_sensor->EEP, eep, 7);
     p_sensor->value = 0;
-    p_sensor->rangeData = (SensorRange*) malloc(sizeof (SensorRange));
+    p_sensor->rangeData = (SensorRange*) gmalloc(sizeof (SensorRange));
     p_sensor->rangeData->scaleMax = scaleMax;
     p_sensor->rangeData->scaleMin = scaleMin;
     p_sensor->rangeData->rangeMax = rangeMax;
@@ -371,7 +373,7 @@ int AddSensorLightOccupancy(char* id, void ** pp_sensorList, char eep[7], float 
     Sensor* p_sensor;
     if (*pp_sensorList == NULL) { /* Liste vide */
         /* Creation du premier de la liste */
-        *pp_sensorList = (Sensor*) malloc(sizeof (Sensor));
+        *pp_sensorList = (Sensor*) gmalloc(sizeof (Sensor));
         ((Sensor*) (*pp_sensorList))->next = NULL;
         p_sensor = ((Sensor*) * pp_sensorList);
     } else {
@@ -380,7 +382,7 @@ int AddSensorLightOccupancy(char* id, void ** pp_sensorList, char eep[7], float 
             p_sensor = p_sensor->next;
         }
         /* Creation du capteur en fin de liste */
-        p_sensor->next = (Sensor*) malloc(sizeof (Sensor));
+        p_sensor->next = (Sensor*) gmalloc(sizeof (Sensor));
         p_sensor = p_sensor->next;
         p_sensor->next = NULL;
     }
@@ -391,7 +393,7 @@ int AddSensorLightOccupancy(char* id, void ** pp_sensorList, char eep[7], float 
     p_sensor->id[10] = '\0';
     strncpy(p_sensor->EEP, eep, 7);
     p_sensor->value = 0;
-    p_sensor->rangeData = (SensorRange*) malloc(sizeof (SensorRange));
+    p_sensor->rangeData = (SensorRange*) gmalloc(sizeof (SensorRange));
     p_sensor->rangeData->scaleMax = scaleMax;
     p_sensor->rangeData->scaleMin = scaleMin;
     p_sensor->rangeData->rangeMax = rangeMax;
@@ -399,7 +401,7 @@ int AddSensorLightOccupancy(char* id, void ** pp_sensorList, char eep[7], float 
     p_sensor->decodeMessage = decodeMessageLight;
 
     /* Creation du capteur de presence en fin de liste */
-    p_sensor->next = (Sensor*) malloc(sizeof (Sensor));
+    p_sensor->next = (Sensor*) gmalloc(sizeof (Sensor));
     p_sensor = p_sensor->next;
     /* Ajout des parametres du capteit de presence */
     strncpy(p_sensor->id, id, 8);
@@ -418,7 +420,7 @@ int AddSensorLightOccupancy(char* id, void ** pp_sensorList, char eep[7], float 
 int AddSensorTempLightSunSpot(char* id, void ** pp_sensorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax) {
     Sensor* p_sensor;
     if (*pp_sensorList == NULL) {
-        *pp_sensorList = (Sensor*) malloc(sizeof (Sensor));
+        *pp_sensorList = (Sensor*) gmalloc(sizeof (Sensor));
         ((Sensor*) (*pp_sensorList))->next = NULL;
         p_sensor = ((Sensor*) * pp_sensorList);
     } else {
@@ -427,7 +429,7 @@ int AddSensorTempLightSunSpot(char* id, void ** pp_sensorList, char eep[7], floa
             p_sensor = p_sensor->next;
         }
         /* Creation du capteur en fin de liste */
-        p_sensor->next = (Sensor*) malloc(sizeof (Sensor));
+        p_sensor->next = (Sensor*) gmalloc(sizeof (Sensor));
         p_sensor = p_sensor->next;
         p_sensor->next = NULL;
     }
@@ -440,7 +442,7 @@ int AddSensorTempLightSunSpot(char* id, void ** pp_sensorList, char eep[7], floa
     p_sensor->rangeData = NULL;
     p_sensor->decodeMessage = decodeMessageLight;
 
-    p_sensor->next = (Sensor*) malloc(sizeof (Sensor));
+    p_sensor->next = (Sensor*) gmalloc(sizeof (Sensor));
     p_sensor = p_sensor->next;
 
     strncpy(p_sensor->id, id, 8);
@@ -456,38 +458,9 @@ int AddSensorTempLightSunSpot(char* id, void ** pp_sensorList, char eep[7], floa
 
 int AddActuatorCurrent(char* id, void ** pp_actuatorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax) {
     Actuator* p_actuator;
-    /*char * newId;
-    newId = id;*/
-    /* Test si on ajoute un actionneur n'est pas deja enregistré dans le fichier de configuration actuators.txt */
-    /*if (strlen(id) <= 8){
-            Actuator *p_actuatorCurrent;
-            newId[8] = 'a';
-     */
-    /* Si la liste d actionneurs est vide */
-    /*	if (pp_actuatorList == NULL){
-                    newId[9] = '0';
-                    newId[10] = '0';
-                    newId[11] = '\0';
-            }else{
-                    int actuatorIdInt;
-                    char actuatorId[2] = "00";
-                    p_actuatorCurrent = (Actuator*)*pp_actuatorList;
-     */ /* Recherche a partir de la liste d actionneurs  d'un id unique pour l'actionneur*/
-    /*		while ( (p_actuatorCurrent != NULL) && (p_actuatorCurrent->next != NULL) ){
-                            if (strcmp(p_actuatorCurrent->id,newId) == 0)
-                            {
-                                    actuatorIdInt = xtoi(actuatorId) + 1;
-                                    sprintf(actuatorId,"%X",actuatorIdInt);
-                            }
-                            newId[9] = actuatorId[0];
-                            newId[10] = actuatorId[1];
-                            p_actuatorCurrent = p_actuatorCurrent->next;
-                    }
-            }
-    }*/
-
+    
     if (*pp_actuatorList == NULL) {
-        *pp_actuatorList = (Actuator*) malloc(sizeof (Actuator));
+        *pp_actuatorList = (Actuator*) gmalloc(sizeof (Actuator));
         ((Actuator*) (*pp_actuatorList))->next = NULL;
         p_actuator = ((Actuator*) * pp_actuatorList);
     } else {
@@ -496,7 +469,7 @@ int AddActuatorCurrent(char* id, void ** pp_actuatorList, char eep[7], float sca
             p_actuator = p_actuator->next;
         }
         /* Insertion de l'actionneur en fin de liste */
-        p_actuator->next = (Actuator*) malloc(sizeof (Actuator));
+        p_actuator->next = (Actuator*) gmalloc(sizeof (Actuator));
         p_actuator = p_actuator->next;
         p_actuator->next = NULL;
     }
@@ -514,7 +487,7 @@ int AddActuatorTemp(char* id, void ** pp_actuatorList, char eep[7], float scaleM
     Actuator* p_actuator;
 
     if (*pp_actuatorList == NULL) {
-        *pp_actuatorList = (Actuator*) malloc(sizeof (Actuator));
+        *pp_actuatorList = (Actuator*) gmalloc(sizeof (Actuator));
         ((Actuator*) (*pp_actuatorList))->next = NULL;
         p_actuator = ((Actuator*) * pp_actuatorList);
     } else {
@@ -523,7 +496,7 @@ int AddActuatorTemp(char* id, void ** pp_actuatorList, char eep[7], float scaleM
             p_actuator = p_actuator->next;
         }
         /* Insertion de l'actionneur en fin de liste */
-        p_actuator->next = (Actuator*) malloc(sizeof (Actuator));
+        p_actuator->next = (Actuator*) gmalloc(sizeof (Actuator));
         p_actuator = p_actuator->next;
         p_actuator->next = NULL;
     }
@@ -531,7 +504,7 @@ int AddActuatorTemp(char* id, void ** pp_actuatorList, char eep[7], float scaleM
     strncpy(p_actuator->id, id, 12);
     strncpy(p_actuator->EEP, eep, 7);
     p_actuator->status = 0;
-    p_actuator->rangeData = (ActuatorRange*) malloc(sizeof (ActuatorRange));
+    p_actuator->rangeData = (ActuatorRange*) gmalloc(sizeof (ActuatorRange));
     p_actuator->rangeData->rangeMin = scaleMin;
     p_actuator->rangeData->rangeMax = scaleMax;
     p_actuator->action = actionTemp;

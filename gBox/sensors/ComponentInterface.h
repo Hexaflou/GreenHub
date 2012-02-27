@@ -17,7 +17,7 @@
 #define COMPONENT_ALREADY_EXIST -3
 #define INVALID_ID -2
 #define OK 0
-#define DEBUG 0
+#define DEBUG 1
 #define MAX_MQ_SIZE 1024
 
 /* Inclusions externes */

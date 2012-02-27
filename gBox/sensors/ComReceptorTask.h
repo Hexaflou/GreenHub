@@ -16,7 +16,7 @@
 #include <mqueue.h> 
 
 /* Initialisation des deux t�ches, retourne un pointeur sur la boite au lettre */
-mqd_t comReceptorTaskInit();
+mqd_t comReceptorTaskInit(char *,int);
 
 /* Destruction des deux t�ches */
 int comReceptorTaskClose();

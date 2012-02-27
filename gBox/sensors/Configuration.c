@@ -29,11 +29,11 @@ cJSON* createCSON(char* id, char* EEP){
 /*
  * Charge la configuration du systeme a partir de la lecture d'un fichier contenant l'EEP et l'id des capteurs
  */
-void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, Sensor ** pp_sensorList, Actuator ** pp_actuatorList, EEP* EEPList){
+int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, Sensor ** pp_sensorList, Actuator ** pp_actuatorList, EEP* EEPList){
 	
 	char sensor[TAILLE_ID_SENSOR+TAILLE_EEP+40];
 	char actuator[TAILLE_ID_ACTUATOR+TAILLE_EEP+40];
-	cJSON *root;
+	cJSON *root, *eep;
 	char* org, *funct, *type;
 	int c;
 	char * id;
@@ -45,7 +45,8 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 	
 	if (f == NULL)
 	{
-		printf("ERREUR dans l'ouverture du fichier de capteurs. \n");
+		printf("[readConfig] Erreur dans l'ouverture du fichier de capteurs %s.\n",fileNameSensor);
+		return ERROR;
 	}
 	/* Initialisation de la EEPList */
 	initializeEEPList(fileNameEEP, EEPList);
@@ -83,9 +84,13 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 		root = cJSON_Parse(sensor);
 		if (root != NULL){
 			/* EEP */
-			eepstr= cJSON_GetObjectItem(root,"EEP")->valuestring;
-			if(eepstr == NULL)
-				printf("error\n");
+			eep= cJSON_GetObjectItem(root,"EEP");
+			if(eep == NULL)
+			{				
+				printf("[readConfig] EEP invalide dans le fichier %s\n", fileNameSensor);
+				return ERROR;
+			}
+			eepstr = eep->valuestring;
 			/* org, funct, type */
 			org = str_sub(eepstr,0,1);
 			funct = str_sub(eepstr,2,3);
@@ -93,7 +98,10 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 			/* id */
 			id=cJSON_GetObjectItem(root,"id")->valuestring;
 			if(id == NULL)
-				printf("error 2\n");
+			{
+				printf("[readConfig] ID invalide dans le fichier %s\n", fileNameSensor);
+				return ERROR;
+			}
 			/* Ajout du capteur */
 			AddComponentByEEP(id, (void**) pp_sensorList, EEPList, org, funct, type);
 			cJSON_Delete(root);
@@ -110,7 +118,7 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 	f = fopen(fileNameActuator, "r");
 	if (f == NULL)
 	{
-		printf("ERREUR dans l'ouverture du fichier d actionneurs.\n");
+		printf("[readConfig] Erreur dans l'ouverture du fichier d'actionneurs %s.\n",fileNameActuator);
 	}
 	
 	/* Recuperation des informations de chaque actionneur */
@@ -148,9 +156,13 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 		root = cJSON_Parse(actuator);
 		if (root != NULL){
 			/* EEP */
-			eepstr= cJSON_GetObjectItem(root,"EEP")->valuestring;
-			if(eepstr == NULL)
-				printf("error\n");
+			eep= cJSON_GetObjectItem(root,"EEP");
+			if(eep == NULL)
+			{
+				printf("[readConfig] EEP invalide dans le fichier %s\n", fileNameActuator);
+				return ERROR;
+			}
+			eepstr = eep->valuestring;
 			/* org, funct, type */
 			org = str_sub(eepstr,0,1);
 			funct = str_sub(eepstr,2,3);
@@ -158,7 +170,10 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 			/* id */
 			id=cJSON_GetObjectItem(root,"id")->valuestring;
 			if(id == NULL)
-				printf("error 2\n");
+			{
+				printf("[readConfig] ID invalide dans le fichier %s\n", fileNameActuator);
+				return ERROR;
+			}
 			/* Ajout du capteur */			
 			AddComponentByEEP(id, (void**) pp_actuatorList, EEPList, org, funct, type);
 			cJSON_Delete(root);
@@ -169,7 +184,8 @@ void readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator,
 		c=fgetc(f);
 	} /* Fin while */
 	/* Fermeture du fichier */
-	fclose(f);	
+	fclose(f);
+	return OK;
 }
 
 /*

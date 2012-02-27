@@ -9,6 +9,7 @@
 #include "SimulationReceptorEnOcean.h"
 #include "Configuration.h"
 #include "ComSunSpotTask.h"
+#include "../lib/cJSON.h"
 
 /* Inclusions externes */
 #include <sys/socket.h>
@@ -19,7 +20,10 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <mqueue.h> 
+#include <mqueue.h>
+
+/* Déclaration de constantes */
+#define CONFIG_CJSON_LENGTH 250
 
 /***************************PRIVEE***********************/
 /* Déclaration de variables */
@@ -39,17 +43,114 @@ static mqd_t mqReceptor;
 /* Fonction lançant les deux connections d'écoute avec les périphériques EnOcean et SunSpot */
 int ComponentInterfaceInit()
 {
+	/* Objet cJSON permettant de récupérer les informations du fichier de configuration CONFIG_FILE */
+	cJSON * root, * receptorIP, * receptorPort, *eepConfig, *sensorConfig, *actuatorConfig;
+	char c;
+	char txt[CONFIG_CJSON_LENGTH];
+	char * receptorIPTxt, * receptorPortTxt, *eepConfigTxt, *sensorConfigTxt, *actuatorConfigTxt;
+	int nbOpenedAccolade;
+	FILE *f;
+	
 	if (alreadyInitialized){
 		return ERROR;
 	}
+
+	/* Ouverture du fichier en lecture */
+	f = fopen("configuration.txt", "r");
+
+	if (f == NULL)
+	{
+		printf("[ComponentInterface] Erreur dans l'ouverture du fichier de configuration configuration.txt. \n");
+		return ERROR;
+	}
+		/* Recuperation des informations de chaque capteur */
+	c=fgetc(f);
+	while (c!=EOF){
+		memset (txt, 0, sizeof (txt));
+		/* Lecture jusqu'au debut de l'objet json :*/
+		while (c != '{' && c != EOF) {
+			c=fgetc(f);
+		}
+		if (c == EOF)
+			break;
+		sprintf(txt, "%s%c", txt, c);
+
+		/* Lecture de l'objet JSON : */
+		nbOpenedAccolade = 1;
+		while (nbOpenedAccolade > 0) {
+			c=fgetc(f);
+			if (c == EOF)
+				break;
+			sprintf(txt, "%s%c", txt, c);
+			if (c=='{') {
+				nbOpenedAccolade++;
+			}
+			else if (c=='}') {
+				nbOpenedAccolade--;
+			}
+		}
+		if (c == EOF)
+			break;
+		sprintf(txt, "%s%c", txt, '\0');
+		/* Recuperation des donnees du json */
+		root = cJSON_Parse(txt);
+		if (root != NULL){
+			/* Receptor IP */
+			receptorIP= cJSON_GetObjectItem(root,"receptorIP");
+			if(receptorIP == NULL)
+			{
+				printf("[ComponentInterfaceInit] IP du récepteur invalide dans le fichier configuration.txt\n");
+				return ERROR;
+			}
+			receptorIPTxt = receptorIP->valuestring;
+			
+			/* Receptor Port */
+			receptorPort= cJSON_GetObjectItem(root,"receptorPort");
+			if(receptorPort == NULL)
+			{
+				printf("[ComponentInterfaceInit] Port du récepteur incorrect dans le fichier configuration.txt\n");
+				return ERROR;
+			}
+			receptorPortTxt = receptorPort->valueint;
+
+			/* Fichier de config. EEP */
+			eepConfig= cJSON_GetObjectItem(root,"eepConfig");
+			if(eepConfig == NULL)
+			{
+				printf("[ComponentInterfaceInit] Fichier de configuration EEP incorrect dans le fichier configuration.txt\n");
+				return ERROR;
+			}
+			eepConfigTxt = eepConfig->valuestring;
+
+			/* Fichier de config. Capteur */
+			sensorConfig= cJSON_GetObjectItem(root,"sensorConfig");
+			if(sensorConfig == NULL)
+			{
+				printf("[ComponentInterfaceInit] Fichier de configuration Sensor incorrect dans le fichier configuration.txt\n");
+				return ERROR;
+			}
+			sensorConfigTxt = sensorConfig->valuestring;
+
+			/* Fichier de config. Actionneur */
+			actuatorConfig= cJSON_GetObjectItem(root,"actuatorConfig");
+			if(actuatorConfig == NULL)
+			{
+				printf("[ComponentInterfaceInit] Fichier de configuration Actuator incorrect dans le fichier configuration.txt\n");
+				return ERROR;
+			}
+			actuatorConfigTxt = actuatorConfig->valuestring;
+		}		
+	}
+
+		
 	/* Création des mutex pour la liste de capteurs et la liste d'actionneurs */
 	if (sem_init(&mutex_sensorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
-		return (int)ERROR;
+		return ERROR;
 	}
 	if (sem_init(&mutex_actuatorList, 0, 1) == ERROR){
 		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste d actionneurs.\n");
-		return (int)ERROR;
+		return ERROR;
 	}
 
 	/* Initialisation des listes de capteurs et d'actionneurs */
@@ -60,7 +161,8 @@ int ComponentInterfaceInit()
 	p_EEPList->next = NULL;
 	
 	/* Chargement des capteurs et EEP */
-	readConfig("sensors.txt", "eep.txt", "actuators.txt", &p_sensorList, &p_actuatorList, p_EEPList);
+	if (readConfig(sensorConfigTxt, eepConfigTxt, actuatorConfigTxt, &p_sensorList, &p_actuatorList, p_EEPList) == ERROR)
+		return ERROR;
 	sem_post(&mutex_sensorList);
 
 	/* Mode Simulation (récepteur EnOcean, capteurs et actionneurs) */
@@ -75,9 +177,10 @@ int ComponentInterfaceInit()
 	/* Lancement de 2 threads pour SunSPOTs et pour EnOcean */
 	 /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
 
+	cJSON_Delete(root);
 	alreadyInitialized = 1;
 	 
-	return 0;
+	return OK;
 }
 
 /* Destruction des composants et des tâches */

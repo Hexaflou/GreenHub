@@ -216,7 +216,6 @@ int getOccupancy(char* message)
 	char * byte = str_sub(message, 8, 9);
 	byteInt = xtoi(byte); /* Extraction de l octet de donnee a partir du message */
 	occupancy = (byteInt & 0x02)>>1; /* Extraction du bit 1 de l octet */
-	printf("Resultat : %i\n", occupancy);
 	free(byte);
 	return occupancy;
 }

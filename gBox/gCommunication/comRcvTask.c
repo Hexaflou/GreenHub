@@ -12,6 +12,7 @@
 #include "gCommunication.h"
 #include "../sensors/ComponentInterface.h"
 #include "../sensors/Sensor.h"
+#include "../sensors/Actuator.h"
 
 /****************************PRIVATE DECLARATION***********************/
 static void * comRcvTask(void * attr);
@@ -20,7 +21,6 @@ static void * comRcvTask(void * attr);
 int communicationParse(char* trame);
 
 /* fonctions de traitement particulieres */
-static void sensorAction(char* mac_address,char * action);
 static void getValue(char * mac_address);
 static void activateRT(int interval);
 
@@ -106,6 +106,7 @@ int communicationParse(char* trame)
 	char* msg_type=NULL;
 	char* mac_address=NULL;
 	char* action=NULL;
+	double value;
 	int interval=0;
 
 	if(data == NULL)
@@ -119,8 +120,8 @@ int communicationParse(char* trame)
 	if ( strncmp(msg_type,"action",7) ==0 )
 	{	
 		mac_address=cJSON_GetObjectItem(data,"mac_address")->valuestring;
-		action=cJSON_GetObjectItem(data,"action")->valuestring;
-		sensorAction(mac_address,action);
+		value=cJSON_GetObjectItem(data,"action")->valuedouble;
+		ActionActuator(mac_address,value);
 	}
 	else if ( strncmp(msg_type,"last_state",11) ==0)
 	{
@@ -142,11 +143,6 @@ int communicationParse(char* trame)
 	return 0;
 }
 
-void sensorAction(char* mac_address,char * action)
-{
-	printf("A faire ! : mac address : %s, Action : %s \n",mac_address,action);
-	/* TODO : ajouter l'action quand elle sera dispo */
-}
 void getValue(char * mac_address)
 {
 

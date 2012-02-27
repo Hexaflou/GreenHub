@@ -19,12 +19,17 @@
 /***************************PRIVEE***********************/
 static void * comSndReceptorTask(void * attr);
 static void *ListenEnOcean(void *ptr);
+static void *ListenEnOceanSimulation(void *ptr);
 static int dataSend(char * msg);
 
 static mqd_t smq = -1;
 static mqd_t rmq = -1;
+static mqd_t smqSimulation = -1;
+static mqd_t rmqSimulation = -1;
+
 static pthread_t comSndReceptorThread;
 static pthread_t comRcvReceptorThread;
+static pthread_t simulationReceptorThread;
 static SOCKET sock = 0;
 static char * message = NULL;
 static char * receptorIP;
@@ -33,8 +38,9 @@ static int receptorPort;
 /************************PUBLIC***************************************/
 
 /* Initialisation de la tache, retourne un pointeur sur la boite au lettre */
-mqd_t comReceptorTaskInit(char * arg_receptorIP, int arg_receptorPort) {
+SmqReturn comReceptorTaskInit(char * arg_receptorIP, int arg_receptorPort) {
     struct mq_attr attr;
+    struct SmqReturn smqReturn;
     /* initialize the queue attributes */
     attr.mq_flags = 0;
     attr.mq_maxmsg = 10;
@@ -47,27 +53,36 @@ mqd_t comReceptorTaskInit(char * arg_receptorIP, int arg_receptorPort) {
     receptorPort = arg_receptorPort;
     
     /* create the message queue */
-    smq = mq_open(QUEUE_NAME, O_WRONLY | O_CREAT, 0644, &attr);
-    assert((mqd_t) - 1 != smq);
+    smqReturn.smq = mq_open(QUEUE_NAME, O_WRONLY | O_CREAT, 0644, &attr);
+    assert((mqd_t) - 1 != smqReturn.smq);
+
+    smqReturn.smqSimulation = mq_open(QUEUE_NAME, O_WRONLY | O_CREAT, 0644, &attr);
+    assert((mqd_t) - 1 != smqReturn.smqSimulation);
 
     /* lancement de la tache */
     pthread_create(&comRcvReceptorThread, NULL, &ListenEnOcean, NULL);
     pthread_create(&comSndReceptorThread, NULL, &comSndReceptorTask, NULL);
+    pthread_create(&simulationReceptorThread, NULL, &ListenEnOceanSimulation, NULL);
 
-    return smq;
+    return smqReturn;
 }
 
 /* Destruction de la tache */
 int comReceptorTaskClose() {
     /* close task */
-    int ret, ret2;
+    int ret, ret2, ret3;
     ret = pthread_cancel(comSndReceptorThread);
     ret2 = pthread_cancel(comRcvReceptorThread);
+    ret3 = pthread_cancel(simulationReceptorThread);
 
     /* cleanup */
     if (smq != -1)
         assert((mqd_t) - 1 != mq_close(smq));
     if (rmq != -1)
+        assert((mqd_t) - 1 != mq_close(rmq));
+    if (smqSimulation != -1)
+        assert((mqd_t) - 1 != mq_close(smq));
+    if (rmqSimulation != -1)
         assert((mqd_t) - 1 != mq_close(rmq));
     assert((mqd_t) - 1 != mq_unlink(QUEUE_NAME));
 
@@ -166,6 +181,34 @@ void *ListenEnOcean(void *message2) {
 }
 
 /*
+ * Fonction permettant l'écoute de périphériques EnOcean simulés.
+ */
+void *ListenEnOceanSimulation(void *message2) {
+    char buffer[MAX_MQ_SIZE + 1];
+    char *msgWithoutHeader;
+    ssize_t bytes_read;
+
+    /* create the message queue */
+    rmqSimulation = mq_open(QUEUE_NAME, O_RDONLY);
+
+    while (1) {
+        /* receive the message */	
+        bytes_read = mq_receive(rmq, buffer, MAX_MQ_SIZE, NULL);
+        assert(bytes_read >= 0);
+        buffer[bytes_read] = '\0';
+
+	/* On enlève le header */
+	msgWithoutHeader = str_sub(buffer,6,27);			
+        ManageMessage(msgWithoutHeader);
+    }
+
+    return (void *) NULL;
+
+    
+    return 0;
+}
+
+/*
  * Tâche scrutant la boîte aux lettres pour envoyer les messages au récepteur EnOcean.
  */
 static void * comSndReceptorTask(void * attr) {
@@ -177,8 +220,7 @@ static void * comSndReceptorTask(void * attr) {
     assert((mqd_t) - 1 != rmq);
 
     while (1) {
-        /* receive the message */
-	printf("PROUT...\n");
+        /* receive the message */	
         bytes_read = mq_receive(rmq, buffer, MAX_MQ_SIZE, NULL);
         assert(bytes_read >= 0);
 
@@ -203,7 +245,7 @@ static int dataSend(char * msg) {
         perror("[ComReceptorTask] Error in message post.");
         return SOCKET_ERROR;
     } else {
-#if DEBUG == 0
+#if DEBUG > 0
         printf("[ComReceptorTask] Sent to EnOcean receptor : \n%s \nNb of bytes sent : %i\n\n", msg, sendResult);
 #endif
     }

@@ -96,7 +96,6 @@ unsigned nunites;
 nunites = (noctets + sizeof(En_tete) -1)/ sizeof(En_tete)+1 ;
 
 if ((pprec = plibre) == NULL) {
-	printf("Il n'existe pas encore de liste . Creation de la base \n");
 	base.s.ptr = plibre = pprec = &base;
 	base.s.taille = 0;
 }

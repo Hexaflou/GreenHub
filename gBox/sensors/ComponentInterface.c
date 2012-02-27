@@ -28,7 +28,7 @@
 
 /***************************PRIVEE***********************/
 /* Déclaration de variables */
-static mqd_t smq;
+static struct SmqReturn smqReturn;
 static sem_t mutex_sensorList;
 static sem_t mutex_actuatorList;
 static Sensor* p_sensorList;
@@ -166,10 +166,10 @@ int ComponentInterfaceInit() {
     }
 */
     /* Création et lancement des deux tâches permettant de communiquer avec le récepteur EnOcean */
-    smq = comReceptorTaskInit(receptorIPTxt, receptorPortInt);
+    smqReturn = comReceptorTaskInit(receptorIPTxt, receptorPortInt);
 
-    /* Mode Hors Simulation*/
-    StartSimulationSensor(smq);
+    /* Mode Hors Simulation*/    
+    StartSimulationSensor(smqReturn.smqSimulation);
 
     /* Lancement de 2 threads pour SunSPOTs et pour EnOcean */
     /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
@@ -183,8 +183,8 @@ int ComponentInterfaceInit() {
 /* Destruction des composants et des tâches */
 int ComponentInterfaceClose() {
     comReceptorTaskClose();
-    comSunSpotTaskClose();
-    comSimulationReceptorTaskClose();
+    /*comSunSpotTaskClose();*/
+    /*comSimulationReceptorTaskClose();*/
     StopSimulationSensor();
     destroyEEPList(p_EEPList); /* Désalloue p_EEPList */
     destroyComponentList(p_sensorList, p_actuatorList); /* Désalloue p_EEPList */
@@ -205,6 +205,7 @@ void ManageMessage(char* message) {
 #if DEBUG > 0
     printf("Message : %s \n", message);
 #endif
+	
 
     sem_wait(&mutex_sensorList);
     currentSensor = p_sensorList;
@@ -218,7 +219,7 @@ void ManageMessage(char* message) {
         }
         gfree(sensorRealId);	
         currentSensor = currentSensor->next;
-	sensorRealId = str_sub(currentSensor->id, 0, 7);	
+	sensorRealId = str_sub(currentSensor->id, 0, 7);
     }
     if (sensorRealId != NULL)
 	gfree(sensorRealId);
@@ -382,7 +383,7 @@ int ActionActuator(char* id, float value) {
         if (strcmp(p_currentActuator->id, id) == 0) {
             /*printf("Actionneur présent dans la liste ! \n");*/
             sem_post(&mutex_actuatorList);
-            p_currentActuator->action(value, p_currentActuator, smq);
+            p_currentActuator->action(value, p_currentActuator, smqReturn.smq);
             return OK;
         } else {
             p_currentActuator = p_currentActuator->next;

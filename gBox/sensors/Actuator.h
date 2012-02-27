@@ -27,7 +27,6 @@ typedef struct Actuator {
     struct Actuator * next;
 } Actuator;
 
-
 /* Fonctions d actions pour les actionneurs */
 int actionCurrent(float value, struct Actuator * actuator, mqd_t smq);
 int actionTemp(float value, struct Actuator * actuator, mqd_t smq);

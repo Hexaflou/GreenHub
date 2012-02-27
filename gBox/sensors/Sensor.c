@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "../gLogs.h"
 #include "ComponentInterface.h"
+#include <../../libs/gMemory/gMemory.h>
 
 
 /*******************************************************
@@ -125,12 +126,12 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor) {
  */
 int decodeMessageSwitch(char* message, struct Sensor * p_sensor) {
     int switch_button = getSwitch(message);
-    /*	if (switch_button == A0){
-                    ActionActuator("0021CBE5aC00\0", B0);
+    	if (switch_button == A0){
+                    ActionActuator("0021CBE5aC00\0", 0);
             }
             if (switch_button == A1){
-                    ActionActuator("0021CBE5aC00\0", B1);
-            }*/
+                    ActionActuator("0021CBE5aC00\0", 1);
+            }
     if (switch_button != NO_BUTTON) {
         printf("Valeur de l interrupteur : %i \n", switch_button);
         /* Si la nouvelle valeur est differente de l ancienne */
@@ -161,7 +162,7 @@ int getTemp(char* message) {
     char * byte;
     byte = str_sub(message, 6, 7);
     temp = xtoi(byte); /* Extraction de la temperature a partir du message */
-    free(byte);
+    gfree(byte);
     return temp;
 }
 
@@ -174,7 +175,7 @@ int getLightLittleSensor(char* message) {
     char* byte;
     byte = str_sub(message, 4, 5);
     light = xtoi(byte); /* Extraction de la luminosite a partir du message */
-    free(byte);
+    gfree(byte);
     return light;
 }
 
@@ -187,7 +188,7 @@ int getLightBigSensor(char* message) {
     char * byte;
     byte = str_sub(message, 4, 7);
     light = xtoi(byte); /* Extraction de la luminosite a partir du message */
-    free(byte);
+    gfree(byte);
     return light;
 }
 
@@ -200,7 +201,7 @@ int getOccupancy(char* message) {
     char * byte = str_sub(message, 8, 9);
     byteInt = xtoi(byte); /* Extraction de l octet de donnee a partir du message */
     occupancy = (byteInt & 0x02) >> 1; /* Extraction du bit 1 de l octet */
-    free(byte);
+    gfree(byte);
     return occupancy;
 }
 
@@ -225,8 +226,8 @@ int getSwitch(char* message) {
             result = THREE_FOUR;
         }
     }
-    free(byte);
-    free(status);
+    gfree(byte);
+    gfree(status);
     return (int) result;
 }
 
@@ -240,6 +241,6 @@ int getContact(char* message) {
     byte = str_sub(message, 8, 9);
     byteInt = xtoi(byte); /* Extraction de l octet de donnee a partir du message */
     closed = byteInt & 0x01; /* Extraction du bit 0 de l octet */
-    free(byte);
+    gfree(byte);
     return closed;
 }

@@ -11,6 +11,7 @@
 #include "ComReceptorTask.h"
 #include "ComponentInterface.h"
 #include "../gCommunication/comIncludes.h"
+#include <../../libs/gMemory/gMemory.h>
 
 /* Définition de constante */
 #define QUEUE_NAME  "/GH_comSendReceptorQ"
@@ -26,11 +27,13 @@ static pthread_t comSndReceptorThread;
 static pthread_t comRcvReceptorThread;
 static SOCKET sock = 0;
 static char * message = NULL;
+static char * receptorIP;
+static int receptorPort;
 
 /************************PUBLIC***************************************/
 
 /* Initialisation de la tache, retourne un pointeur sur la boite au lettre */
-mqd_t comReceptorTaskInit() {
+mqd_t comReceptorTaskInit(char * arg_receptorIP, int arg_receptorPort) {
     struct mq_attr attr;
     /* initialize the queue attributes */
     attr.mq_flags = 0;
@@ -38,6 +41,11 @@ mqd_t comReceptorTaskInit() {
     attr.mq_msgsize = MAX_MQ_SIZE;
     attr.mq_curmsgs = 0;
 
+    /* Initialize the connexion's parameters */
+    receptorIP = (char*) gmalloc(sizeof(char)*strlen(arg_receptorIP));    
+    strcpy(receptorIP,arg_receptorIP);
+    receptorPort = arg_receptorPort;
+    
     /* create the message queue */
     smq = mq_open(QUEUE_NAME, O_WRONLY | O_CREAT, 0644, &attr);
     assert((mqd_t) - 1 != smq);
@@ -63,10 +71,12 @@ int comReceptorTaskClose() {
         assert((mqd_t) - 1 != mq_close(rmq));
     assert((mqd_t) - 1 != mq_unlink(QUEUE_NAME));
 
+    gfree(receptorIP);    
+    
     if (sock != 0)
         close(sock);
     if (message != NULL)
-        free(message);
+        gfree(message);
     return (ret || ret2);
 }
 
@@ -86,9 +96,9 @@ void *ListenEnOcean(void *message2) {
 
     /* Protocole Internet */
     serverAddr.sin_family = AF_INET;
-    /*serverAddr.sin_addr.s_addr = inet_addr("134.214.105.28");*/
-    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    serverAddr.sin_port = htons(8888);
+    serverAddr.sin_addr.s_addr = inet_addr(receptorIP);
+    /*serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");*/
+    serverAddr.sin_port = htons(receptorPort);
 
     /* Creation d un socket TCP */
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == ERROR) {
@@ -140,7 +150,7 @@ void *ListenEnOcean(void *message2) {
         tailleTrame = xtoi(buffer);
 
         /* Un octet correspond a deux caracteres */
-        message = (char*) malloc(tailleTrame * sizeof (char) * 2 + 1);
+        message = (char*) gmalloc(tailleTrame * sizeof (char) * 2 + 1);
 
         /* Reception du message sans le header */
         if ((n = recv(sock, message, tailleTrame * 2, 0)) < 0) {
@@ -149,7 +159,7 @@ void *ListenEnOcean(void *message2) {
         }
         message[tailleTrame * 2] = '\0';
         ManageMessage(message);
-        free(message);
+        gfree(message);
         message = NULL;
     }
     return 0;
@@ -168,6 +178,7 @@ static void * comSndReceptorTask(void * attr) {
 
     while (1) {
         /* receive the message */
+	printf("PROUT...\n");
         bytes_read = mq_receive(rmq, buffer, MAX_MQ_SIZE, NULL);
         assert(bytes_read >= 0);
 
@@ -192,7 +203,7 @@ static int dataSend(char * msg) {
         perror("[ComReceptorTask] Error in message post.");
         return SOCKET_ERROR;
     } else {
-#if DEBUG > 0
+#if DEBUG == 0
         printf("[ComReceptorTask] Sent to EnOcean receptor : \n%s \nNb of bytes sent : %i\n\n", msg, sendResult);
 #endif
     }

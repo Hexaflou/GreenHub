@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 /*****************************PRIVATE DECLARATION*****************************/
 /* id of the current thread */
@@ -105,7 +106,7 @@ void yield()
 		}
 		/* Verification pour les sleep */
 		if(current_thread->state == SLEEPING && 
-								time(NULL)>current_thread->wake_up_date)
+								time(NULL) > current_thread->wake_up_date)
 		{
 			current_thread->wake_up_date=0;
 			current_thread->state=ACTIVABLE;

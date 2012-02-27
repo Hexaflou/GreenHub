@@ -13,13 +13,10 @@ void f1(void *args)
 		puts("A");
 		puts("B");
 		puts("C");
-		yield();
 		puts("D");
 		puts("E");
 		puts("F");
-		yield();
 		puts("G");
-		yield();
 	}
 }
 
@@ -29,16 +26,13 @@ void f2(void *args)
 	{
 		puts("1");
 		puts("2");
-		yield();
 		puts("3");
 		puts("4");
 		puts("5");
 		puts("6");
-		yield();
 		puts("7");
 		puts("8");
 		puts("9");
-		yield();
 	}
 }
 
@@ -48,7 +42,6 @@ void f3(void *args)
 	while(go)
 	{
 		puts("#");
-		yield();
 	}
 }
 

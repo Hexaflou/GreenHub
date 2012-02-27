@@ -15,7 +15,7 @@ typedef void(gfct)(void *);
 struct ctx_ss
 {
 	int id;
-	long * esp;	
+	long * esp;
 	long * ebp;
 	gThread_state state;
 	long * stack;

@@ -21,7 +21,8 @@ static void * comRcvTask(void * attr);
 int communicationParse(char* trame);
 
 /* fonctions de traitement particulieres */
-static void getValue(char * mac_address);
+static void getSensorValue(char * mac_address);
+static void getActuatorValue(char * mac_address);
 static void activateRT(int interval);
 
 static SOCKET sock;
@@ -98,6 +99,7 @@ int communicationParse(char* trame)
 	char* msg_type=NULL;
 	char* mac_address=NULL;
 	char* action=NULL;
+	char * comp_type=NULL;
 	double value;
 	int interval=0;
 
@@ -117,8 +119,12 @@ int communicationParse(char* trame)
 	}
 	else if ( strncmp(msg_type,"last_state",11) ==0)
 	{
+		comp_type = cJSON_GetObjectItem(data,"comp_type")->valuestring;
 		mac_address=cJSON_GetObjectItem(data,"mac_address")->valuestring;
-		getValue(mac_address);
+		if(strncmp(comp_type,"sensor",6) ==0)
+			getSensorValue(mac_address);
+		else
+			getActuatorValue(mac_address);
 	}
 	else if ( strncmp(msg_type,"realtime",9) ==0)
 	{
@@ -135,7 +141,7 @@ int communicationParse(char* trame)
 	return 0;
 }
 
-void getValue(char * mac_address) {
+void getSensorValue(char * mac_address) {
 
     Sensor* tempSensor = NULL;
     sem_t semSensorList;
@@ -159,6 +165,12 @@ void getValue(char * mac_address) {
 
     sem_post(&semSensorList);
 
+}
+
+void getActuatorValue(char * mac_address) {
+	float value;
+	GetStatusFromActuator(mac_address,&value);
+	gCommunicationSendValue(mac_address, value);
 }
 
 void activateRT(int interval) {

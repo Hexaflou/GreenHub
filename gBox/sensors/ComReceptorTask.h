@@ -15,8 +15,13 @@
 /* Inclusions externes */
 #include <mqueue.h> 
 
+typedef struct SmqReturn{
+	mqd_t smq;
+	mqd_t smqSimulation;
+}SmqReturn;
+
 /* Initialisation des deux t�ches, retourne un pointeur sur la boite au lettre */
-mqd_t comReceptorTaskInit(char *,int);
+SmqReturn comReceptorTaskInit(char *,int);
 
 /* Destruction des deux t�ches */
 int comReceptorTaskClose();

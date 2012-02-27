@@ -37,8 +37,10 @@ int decodeMessageLight(char * message, struct Sensor* p_sensor) {
         p_sensor->value = light;
         gLogsLog(p_sensor->id, p_sensor->value);
         printf("Valeur du capteur de luminosite : %f \n", p_sensor->value);
+	gfree(message);
         return VALUE_CHANGE;
     }
+    gfree(message);
     return NO_CHANGE;
 }
 
@@ -60,8 +62,10 @@ int decodeMessageOccupancy(char* message, struct Sensor* p_sensor) {
     if (occupancy != p_sensor->value) {
         p_sensor->value = occupancy;
         gLogsLog(p_sensor->id, p_sensor->value);
+	gfree(message);
         return VALUE_CHANGE;
     }
+    gfree(message);
     return NO_CHANGE;
 }
 
@@ -88,8 +92,10 @@ int decodeMessageTemp(char* message, struct Sensor* p_sensor) {
     if (p_sensor->value != temp) {
         p_sensor->value = temp;
         gLogsLog(p_sensor->id, p_sensor->value);
+	gfree(message);
         return VALUE_CHANGE;
     }
+    gfree(message);
     return NO_CHANGE;
 }
 
@@ -105,17 +111,19 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor) {
 
     if (closed == 1) {
         printf("Contact ferme. \n");
-        ActionActuator("0021CBE5a00\0", 0);
+        /*ActionActuator("0021CBE5a00\0", 0);*/ /* Test */
     } else {
         printf("Contact ouvert. \n");
-        ActionActuator("0021CBE5a00\0", 1);
+        /*ActionActuator("0021CBE5a00\0", 1);*/ /* Test */
     }
     /* Si la nouvelle valeur est differente de l ancienne */
     if (closed != p_sensor->value) {
         p_sensor->value = closed;
         gLogsLog(p_sensor->id, p_sensor->value);
+	gfree(message);
         return VALUE_CHANGE;
     }
+    gfree(message);
     return NO_CHANGE;
 }
 
@@ -138,11 +146,14 @@ int decodeMessageSwitch(char* message, struct Sensor * p_sensor) {
         if (switch_button != p_sensor->value) {
             p_sensor->value = switch_button;
             gLogsLog(p_sensor->id, p_sensor->value);
+	    gfree(message);
             return VALUE_CHANGE;
         } else {
+            gfree(message);
             return NO_CHANGE;
         }
     }
+    gfree(message);
     return NO_BUTTON;
 }
 

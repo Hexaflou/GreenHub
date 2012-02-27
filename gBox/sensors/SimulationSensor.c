@@ -57,7 +57,7 @@ int StartSimulationSensor(mqd_t arg_smq) {
     launchSimulationSensor("FFEA0321", 10, &p_simuThreadList, SIMU_TEMP);
 
     /* Capteur de luminosité (entre 0 et 510Lux) et de présence : salle de bain */
-    launchSimulationSensor("00054155", 6, &p_simuThreadList, SIMU_LIGHT_OCCUPANCY);
+    launchSimulationSensor("00054155", 2, &p_simuThreadList, SIMU_LIGHT_OCCUPANCY);
 
     return 0;
 }
@@ -467,27 +467,4 @@ void * SimulationSensorLightOccupancy(void * p_argSensor) {
         mq_send(smq, message, MAX_MQ_SIZE, 0);
     }
     return (void*) NULL;
-}
-
-/*
- * Fonction permettant de calculer la checksum d'un message. Le champ checksum du message en paramètre sera mis à jour.
- * Paramètre d'entrée :char * message : trame à traiter.
- */
-char* CalculateCheckSum(char * message) {
-    int nbChar, ii;
-    int byteSum;
-    char byte[2];
-    char * byteSumHexa;
-    byteSumHexa = (char*) gmalloc(sizeof (char) *30);
-    nbChar = xtoi(str_sub(message, 0, 1));
-    for (ii = 0; ii < nbChar; ii += 2) {
-        /* TODO: MARCHE PAS */
-        byte[0] = message[ii];
-        byte[1] = message[ii + 1];
-        byteSum = byteSum + xtoi(byte);
-    }
-    sprintf(byteSumHexa, "%X", byteSum);
-    printf("ByteSumHexa : %s \n", byteSumHexa);
-    gfree(byteSumHexa);
-    return byteSumHexa;
 }

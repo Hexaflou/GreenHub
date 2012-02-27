@@ -21,5 +21,5 @@
 unsigned int xtoi(const char* hexstr);
 
 /* Renvoie une chaîne de caractère correspondant à une sous-chaîne de caractère de s */
-char *str_sub (const char *s, unsigned int start, unsigned int end);
+char *str_sub(const char *s, unsigned int start, unsigned int end);
 #endif /* UTILITY_H_ */

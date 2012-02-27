@@ -28,80 +28,72 @@ static SOCKET sock;
 static pthread_t comRcvT;
 
 /*********************************PUBLIC FUNCTIONS*********************/
+
 /* Initialisation de la tache */
-int comRcvTaskInit(int socket)
-{
-	sock = (SOCKET) socket;
-	printf("initialisation de la reception\n");
-	return pthread_create( &comRcvT, NULL, comRcvTask, (void *) NULL);
+int comRcvTaskInit(int socket) {
+    sock = (SOCKET) socket;
+    printf("initialisation de la reception\n");
+    return pthread_create(&comRcvT, NULL, comRcvTask, (void *) NULL);
 }
 
 /* Destruction de la tache */
-int comRcvTaskClose()
-{
-	return pthread_cancel(comRcvT);
+int comRcvTaskClose() {
+    return pthread_cancel(comRcvT);
 }
 
 /******************************* PRIVATE ******************************/
-static void * comRcvTask(void * attr)
-{
-	char data[2048];
-	char temp[2048];
-	char * pch = NULL;
-	int index = 0;
-	int size = 0;
-	int length = 0;
+static void * comRcvTask(void * attr) {
+    char data[2048];
+    char temp[2048];
+    char * pch = NULL;
+    int index = 0;
+    int size = 0;
+    int length = 0;
 
-	while(1)
-	{
-		/*Recuperation d'un datagramme a la suite de l'ancien*/
-		size = recv(sock, data + index, 2040 - index -1, 0);
-		if (size > 0)
-			printf("Données reçus : \n%s\n\n",data);
-		else
-		{
-			printf("erreur de socket : %s\n",strerror(errno));
+    while (1) {
+        /*Recuperation d'un datagramme a la suite de l'ancien*/
+        size = recv(sock, data + index, 2040 - index - 1, 0);
+        if (size > 0)
+            printf("Données reçus : \n%s\n\n", data);
+        else {
+            printf("erreur de socket : %s\n", strerror(errno));
 
-			sleep(1);
-		}
-		if(size>0)
-		{
-			/*Separation de ce qui reste*/
-			pch = strtok(data,"}");
-			index =0;
-			while(pch != NULL)
-			{
-				length = strlen(pch);
-				/* si on fini ce tour l'index est a la fin du 
-				 * json courant                             */
-				index += length;
-				/* On copie le json dans temp pour y rajouter un }*/
-				strncpy(temp,pch,length);
-				temp[length]='}';
-				temp[length+1]='\0';
-				/* On traite le json */
-				communicationParse(temp);
-				/* On lit la suite */
-				pch = strtok(NULL, "}");
-		}
+            sleep(1);
+        }
+        if (size > 0) {
+            /*Separation de ce qui reste*/
+            pch = strtok(data, "}");
+            index = 0;
+            while (pch != NULL) {
+                length = strlen(pch);
+                /* si on fini ce tour l'index est a la fin du
+                 * json courant                             */
+                index += length;
+                /* On copie le json dans temp pour y rajouter un }*/
+                strncpy(temp, pch, length);
+                temp[length] = '}';
+                temp[length + 1] = '\0';
+                /* On traite le json */
+                communicationParse(temp);
+                /* On lit la suite */
+                pch = strtok(NULL, "}");
+            }
 
-		/* On conserve les donnees non traitee */
-		if(size > index)
-		{
-			strncpy(temp, data + index, 2040-index);
-			strncpy(data,temp,2040);
-			index = strlen(data);
-		}
-		else
-			index =0;
-	}
+            /* On conserve les donnees non traitee */
+            if (size > index) {
+                strncpy(temp, data + index, 2040 - index);
+                strncpy(data, temp, 2040);
+                index = strlen(data);
+            } else
+                index = 0;
+        }
+    }
+    return (void *) NULL;
 }
-return (void *) NULL;
-}
+
 
 int communicationParse(char* trame)
 {
-
 	cJSON *data = cJSON_Parse(trame);
 	char* msg_type=NULL;
 	char* mac_address=NULL;
@@ -143,38 +135,33 @@ int communicationParse(char* trame)
 	return 0;
 }
 
-void getValue(char * mac_address)
-{
+void getValue(char * mac_address) {
 
-	Sensor* tempSensor = NULL;
-	sem_t semSensorList;
+    Sensor* tempSensor = NULL;
+    sem_t semSensorList;
 
-	tempSensor=getSensorList();
-	/* TODO : Penser à passer aux mutex p_thread*/
-	semSensorList = getSemSensor() ;
+    tempSensor = getSensorList();
+    /* TODO : Penser à passer aux mutex p_thread*/
+    semSensorList = getSemSensor();
 
-	sem_wait(&semSensorList);
+    sem_wait(&semSensorList);
 
-	while(tempSensor != NULL)
-	{
-		if ( strncmp(tempSensor->id , mac_address , 10) == 0 )
-		{
-			gCommunicationSendValue(tempSensor->id,tempSensor->value);
+    while (tempSensor != NULL) {
+        if (strncmp(tempSensor->id, mac_address, 10) == 0) {
+            gCommunicationSendValue(tempSensor->id, tempSensor->value);
             /* We can return from here (MAC address is unique) */
-            sem_post(&semSensorList); 
-			return;
-		}
-		else
-		{
-			tempSensor = tempSensor->next;
-		}
-	}
+            sem_post(&semSensorList);
+            return;
+        } else {
+            tempSensor = tempSensor->next;
+        }
+    }
 
-	sem_post(&semSensorList);
+    sem_post(&semSensorList);
 
 }
-void activateRT(int interval)
-{
-	printf("Activating Real Time mode for : %d seconds \n",interval);
-	gRTSetPeriod(interval);
+
+void activateRT(int interval) {
+    printf("Activating Real Time mode for : %d seconds \n", interval);
+    gRTSetPeriod(interval);
 }

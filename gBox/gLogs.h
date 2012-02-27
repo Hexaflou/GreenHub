@@ -14,7 +14,7 @@
 #define LOG_STATE_FILENAME 	"sendstate.data"
 
 /* Log the given datas */
-int gLogsLog (char mac[40], double value);
+int gLogsLog(char mac[40], double value);
 
 int gLogThreadInit();
 

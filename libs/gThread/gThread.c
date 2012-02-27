@@ -3,14 +3,16 @@
 #include <hw.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 /*****************************PRIVATE DECLARATION*****************************/
 /* id of the current thread */
 static GThread current_thread = 0;
 static ctx_s * first_thread = 0;
+static int next_id = 0;
 void delete_current_thread();
-void switch_ctx(ctx_s* to_save, ctx_s* to_load);
-void first_launch(ctx_s* to_save, ctx_s* to_load);
+void switch_ctx(ctx_s* to_save);
+void first_launch(ctx_s* to_save);
 
 /*****************************PUBLIC FUNCTIONS********************************/
 void gThread_start()
@@ -22,25 +24,12 @@ void gThread_start()
 
 GThread gThread_create(int stack_size, gfct* func, void * attr)
 {
-	static int id = 0;
+
 	ctx_s * athread = (ctx_s *)malloc(sizeof(ctx_s));
-	athread->id = id++;
+	athread->id = next_id++;
 	athread->stack = (void *) malloc(stack_size + 32);/* Il y a un peu de marge TODO:Ajuster*/
 	athread->wake_up_date = 0;
 	athread->state = TOLAUNCH;
-	
-#ifdef UNACTIVE
-	/* sauvegarde de l'attribut de*/
-	*(long*)(athread->stack + stack_size + 16) = (long) attr;
-	/* Adresse de esp restaure apres return du switch */
-	*(long*)(athread->stack + stack_size) = (long)(athread->stack + stack_size + 8);
-	/* Adresse de la fonction a exectuter (endroit du saut apres return du switch) */
-	*(long*)(athread->stack + stack_size + 4) = (long)func;
-	/* Adresse de la fonction sur retour depuis la tache */
-	*(long*)(athread->stack + stack_size + 8) = (long)&delete_current_thread;
-	/* Adresse de ebp */
-	*(long*)(athread->stack + stack_size + 12) = (long)(athread->stack + stack_size + 12);
-#endif
 
 	/* ESP et EBP pointent sur la sauvegarde de EBP */
 	athread->esp = athread->ebp = athread->stack + stack_size;
@@ -69,7 +58,8 @@ int gThread_cancel(GThread athread)
 	{
 		th = th->next;
 	}
-	th->next = athread->next;/* on vire le thread de la liste des threads */
+	/* on vire le thread de la liste des threads */
+	th->next = athread->next;
 	free(((ctx_s *) athread)->stack);
 	free((ctx_s *) athread);
 	return 0;
@@ -77,53 +67,102 @@ int gThread_cancel(GThread athread)
 
 void yield()
 {
-	irq_disable();
 	ctx_s * old = current_thread;
+	irq_disable();
+	/* Si le thread courant est null -> c'est le principal,
+	 *  il faut le creer */
 	if(current_thread==NULL)
 	{
 		current_thread = malloc(sizeof(ctx_s));
-		current_thread->id = 255;
+		current_thread->id = next_id++;
 		current_thread->stack = NULL;
 		current_thread->wake_up_date = 0;
-		current_thread->state = ACTIVABLE;
 		current_thread->next=first_thread;
 		first_thread=current_thread;
 		old = current_thread;
 	}
-	if(current_thread->next == NULL)
+	
+	/* si il n'y a qu'un thread c'est que c'est le courant...il n'y a 
+	 * rien a faire, on y est */
+	if(first_thread->next == NULL)
 	{
-		current_thread=first_thread;
+		irq_enable();
+		return;
 	}
-	else
-	{
-		current_thread = current_thread->next;
-	}
-
+	
+	current_thread->state = ACTIVABLE;
+	
+	/* On cherche le thread activable suivant */
+	do {
+		/* Si on est au dernier, on recommence au debut*/
+		if(current_thread->next == NULL)
+		{
+			current_thread = first_thread;
+		}
+		else
+		{
+			current_thread = current_thread->next;
+		}
+		/* Verification pour les sleep */
+		if(current_thread->state == SLEEPING && 
+								time(NULL)>current_thread->wake_up_date)
+		{
+			current_thread->wake_up_date=0;
+			current_thread->state=ACTIVABLE;
+		}
+	} while(   current_thread->state != ACTIVABLE 
+			&& current_thread->state != TOLAUNCH  );
+	
+	
+	/* Premier ou deuxieme lancement ?*/
 	if(current_thread->state==TOLAUNCH)
 	{
-		current_thread->state=ACTIVABLE;
-		first_launch(old,current_thread);
+		current_thread->state=RUNNING;
+		first_launch(old);
 	}
 	else
 	{
-		switch_ctx(old,current_thread);
+		current_thread->state=RUNNING;
+		switch_ctx(old);
 	}
+	
 	irq_enable();
 }
 
 void gSleep(int sec)
 {
-
+	irq_disable();
+	current_thread->wake_up_date=time(NULL)+sec;
+	current_thread->state=SLEEPING;
+	yield();
 }
 
 void suspend(GThread thread)
 {
-
+	irq_disable();
+	if(thread->state == TOLAUNCH)
+	{
+		thread->state = WAITINGT;
+	}
+	else if (thread->state == ACTIVABLE)
+	{
+		thread->state = WAITING;
+	}
+	irq_enable();
 }
 
 void active(GThread thread)
 {
-
+	irq_disable();
+	if(thread->state == WAITINGT)
+	{
+		thread->state = TOLAUNCH;
+	}
+	else if (thread->state == WAITING)
+	{
+		thread->state = ACTIVABLE;
+	}
+	irq_enable();
 }
 
 /*****************************PRIVATE FUNCTIONS******************************/
@@ -141,12 +180,14 @@ void delete_current_thread()
 	}
 	free(todelete->stack);
 	free(todelete);
-	yield();
+	if(first_thread != NULL)
+		yield();
+	else
+		irq_enable();
 }
 
-void first_launch(ctx_s* to_save, ctx_s* to_load)
+void first_launch(ctx_s* to_save)
 {
-	printf("first launch of thread number %d\n",to_load->id);
 	asm("movl %%esp, %0" "\n" 
 	    "movl %%ebp, %1"
        :"=r"(to_save->esp),
@@ -154,21 +195,25 @@ void first_launch(ctx_s* to_save, ctx_s* to_load)
 	asm("movl %0, %%esp" "\n"
 	    "movl %1, %%ebp"
 		:
-		:"r"(to_load->esp),
-		 "r"(to_load->ebp ));
+		:"r"(current_thread->esp),
+		 "r"(current_thread->ebp ));
+	
+	/* On reactive le yield periodique avant de lancer la tache */	 
 	irq_enable();
 	current_thread->func(current_thread->attr);
 	
-	/* if we are here...*/
+	/* au retour de la fonction on se retrouve ici on detruit
+	 *  donc la tache */
 	delete_current_thread();
 }
 
-void switch_ctx(ctx_s* to_save, ctx_s* to_load)
+void switch_ctx(ctx_s* to_save)
 {
 	asm("mov %%ebp, %0" :"=r"(to_save->ebp));
 	asm("mov %%esp, %0" :"=r"(to_save->esp));
-	asm("mov %0, %%esp" ::"r"(to_load->esp));
-	asm("mov %0, %%ebp" ::"r"(to_load->ebp));
+	asm("mov %0, %%esp" ::"r"(current_thread->esp));
+	asm("mov %0, %%ebp" ::"r"(current_thread->ebp));
+	/* on reactive avant de retourner a la tache */
 	irq_enable();
 	return;
 }

@@ -62,11 +62,14 @@ int main()
 	
 	gThread_start();
 	
-	while(1)
+	while(getchar_unlocked()!='q')
 	{
+		/* Rendre la main tout de suite */
+		yield();
 	}
-		
 	go = 0;
+	printf("attente de la mort des taches\n");
+	
 	printf("Fin de l'application de test\n");
 	return 0;
 }

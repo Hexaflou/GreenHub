@@ -18,23 +18,22 @@
 #define NOT_SUPPORTED -1
 #define NOT_FOUND -2
 
-typedef struct EEP
-{
-	char eep[7];
-	int (*AddComponent)(char* id, void ** pp_ComponentList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax);
-	char name[70];
-	struct EEP* next;
-	/* Arguments optionnels pour spécifier la portée de la mesure */	
-	int scaleMin;
-	int scaleMax;	
-	int rangeMin;
-	int rangeMax;
-}EEP;
+typedef struct EEP {
+    char eep[7];
+    int (*AddComponent)(char* id, void ** pp_ComponentList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax);
+    char name[70];
+    struct EEP* next;
+    /* Arguments optionnels pour spécifier la portée de la mesure */
+    int scaleMin;
+    int scaleMax;
+    int rangeMin;
+    int rangeMax;
+} EEP;
 
 /*
  * Construit la liste d'EEP à partir d'un fichier de configuration dont le chemin est donné en paramètre
  */
-int initializeEEPList(char*,EEP*);
+int initializeEEPList(char*, EEP*);
 
 /*
  * Supprime la liste d'EEP
@@ -66,4 +65,4 @@ int AddActuatorCurrent(char * id, void ** pp_ActuatorList, char eep[7], float sc
 int AddActuatorTemp(char * id, void ** pp_ActuatorList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax);
 
 #endif /* EEP_H_ */
- 
+

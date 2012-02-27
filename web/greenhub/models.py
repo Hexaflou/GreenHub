@@ -23,7 +23,10 @@ class Sensor(models.Model):
     user = models.ForeignKey(User)
 
     def last_state(self):
-        return self.state_set.order_by("captured_at").reverse()[0]
+        try:
+            return self.state_set.order_by("captured_at").reverse()[0]
+        except IndexError:
+            return None
 
     def last_hour_state(self):
         return self.state_set.filter(captured_at__gte = datetime.datetime.now() - datetime.timedelta(hours=1)).aggregate(Avg('value'))['value__avg']

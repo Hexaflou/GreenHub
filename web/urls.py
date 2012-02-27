@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     # url(r'^GreenHub/', include('GreenHub.foo.urls')),
     url(r'^$', 'greenhub.views.index'),
     url(r'^home', 'greenhub.views.home'),
+    url(r'^send-command/(?P<type>.*)', 'greenhub.views.command'),
 
     url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
 

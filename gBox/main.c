@@ -9,16 +9,15 @@
 #include "gLogs.h"
 #include "sensors/ComponentInterface.h"
 
-int main ()
-{
-	gCommunicationInit(2);
-	/* initialize random seed: */
-	srand ( time(NULL) );
-	gLogThreadInit();
-	ComponentInterfaceInit();
-	getchar();
-	ComponentInterfaceClose();
-	gLogThreadClose();
-	gCommunicationClose();
-	return 0;
+int main() {
+    gCommunicationInit(2);
+    /* initialize random seed: */
+    srand(time(NULL));
+    gLogThreadInit();
+    ComponentInterfaceInit();
+    getchar();
+    ComponentInterfaceClose();
+    gLogThreadClose();
+    gCommunicationClose();
+    return 0;
 }

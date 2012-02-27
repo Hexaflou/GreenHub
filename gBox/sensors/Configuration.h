@@ -27,12 +27,12 @@ int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, 
 /*
  * Edite les fichiers de configuration en fonction de la liste de composants et EEP
  */
-void writeConfig(char* fileNameSensor,char* fileNameEEP, Sensor * p_sensorList,EEP* p_EEPList);
+void writeConfig(char* fileNameSensor, char* fileNameEEP, Sensor * p_sensorList, EEP* p_EEPList);
 
 /*
  * Détruit la liste de composants.
- */ 
+ */
 int destroyComponentList(Sensor*, Actuator*);
 
 #endif /* CONFIGURATION_H_ */
- 
+

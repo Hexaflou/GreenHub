@@ -28,6 +28,5 @@ int gCommunicationSendValue(char hwid[12], double value);
 int gCommunicationIsAlive();
 
 
-
 #endif
 

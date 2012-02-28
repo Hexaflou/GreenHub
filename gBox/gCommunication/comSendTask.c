@@ -64,10 +64,15 @@ static void * comSendTask(void * attr) {
     while (1) {
         /* receive the message */
         bytes_read = mq_receive(rmq, buffer, MAX_MQ_SIZE, NULL);
-        assert(bytes_read >= 0);
-
-        buffer[bytes_read] = '\0';
-        dataSend(buffer);
+        
+        /* On n'essaye d'envoyer que si la connection est établie */
+        while(!gCommunicationIsAlive())
+			sleep(1);
+			
+        if(bytes_read >= 0) {
+			buffer[bytes_read] = '\0';
+			dataSend(buffer);
+		}
     }
 
     return (void *) NULL;
@@ -77,8 +82,6 @@ static int dataSend(char * msg) {
     if (send(sock, msg, strlen(msg), 0) < 0) {
         perror("[gCommunication] Impossible d'envoyer un message.");
         return SOCKET_ERROR;
-    } else {
-        /* printf("send to server : \n%s \n\n", msg); */
     }
     return 0;
 }

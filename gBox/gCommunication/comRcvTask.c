@@ -26,6 +26,10 @@ static void getActuatorValue(char * hardware_id);
 static void activateRT(int interval);
 static void addComponent(cJSON * data);
 
+/* Boucle infinie tant que la connection n'est pas établie 
+ * définie dans gCommunication */
+void gCommunicationReco();
+
 static SOCKET sock;
 static pthread_t comRcvT;
 static int gCommunicationStateVA = 1;
@@ -67,6 +71,8 @@ static void * comRcvTask(void * attr) {
 			{
 				/* La connection a été perdu */
 				gCommunicationStateVA = 0;
+				gCommunicationReco();
+				gCommunicationStateVA = 1;
 			}
 			else {
 				sleep(5);
@@ -112,7 +118,7 @@ int communicationParse(char* trame) {
     int interval = 0;
 
     if (data == NULL) {
-        fprintf(stderr, "Unvalid json received.\n");
+        fprintf(stderr, "[gCommunication] Unvalid json received.\n");
         return -1;
     }
 
@@ -146,7 +152,7 @@ int communicationParse(char* trame) {
         activateRT(interval);
         
     } else {
-        fprintf(stderr, "Commande inconnue reçue du serveur.\n");
+        fprintf(stderr, "[gCommunication] Commande inconnue reçue du serveur.\n");
     }
 
     cJSON_Delete(data);
@@ -187,7 +193,7 @@ void getActuatorValue(char * hardware_id) {
 }
 
 void activateRT(int interval) {
-    printf("Activating Real Time mode for : %d seconds \n", interval);
+    printf("[gBox] Activation du mode temps reel pour : %d seconds \n", interval);
     gRTSetPeriod(interval);
 }
 
@@ -208,6 +214,7 @@ void addComponent(cJSON * data)
 	org = cJSON_GetObjectItem(data, "org")->valueint;
 	funct = cJSON_GetObjectItem(data, "funct")->valueint;
 	type = cJSON_GetObjectItem(data, "type")->valueint;
+	
 	/* On essaye d'ajouter le capteur */
 	result = AddComponent(hardware_id, org, funct, type);
 	

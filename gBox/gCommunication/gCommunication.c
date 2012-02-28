@@ -101,5 +101,14 @@ int gCommunicationIsAlive()
 	return gCommunicationStateGet();
 }
 
+gCommunicationReco()
+{
+	int i = 0;
+	while (connect(sock, (SOCKADDR *) & sin, sizeof (SOCKADDR)) == SOCKET_ERROR) {
+		i++;
+        printf(stderr,"[gCommunication] Tentative de reconnection au serveur n°%d échoué.\n",i);
+        sleep(10);
+    }
+}
 
 

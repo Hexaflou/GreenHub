@@ -101,6 +101,8 @@ static void * gLogFunc(void * attr) {
     char data[1024];
 
     while (1) {
+		/* Ne sert a rien de lire pour l'envoi si la connexion est morte
+		 * On risquerai de perde des données en cas de plantage */
 		if(gCommunicationIsAlive()) {
 			pthread_mutex_lock(&mutex);
 			fseek(rLogFile, 0, SEEK_CUR);

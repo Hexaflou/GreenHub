@@ -1,0 +1,23 @@
+Greenhub package (version preview)
+==================================
+
+Ceci est une version du code et des documents non complets. 
+
+La plupart du code est dans un état stable, mais une revue de code est encore à faire pour
+améliorer sensitivement la qualité de certaines parties du code (passage en commentaires
+conditionnels de DEBUG, utilisation de primitives de logs, etc.).
+
+Il permet cependant de remarquer l'étendue du travail effectué, et la version est compilable
+et fonctionelle.
+
+Pour mieux s'imprégner du point de vue pris par l'hexanome sur le sujet, ne pas oublier
+de lire le fichier docs/GreenHub-SupportAuCode-Preview.pdf avant de continuer.
+
+Contenu des répertoires :
+
+ - docs : Documentation (en cours de rédaction).
+ - gBox : Code du serveur GreenBox, situé chez l'habitant (en C).
+ - web : Code du serveur Web (réalisé en Python + Django, et Python + Twisted).
+ - libs : Code de gMemory et gThread.
+ - sun_spot : Code spécifique à SunSpot, à charger dans les capteurs SunSpot.
+

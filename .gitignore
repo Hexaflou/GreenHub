@@ -18,6 +18,7 @@ Capteur/Debug
 *.o
 *.out
 Capteur/Debug
+Makefile.depends
 
 # SVN is bad
 .svn

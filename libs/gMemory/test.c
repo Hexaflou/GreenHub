@@ -111,7 +111,7 @@ int main() {
 	llist ma_liste = NULL; /*Initialisation de la liste*/
     int i=1; /*Variable compteur*/
     char* doubleGmalloc = NULL; /*Pointeurs de test*/
-    char * pointeur = NULL
+    char * pointeur = NULL ;
    
     printf("\nTest d'allocation simple\n\n");
    
@@ -157,8 +157,8 @@ int main() {
  
 	printf("\nDouble gfree\n\n On s'attend à une segmentation fault !\n\n");
     
-    free(doubleGmalloc);
-    free(doubleGmalloc);
+    gfree(doubleGmalloc);
+    gfree(doubleGmalloc);
     
     
     return 0;

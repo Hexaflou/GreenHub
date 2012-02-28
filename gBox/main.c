@@ -9,7 +9,10 @@
 #include "gLogs.h"
 #include "sensors/ComponentInterface.h"
 
-int main() {
+int run = 1;
+
+void gBox()
+{
 	/* TODO : ce chiffre 2 doit venir d'un fichier de config */
 	while(gCommunicationInit(2)!=0)
 	{
@@ -23,9 +26,15 @@ int main() {
     ComponentInterfaceInit();
     printf("[gBox] Application lancée, un appui sur ENTREE quittera l'application\n");
     getchar();
+    run = 0;
     printf("[gBox] Fermeture normale de l'application\n");
     ComponentInterfaceClose();
     gLogThreadClose();
     gCommunicationClose();
+}
+
+int main() {
+	
+	gBox();
     return 0;
 }

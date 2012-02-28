@@ -28,8 +28,14 @@ static void addComponent(cJSON * data);
 
 static SOCKET sock;
 static pthread_t comRcvT;
+static int gCommunicationStateVA = 1;
 
 /*********************************PUBLIC FUNCTIONS*********************/
+
+int gCommunicationStateGet()
+{
+	return gCommunicationStateVA;
+}
 
 /* Initialisation de la tache */
 int comRcvTaskInit(int socket) {
@@ -55,14 +61,18 @@ static void * comRcvTask(void * attr) {
     while (1) {
         /*Recuperation d'un datagramme a la suite de l'ancien*/
         size = recv(sock, data + index, 2040 - index - 1, 0);
-        if (size > 0)
-            printf("Données reçus : \n%s\n\n", data);
-        else {
-            printf("erreur de socket : %s\n", strerror(errno));
-
-            sleep(1);
+        if (size < 0) {
+            fprintf(stderr,"[gCommunication] Erreur de socket : %s\n", strerror(errno));
+			if(errno==ECONNREFUSED || errno == ENOTCONN)
+			{
+				/* La connection a été perdu */
+				gCommunicationStateVA = 0;
+			}
+			else {
+				sleep(5);
+			}
         }
-        if (size > 0) {
+        else if (size >0) {
             /*Separation de ce qui reste*/
             pch = strtok(data, "}");
             index = 0;

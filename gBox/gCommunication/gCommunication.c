@@ -33,7 +33,7 @@ int gCommunicationInit(int userId) {
     hostinfo = gethostbyname(SRV_IP); /* on récupère les informations de l'hôte auquel on veut se connecter */
     if (hostinfo == NULL) /* l'hôte n'existe pas */ {
         fprintf(stderr, "Unknown host \n");
-        printf("[gCommunication] Erreur lors de la tentative de connexion au serveur (Hôte inconnu).\n");
+        fprintf(stderr,"[gCommunication] Erreur lors de la tentative de connexion au serveur (Hôte inconnu).\n");
         return SOCKET_ERROR;
     }
 
@@ -42,8 +42,7 @@ int gCommunicationInit(int userId) {
     sin.sin_family = AF_INET;
 
     if (connect(sock, (SOCKADDR *) & sin, sizeof (SOCKADDR)) == SOCKET_ERROR) {
-        perror("connect()");
-        printf("[gCommunication] Erreur lors de la tentative de connexion au serveur.\n");
+        printf(stderr,"[gCommunication] Erreur lors de la tentative de connexion au serveur.\n");
         return SOCKET_ERROR;
     }
 
@@ -93,6 +92,12 @@ int gCommunicationClose() {
     comRcvTaskClose();
     closesocket(sock);
     return 0;
+}
+
+
+int gCommunicationIsAlive()
+{
+	return gCommunicationStateGet();
 }
 
 

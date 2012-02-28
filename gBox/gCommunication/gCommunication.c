@@ -109,6 +109,9 @@ void gCommunicationReco()
 	int i = 0;
 	cJSON *init = cJSON_CreateObject();
     char * msg = NULL;
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    comSendUpdateSocket(sock);
+    comRcvUpdateSocket(sock);
 	while (connect(sock, (SOCKADDR *) & sin, sizeof (SOCKADDR)) == SOCKET_ERROR) {
 		i++;
         fprintf(stderr,"[gCommunication] Tentative de connection au serveur n°%d échoué.\n",i);

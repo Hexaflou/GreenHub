@@ -123,7 +123,9 @@ void gCommunicationReco()
     cJSON_AddNumberToObject(init, "user_id", userId);
     msg = cJSON_Print(init);
 
-    gCommunicationSend(msg);
+    if (send(sock, msg, strlen(msg), 0) < 0) {
+        perror("[gCommunication] Impossible d'envoyer un message de login. (WTF)");
+    }
     
     cJSON_Delete(init);
     free(msg);

@@ -109,6 +109,9 @@ void gCommunicationReco()
 	int i = 0;
 	cJSON *init = cJSON_CreateObject();
     char * msg = NULL;
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    comSendUpdateSocket(sock);
+    comRcvUpdateSocket(sock);
 	while (connect(sock, (SOCKADDR *) & sin, sizeof (SOCKADDR)) == SOCKET_ERROR) {
 		i++;
         fprintf(stderr,"[gCommunication] Tentative de connection au serveur n°%d échoué.\n",i);
@@ -120,7 +123,9 @@ void gCommunicationReco()
     cJSON_AddNumberToObject(init, "user_id", userId);
     msg = cJSON_Print(init);
 
-    gCommunicationSend(msg);
+    if (send(sock, msg, strlen(msg), 0) < 0) {
+        perror("[gCommunication] Impossible d'envoyer un message de login. (WTF)");
+    }
     
     cJSON_Delete(init);
     free(msg);

@@ -17,4 +17,6 @@ mqd_t comSendTaskInit(int socket);
 /* Destruction de la tache */
 int comSendTaskClose();
 
+void comSendUpdateSocket(int socket);
+
 #endif

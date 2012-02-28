@@ -18,4 +18,6 @@ int comRcvTaskClose();
 
 int gCommunicationStateGet();
 
+void comRcvUpdateSocket(int socket);
+
 #endif

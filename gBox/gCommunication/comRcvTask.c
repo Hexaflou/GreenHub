@@ -53,6 +53,11 @@ int comRcvTaskClose() {
     return pthread_cancel(comRcvT);
 }
 
+void comRcvUpdateSocket(int socket)
+{
+	sock = (SOCKET) socket;
+}
+
 /******************************* PRIVATE ******************************/
 static void * comRcvTask(void * attr) {
     char data[2048];

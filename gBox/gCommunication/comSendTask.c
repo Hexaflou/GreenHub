@@ -52,6 +52,11 @@ int comSendTaskClose() {
     return ret;
 }
 
+void comSendUpdateSocket(int socket)
+{
+	sock = (SOCKET) socket;
+}
+
 /************************PRIVATE***************************************/
 static void * comSendTask(void * attr) {
     char buffer[MAX_MQ_SIZE + 1];

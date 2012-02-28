@@ -16,4 +16,6 @@ int comRcvTaskInit(int socket);
 /* Destruction de la tache */
 int comRcvTaskClose();
 
+int gCommunicationStateGet();
+
 #endif

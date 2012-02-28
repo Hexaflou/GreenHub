@@ -101,23 +101,25 @@ static void * gLogFunc(void * attr) {
     char data[1024];
 
     while (1) {
-        pthread_mutex_lock(&mutex);
-        fseek(rLogFile, 0, SEEK_CUR);
-        while (!feof(rLogFile)) {
-            
-            if (fgets(data, 1024, rLogFile) != NULL) {
-                sscanf(data, "%*s %s %*c %*s %lf %*c %*s %d", hwid, &value, &date);
-                /*printf("Lu : hwid=%s, value=%lf, date=%d (from data=%s)\n", mac, value, date, data);*/
-                send(hwid, value, date);
-                position++;
-            } else if (ferror(rLogFile)) {
-                printf("[gLog] Erreur lors de la lecture du fichier de log.\n");
-            }
-        }
+		if(gCommunicationIsAlive()) {
+			pthread_mutex_lock(&mutex);
+			fseek(rLogFile, 0, SEEK_CUR);
+			while (!feof(rLogFile)) {
+				
+				if (fgets(data, 1024, rLogFile) != NULL) {
+					sscanf(data, "%*s %s %*c %*s %lf %*c %*s %d", hwid, &value, &date);
+					/*printf("Lu : hwid=%s, value=%lf, date=%d (from data=%s)\n", mac, value, date, data);*/
+					send(hwid, value, date);
+					position++;
+				} else if (ferror(rLogFile)) {
+					printf("[gLog] Erreur lors de la lecture du fichier de log.\n");
+				}
+			}
 
-        fseek(stateFile, 0, SEEK_SET);
-        fprintf(stateFile, "%d\n", position);
-        pthread_mutex_unlock(&mutex);
+			fseek(stateFile, 0, SEEK_SET);
+			fprintf(stateFile, "%d\n", position);
+			pthread_mutex_unlock(&mutex);
+		}
         /* wait for next time */
         sleep(LOG_SEND_PERIOD);
     }

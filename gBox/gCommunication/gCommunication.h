@@ -24,6 +24,10 @@ int gCommunicationSend(char * msg);
 /* send value to the server (thread-safe) */
 int gCommunicationSendValue(char hwid[12], double value);
 
+/* return 1 if yes and 0 if no */
+int gCommunicationIsAlive();
+
+
 
 #endif
 

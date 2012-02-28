@@ -10,7 +10,6 @@
 #include "Configuration.h"
 #include "ComSunSpotTask.h"
 #include "../lib/cJSON.h"
-#include <../../libs/gMemory/gMemory.h>
 
 /* Inclusions externes */
 #include <sys/socket.h>
@@ -25,6 +24,7 @@
 
 /* Déclaration de constantes */
 #define CONFIG_CJSON_LENGTH 250
+#define ID_ACTUATOR_LENGTH 11
 
 /***************************PRIVEE***********************/
 /* Déclaration de variables */
@@ -35,6 +35,8 @@ static Sensor* p_sensorList;
 static Actuator* p_actuatorList;
 static EEP* p_EEPList;
 static int alreadyInitialized = 0;
+static char * sensorConfigTxt = NULL;
+static char * actuatorConfigTxt = NULL;
 
 /* Pour le mode simulation */
 /* static mqd_t mqReceptor; */
@@ -43,152 +45,167 @@ static int alreadyInitialized = 0;
 
 /* Fonction lançant les deux connections d'écoute avec les périphériques EnOcean et SunSpot */
 int ComponentInterfaceInit() {
-    /* Objet cJSON permettant de récupérer les informations du fichier de configuration CONFIG_FILE */
-    cJSON * root, * receptorIP, * receptorPort, *eepConfig, *sensorConfig, *actuatorConfig;
-    char c;
-    char txt[CONFIG_CJSON_LENGTH];
-    char * receptorIPTxt, *eepConfigTxt, *sensorConfigTxt, *actuatorConfigTxt;    
-    int nbOpenedAccolade, receptorPortInt;
-    FILE *f;
+	/* Objet cJSON permettant de récupérer les informations du fichier de configuration CONFIG_FILE */
+	cJSON * root, * receptorIP, * receptorPort, * receptorID, *eepConfig, *sensorConfig, *actuatorConfig;
+	char c;
+	char txt[CONFIG_CJSON_LENGTH];
+	char * receptorIPTxt, *eepConfigTxt, * receptorIDTxt;
+	int nbOpenedAccolade, receptorPortInt;
+	FILE *f;
 
-    if (alreadyInitialized) {
-        return ERROR;
-    }
+	if (alreadyInitialized) {
+		return ERROR;
+	}
 
-    /* Ouverture du fichier en lecture */
-    f = fopen("configuration.txt", "r");
+	/* Ouverture du fichier en lecture */
+	f = fopen("configuration.json", "r");
 
-    if (f == NULL) {
-        printf("[ComponentInterface] Erreur dans l'ouverture du fichier de configuration configuration.txt. \n");
-        return ERROR;
-    }
-    /* Recuperation des informations de chaque capteur */
-    c = fgetc(f);
-    while (c != EOF) {
-        memset(txt, 0, sizeof (txt));
-        /* Lecture jusqu'au debut de l'objet json :*/
-        while (c != '{' && c != EOF) {
-            c = fgetc(f);
-        }
-        if (c == EOF)
-            break;
-        sprintf(txt, "%s%c", txt, c);
+	if (f == NULL) {
+		printf("[ComponentInterface] Erreur dans l'ouverture du fichier de configuration configuration.txt. \n");
+		return ERROR;
+	}
+	/* Recuperation des informations de chaque capteur */
+	c = fgetc(f);
+	while (c != EOF) {
+		memset(txt, 0, sizeof (txt));
+		/* Lecture jusqu'au debut de l'objet json :*/
+		while (c != '{' && c != EOF) {
+			c = fgetc(f);
+		}
+		if (c == EOF)
+			break;
+		sprintf(txt, "%s%c", txt, c);
 
-        /* Lecture de l'objet JSON : */
-        nbOpenedAccolade = 1;
-        while (nbOpenedAccolade > 0) {
-            c = fgetc(f);
-            if (c == EOF)
-                break;
-            sprintf(txt, "%s%c", txt, c);
-            if (c == '{') {
-                nbOpenedAccolade++;
-            } else if (c == '}') {
-                nbOpenedAccolade--;
-            }
-        }
-        if (c == EOF)
-            break;
-        sprintf(txt, "%s%c", txt, '\0');
-        /* Recuperation des donnees du json */
-        root = cJSON_Parse(txt);
-        if (root != NULL) {
-            /* Receptor IP */
-            receptorIP = cJSON_GetObjectItem(root, "receptorIP");
-            if (receptorIP == NULL) {
-                printf("[ComponentInterfaceInit] IP du récepteur invalide dans le fichier configuration.txt\n");
-                return ERROR;
-            }
-            receptorIPTxt = receptorIP->valuestring;
+		/* Lecture de l'objet JSON : */
+		nbOpenedAccolade = 1;
+		while (nbOpenedAccolade > 0) {
+			c = fgetc(f);
+			if (c == EOF)
+				break;
+			sprintf(txt, "%s%c", txt, c);
+			if (c == '{') {
+				nbOpenedAccolade++;
+			} else if (c == '}') {
+				nbOpenedAccolade--;
+			}
+		}
+		if (c == EOF)
+			break;
+		sprintf(txt, "%s%c", txt, '\0');
+		/* Recuperation des donnees du json */
+		root = cJSON_Parse(txt);
+		if (root != NULL) {
+			/* Receptor IP */
+			receptorIP = cJSON_GetObjectItem(root, "receptorIP");
+			if (receptorIP == NULL) {
+				printf("[ComponentInterfaceInit] IP du récepteur invalide dans le fichier configuration.txt\n");
+				return ERROR;
+			}
+			receptorIPTxt = receptorIP->valuestring;
 
-            /* Receptor Port */
-            receptorPort = cJSON_GetObjectItem(root, "receptorPort");
-            if (receptorPort == NULL) {
-                printf("[ComponentInterfaceInit] Port du récepteur incorrect dans le fichier configuration.txt\n");
-                return ERROR;
-            }
-            receptorPortInt = receptorPort->valueint;
+			/* Receptor Port */
+			receptorPort = cJSON_GetObjectItem(root, "receptorPort");
+			if (receptorPort == NULL) {
+				printf("[ComponentInterfaceInit] Port du récepteur incorrect dans le fichier configuration.txt\n");
+				return ERROR;
+			}
+			receptorPortInt = receptorPort->valueint;
 
-            /* Fichier de config. EEP */
-            eepConfig = cJSON_GetObjectItem(root, "eepConfig");
-            if (eepConfig == NULL) {
-                printf("[ComponentInterfaceInit] Fichier de configuration EEP incorrect dans le fichier configuration.txt\n");
-                return ERROR;
-            }
-            eepConfigTxt = eepConfig->valuestring;
+			/* Receptor ID */
+			receptorID = cJSON_GetObjectItem(root, "receptorID");
+			if (receptorID == NULL) {
+				printf("[ComponentInterfaceInit] ID du récepteur invalide dans le fichier configuration.txt\n");
+				return ERROR;
+			}
+			receptorIDTxt = receptorID->valuestring;
+			
+			/* Fichier de config. EEP */
+			eepConfig = cJSON_GetObjectItem(root, "eepConfig");
+			if (eepConfig == NULL) {
+				printf("[ComponentInterfaceInit] Fichier de configuration EEP incorrect dans le fichier configuration.txt\n");
+				return ERROR;
+			}
+			eepConfigTxt = eepConfig->valuestring;
 
-            /* Fichier de config. Capteur */
-            sensorConfig = cJSON_GetObjectItem(root, "sensorConfig");
-            if (sensorConfig == NULL) {
-                printf("[ComponentInterfaceInit] Fichier de configuration Sensor incorrect dans le fichier configuration.txt\n");
-                return ERROR;
-            }
-            sensorConfigTxt = sensorConfig->valuestring;
+			/* Fichier de config. Capteur */
+			sensorConfig = cJSON_GetObjectItem(root, "sensorConfig");
+			if (sensorConfig == NULL) {
+				printf("[ComponentInterfaceInit] Fichier de configuration Sensor incorrect dans le fichier configuration.txt\n");
+				return ERROR;
+			}
+			sensorConfigTxt = sensorConfig->valuestring;
 
-            /* Fichier de config. Actionneur */
-            actuatorConfig = cJSON_GetObjectItem(root, "actuatorConfig");
-            if (actuatorConfig == NULL) {
-                printf("[ComponentInterfaceInit] Fichier de configuration Actuator incorrect dans le fichier configuration.txt\n");
-                return ERROR;
-            }
-            actuatorConfigTxt = actuatorConfig->valuestring;
-        }
-    }
+			/* Fichier de config. Actionneur */
+			actuatorConfig = cJSON_GetObjectItem(root, "actuatorConfig");
+			if (actuatorConfig == NULL) {
+				printf("[ComponentInterfaceInit] Fichier de configuration Actuator incorrect dans le fichier configuration.txt\n");
+				return ERROR;
+			}
+			actuatorConfigTxt = actuatorConfig->valuestring;
+		}
+	}
 
+	/* Création des mutex pour la liste de capteurs et la liste d'actionneurs */
+	if (sem_init(&mutex_sensorList, 0, 1) == ERROR) {
+		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
+		return ERROR;
+	}
+	if (sem_init(&mutex_actuatorList, 0, 1) == ERROR) {
+		perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste d actionneurs.\n");
+		return ERROR;
+	}
 
-    /* Création des mutex pour la liste de capteurs et la liste d'actionneurs */
-    if (sem_init(&mutex_sensorList, 0, 1) == ERROR) {
-        perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste de capteurs.\n");
-        return ERROR;
-    }
-    if (sem_init(&mutex_actuatorList, 0, 1) == ERROR) {
-        perror("[ComponentInterface] Erreur dans l initialisation du semaphore pour la liste d actionneurs.\n");
-        return ERROR;
-    }
+	ActuatorInterfaceInit(receptorIDTxt);
+	
+	/* Initialisation des listes de capteurs et d'actionneurs */
+	sem_wait(&mutex_sensorList);
+	p_sensorList = NULL;
+	p_actuatorList = NULL;
+	p_EEPList = (EEP*) malloc(sizeof (EEP));
+	p_EEPList->next = NULL;
 
-    /* Initialisation des listes de capteurs et d'actionneurs */
-    sem_wait(&mutex_sensorList);
-    p_sensorList = NULL;
-    p_actuatorList = NULL;
-    p_EEPList = (EEP*) gmalloc(sizeof (EEP));
-    p_EEPList->next = NULL;
+	/* Chargement des capteurs et EEP */
+	if (readConfig(sensorConfigTxt, eepConfigTxt, actuatorConfigTxt, &p_sensorList, &p_actuatorList, p_EEPList) == ERROR)
+		return ERROR;
+	sem_post(&mutex_sensorList);
 
-    /* Chargement des capteurs et EEP */
-    if (readConfig(sensorConfigTxt, eepConfigTxt, actuatorConfigTxt, &p_sensorList, &p_actuatorList, p_EEPList) == ERROR)
-        return ERROR;
-    sem_post(&mutex_sensorList);
-
-    /* Mode Simulation (récepteur EnOcean, capteurs et actionneurs) */
+	/* Mode Simulation (récepteur EnOcean, capteurs et actionneurs) */
 /*
-    {
-        mqReceptor = comSimulationReceptorTaskInit();
-        StartSimulationSensor(mqReceptor);
-    }
+	{
+	mqReceptor = comSimulationReceptorTaskInit();
+	StartSimulationSensor(mqReceptor);
+}
 */
-    /* Création et lancement des deux tâches permettant de communiquer avec le récepteur EnOcean */
-    smqReturn = comReceptorTaskInit(receptorIPTxt, receptorPortInt);
+	
+	/* Création et lancement des deux tâches permettant de communiquer avec le récepteur EnOcean */
+	smqReturn = comReceptorTaskInit(receptorIPTxt, receptorPortInt);
 
-    /* Mode Hors Simulation*/    
-    StartSimulationSensor(smqReturn.smqSimulation);
+	/* Mode Hors Simulation*/    
+	StartSimulationSensor(smqReturn.smqSimulation);
 
-    /* Lancement de 2 threads pour SunSPOTs et pour EnOcean */
-    /*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
+	/* Lancement de 2 threads pour SunSPOTs et pour EnOcean */
+	/*iret1 = pthread_create(&thread1, NULL, ListenSunSpot, (void*) message1);*/
 
-    cJSON_Delete(root);
-    alreadyInitialized = 1;
-
-    return OK;
+	cJSON_Delete(root);
+	alreadyInitialized = 1;
+	return OK;
 }
 
 /* Destruction des composants et des tâches */
 int ComponentInterfaceClose() {
-    comReceptorTaskClose();
-    /*comSunSpotTaskClose();*/
-    /*comSimulationReceptorTaskClose();*/
-    StopSimulationSensor();
-    destroyEEPList(p_EEPList); /* Désalloue p_EEPList */
-    destroyComponentList(p_sensorList, p_actuatorList); /* Désalloue p_EEPList */
-    return 0;
+	comReceptorTaskClose();
+	/*comSunSpotTaskClose();*/
+	/*comSimulationReceptorTaskClose();*/
+	StopSimulationSensor();
+	destroyEEPList(p_EEPList); /* Désalloue p_EEPList */
+	destroyComponentList(p_sensorList, p_actuatorList); /* Désalloue p_EEPList */
+	if (sensorConfigTxt != NULL){
+		free(sensorConfigTxt);
+	}
+	if (actuatorConfigTxt != NULL){
+		free(actuatorConfigTxt);
+	}
+	return 0;
 }
 
 /* 
@@ -217,15 +234,15 @@ void ManageMessage(char* message) {
             /*printf("Détecteur présent dans la liste ! ID : %s \n", sensorRealId);*/
             currentSensor->decodeMessage(message, currentSensor);
         }
-        gfree(sensorRealId);	
+        free(sensorRealId);	
         currentSensor = currentSensor->next;
 	sensorRealId = str_sub(currentSensor->id, 0, 7);
     }
     if (sensorRealId != NULL)
-	gfree(sensorRealId);
+	free(sensorRealId);
     sem_post(&mutex_sensorList);
     
-    gfree(messageId);
+    free(messageId);
     /* If the sensor isn't in the sensors' list */
 
 }
@@ -237,39 +254,84 @@ void ManageMessage(char* message) {
  ****************************************************/
 
 /*
- * Permet d ajouter un capteur a partir de son EEP et son id
+ * Permet d ajouter un composant a partir de son EEP et son id
  * Sortie : Renvoie 0 si tout s'est bien passe, -1 si l EEP n est pas supporte,-2 si l EEP est inconnu et -3 si l'ID est déjà présent.
  */
 int AddComponent(char* id, char org[2], char funct[2], char type[2]) {
-    int result;
-    if (strlen(id) > 8) {
-        Sensor* currentSensor;
-        sem_wait(&mutex_sensorList);
-        currentSensor = p_sensorList;
-        while (currentSensor != NULL) {
-            if (strcmp(currentSensor->id, id) == 0) {
-                sem_post(&mutex_sensorList);
-                return COMPONENT_ALREADY_EXIST;
-            }
-            currentSensor = currentSensor->next;
-        }
-        result = AddComponentByEEP(id, (void**) & p_sensorList, p_EEPList, org, funct, type);
-        sem_post(&mutex_sensorList);
-    } else {
-        Actuator* currentActuator;
-        sem_wait(&mutex_actuatorList);
-        currentActuator = p_actuatorList;
-        while (currentActuator != NULL) {
-            if (strcmp(currentActuator->id, id) == 0) {
-                sem_post(&mutex_actuatorList);
-                return COMPONENT_ALREADY_EXIST;
-            }
-            currentActuator = currentActuator->next;
-        }
-        result = AddComponentByEEP(id, (void**) & p_sensorList, p_EEPList, org, funct, type);
-        sem_post(&mutex_actuatorList);
-    }
-    return result;
+	int result;	
+	char * hardware_id;
+	if (strlen(id) < ID_ACTUATOR_LENGTH) {	/* Si le composant est un capteur */
+		Sensor* currentSensor;		
+		sem_wait(&mutex_sensorList);
+		currentSensor = p_sensorList;
+		hardware_id = str_sub(currentSensor->id,0,7);
+		
+		/* On recherche si le capteur n'existe pas déjà */
+		while (currentSensor != NULL && currentSensor->next != NULL) {
+			if (strcmp(hardware_id, id) == 0) {
+				sem_post(&mutex_sensorList);
+				free(hardware_id);
+				return COMPONENT_ALREADY_EXIST;
+			}
+			currentSensor = currentSensor->next;
+			free(hardware_id);			
+			hardware_id = str_sub(currentSensor->id,0,7);
+		}
+		result = AddComponentByEEP(id, (void**) & p_sensorList, p_EEPList, org, funct, type);
+		
+		/* Recherche dans la liste de capteurs du capteur que l'on vient d'ajouter */
+		while (currentSensor != NULL) {
+			if (strcmp(hardware_id, id) == 0) {
+				writeConfigSensor(sensorConfigTxt, currentSensor);	/* Ajout dans le fichier de configuration du capteur */	
+				free(hardware_id);
+				break;
+			}
+			currentSensor = currentSensor->next;
+			free(hardware_id);
+			if (currentSensor != NULL)
+				hardware_id = str_sub(currentSensor->id,0,7);
+		}	
+		sem_post(&mutex_sensorList);
+	} else {
+		Actuator* currentActuator;
+		char * arg_hardware_id; /* ID réel de l'actionneur sur 2 caractères */
+		sem_wait(&mutex_actuatorList);
+		currentActuator = p_actuatorList;
+		
+		/* On retire les deux derniers caractères de l'id de l'actionneur dans la liste, qui correspondent à son ID réel */
+		hardware_id = str_sub(currentActuator->id,strlen(currentActuator->id)-2, strlen(currentActuator->id)-1);
+		arg_hardware_id = str_sub(id,strlen(currentActuator->id)-2, strlen(currentActuator->id)-1);
+		
+		/* On vérifie si l'actionneur existe déjà */
+		while (currentActuator != NULL && currentActuator->next != NULL) {
+			if (strcmp(hardware_id, arg_hardware_id) == 0) {
+				sem_post(&mutex_actuatorList);
+				free(hardware_id);
+				free(arg_hardware_id);
+				return COMPONENT_ALREADY_EXIST;
+			}
+			currentActuator = currentActuator->next;
+			free(hardware_id);			
+			hardware_id = str_sub(currentActuator->id,strlen(currentActuator->id)-2, strlen(currentActuator->id)-1);
+		}
+		result = AddComponentByEEP(id, (void**) & p_actuatorList, p_EEPList, org, funct, type);
+		
+		/* Recherche dans la liste de capteurs du capteur que l'on vient d'ajouter */
+		while (currentActuator != NULL) {
+			if (strcmp(hardware_id, arg_hardware_id) == 0) {
+				writeConfigActuator(actuatorConfigTxt, currentActuator);	/* Ajout dans le fichier de configuration du capteur */
+				free(hardware_id);
+				break;
+			}
+			currentActuator = currentActuator->next;
+			free(hardware_id);
+			if (currentActuator != NULL)
+				hardware_id = str_sub(currentActuator->id,strlen(currentActuator->id)-2, strlen(currentActuator->id)-1);
+		}	
+		free(arg_hardware_id);
+		sem_post(&mutex_actuatorList);
+	}
+	return result;
 }
 
 
@@ -315,7 +377,7 @@ int GetInfoFromSensor(char id[10], float * p_value) {
         }
     }
     sem_post(&mutex_sensorList);
-    gfree(realId);
+    free(realId);
     return ERROR;
 }
 

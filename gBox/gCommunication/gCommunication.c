@@ -8,7 +8,6 @@
 #include "comRcvTask.h"
 #include <time.h>
 
-#include <../../libs/gMemory/gMemory.h>
 #include "../lib/cJSON.h"
 
 /************************  PRIVATE DECLARATION  ***********************/
@@ -59,7 +58,7 @@ int gCommunicationInit(int userId) {
     gCommunicationSend(msg);
 
     cJSON_Delete(init);
-    gfree(msg);
+    free(msg);
     return 0;
 }
 

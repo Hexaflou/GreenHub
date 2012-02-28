@@ -3,7 +3,6 @@
 #include "Utility.h"
 #include "../gLogs.h"
 #include "ComponentInterface.h"
-#include <../../libs/gMemory/gMemory.h>
 
 
 /*******************************************************
@@ -37,10 +36,8 @@ int decodeMessageLight(char * message, struct Sensor* p_sensor) {
         p_sensor->value = light;
         gLogsLog(p_sensor->id, p_sensor->value);
         printf("Valeur du capteur de luminosite : %f \n", p_sensor->value);
-	gfree(message);
         return VALUE_CHANGE;
     }
-    gfree(message);
     return NO_CHANGE;
 }
 
@@ -62,10 +59,8 @@ int decodeMessageOccupancy(char* message, struct Sensor* p_sensor) {
     if (occupancy != p_sensor->value) {
         p_sensor->value = occupancy;
         gLogsLog(p_sensor->id, p_sensor->value);
-	gfree(message);
         return VALUE_CHANGE;
     }
-    gfree(message);
     return NO_CHANGE;
 }
 
@@ -92,10 +87,8 @@ int decodeMessageTemp(char* message, struct Sensor* p_sensor) {
     if (p_sensor->value != temp) {
         p_sensor->value = temp;
         gLogsLog(p_sensor->id, p_sensor->value);
-	gfree(message);
         return VALUE_CHANGE;
     }
-    gfree(message);
     return NO_CHANGE;
 }
 
@@ -111,19 +104,17 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor) {
 
     if (closed == 1) {
         printf("Contact ferme. \n");
-        /*ActionActuator("0021CBE5a00\0", 0);*/ /* Test */
+        ActionActuator("0021CBE5a03\0", 0);
     } else {
         printf("Contact ouvert. \n");
-        /*ActionActuator("0021CBE5a00\0", 1);*/ /* Test */
+        ActionActuator("0021CBE5a03\0", 1);
     }
     /* Si la nouvelle valeur est differente de l ancienne */
     if (closed != p_sensor->value) {
         p_sensor->value = closed;
         gLogsLog(p_sensor->id, p_sensor->value);
-	gfree(message);
         return VALUE_CHANGE;
     }
-    gfree(message);
     return NO_CHANGE;
 }
 
@@ -146,14 +137,11 @@ int decodeMessageSwitch(char* message, struct Sensor * p_sensor) {
         if (switch_button != p_sensor->value) {
             p_sensor->value = switch_button;
             gLogsLog(p_sensor->id, p_sensor->value);
-	    gfree(message);
             return VALUE_CHANGE;
-        } else {
-            gfree(message);
+        } else {     
             return NO_CHANGE;
         }
     }
-    gfree(message);
     return NO_BUTTON;
 }
 
@@ -173,7 +161,7 @@ int getTemp(char* message) {
     char * byte;
     byte = str_sub(message, 6, 7);
     temp = xtoi(byte); /* Extraction de la temperature a partir du message */
-    gfree(byte);
+    free(byte);
     return temp;
 }
 
@@ -186,7 +174,7 @@ int getLightLittleSensor(char* message) {
     char* byte;
     byte = str_sub(message, 4, 5);
     light = xtoi(byte); /* Extraction de la luminosite a partir du message */
-    gfree(byte);
+    free(byte);
     return light;
 }
 
@@ -199,7 +187,7 @@ int getLightBigSensor(char* message) {
     char * byte;
     byte = str_sub(message, 4, 7);
     light = xtoi(byte); /* Extraction de la luminosite a partir du message */
-    gfree(byte);
+    free(byte);
     return light;
 }
 
@@ -212,7 +200,7 @@ int getOccupancy(char* message) {
     char * byte = str_sub(message, 8, 9);
     byteInt = xtoi(byte); /* Extraction de l octet de donnee a partir du message */
     occupancy = (byteInt & 0x02) >> 1; /* Extraction du bit 1 de l octet */
-    gfree(byte);
+    free(byte);
     return occupancy;
 }
 
@@ -237,8 +225,8 @@ int getSwitch(char* message) {
             result = THREE_FOUR;
         }
     }
-    gfree(byte);
-    gfree(status);
+    free(byte);
+    free(status);
     return (int) result;
 }
 
@@ -252,6 +240,6 @@ int getContact(char* message) {
     byte = str_sub(message, 8, 9);
     byteInt = xtoi(byte); /* Extraction de l octet de donnee a partir du message */
     closed = byteInt & 0x01; /* Extraction du bit 0 de l octet */
-    gfree(byte);
+    free(byte);
     return closed;
 }

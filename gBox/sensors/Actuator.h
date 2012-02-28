@@ -13,6 +13,9 @@
 /* Inclusions externes */
 #include <mqueue.h>
 
+/* Initialise les composants importants pour l'utilisation des actionneurs */
+int ActuatorInterfaceInit(char *arg_idReceptorEnOcean);
+
 typedef struct ActuatorRange {
     float rangeMin;
     float rangeMax;

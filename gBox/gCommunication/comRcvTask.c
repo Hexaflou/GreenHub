@@ -24,6 +24,7 @@ int communicationParse(char* trame);
 static void getSensorValue(char * hardware_id);
 static void getActuatorValue(char * hardware_id);
 static void activateRT(int interval);
+static void addComponent(cJSON * data);
 
 static SOCKET sock;
 static pthread_t comRcvT;
@@ -106,21 +107,34 @@ int communicationParse(char* trame) {
     }
 
     msg_type = cJSON_GetObjectItem(data, "msg_type")->valuestring;
-
+	/* On cherche l'action a effectuer selon le type du message */
+	
+	/* Message d'action */
     if (strncmp(msg_type, "action", 7) == 0) {
         hardware_id = cJSON_GetObjectItem(data, "hardware_id")->valuestring;
         value = cJSON_GetObjectItem(data, "action")->valuedouble;
         ActionActuator(hardware_id, value);
+        
+    /* Message de demande d'état */
     } else if (strncmp(msg_type, "last_state", 11) == 0) {
         comp_type = cJSON_GetObjectItem(data, "comp_type")->valuestring;
         hardware_id = cJSON_GetObjectItem(data, "hardware_id")->valuestring;
-        if (strncmp(comp_type, "sensor", 6) == 0)
+        /* L'opération est différente selon que l'on ait un capteur ou 
+         * que l'on ait un actionneur*/
+        if (strncmp(comp_type, "sensor", 7) == 0)
             getSensorValue(hardware_id);
         else
             getActuatorValue(hardware_id);
+            
+    /* Message d'ajout de composant */
+    } else if (strncmp(msg_type, "add_comp", 9) == 0) {
+        addComponent(data);
+    
+    /* Action sur le mode realtime*/
     } else if (strncmp(msg_type, "realtime", 9) == 0) {
         interval = cJSON_GetObjectItem(data, "interval")->valueint;
         activateRT(interval);
+        
     } else {
         fprintf(stderr, "Commande inconnue reçue du serveur.\n");
     }
@@ -144,7 +158,7 @@ void getSensorValue(char * hardware_id) {
     while (tempSensor != NULL) {
         if (strncmp(tempSensor->id, hardware_id, 10) == 0) {
             gCommunicationSendValue(tempSensor->id, tempSensor->value);
-            /* We can return from here (Hardware ID is unique) */
+            /* On a retrouvé le bon sémaphore on peut s'arrêter */
             sem_post(&semSensorList);
             return;
         } else {
@@ -165,4 +179,53 @@ void getActuatorValue(char * hardware_id) {
 void activateRT(int interval) {
     printf("Activating Real Time mode for : %d seconds \n", interval);
     gRTSetPeriod(interval);
+}
+
+void addComponent(cJSON * data)
+{
+	char * hardware_id = NULL;
+	int org = 0;
+	int funct = 0;
+	int type = 0;
+	int result = 0;
+	
+	/* pour le retour */
+	cJSON *tosend = cJSON_CreateObject();
+	char * msg = NULL;
+	
+	/* Recupération des données reçus */
+	hardware_id = cJSON_GetObjectItem(data, "hardware_id")->valuestring;
+	org = cJSON_GetObjectItem(data, "org")->valueint;
+	funct = cJSON_GetObjectItem(data, "funct")->valueint;
+	type = cJSON_GetObjectItem(data, "type")->valueint;
+	/* On essaye d'ajouter le capteur */
+	result = AddComponent(hardware_id, org, funct, type);
+	
+	/* préparation de la réponse */
+	cJSON_AddStringToObject(tosend, "msg_type", "add_comp");
+	
+	switch(result)
+	{
+		case 0:
+			cJSON_AddStringToObject(tosend, "result", "ok");
+		break;
+		
+		case -1:
+			cJSON_AddStringToObject(tosend, "result", "unsupported");
+		break;
+		
+		case -2:
+			cJSON_AddStringToObject(tosend, "result", "notfound");
+		break;
+		
+		case -3:
+			cJSON_AddStringToObject(tosend, "result", "existing");
+		break;
+	}
+	
+	gCommunicationSend(msg);
+	
+	/* Clean data */
+    free(msg);
+    cJSON_Delete(tosend);
 }

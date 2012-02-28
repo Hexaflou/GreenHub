@@ -33,7 +33,7 @@ static pthread_t comRcvT;
 /* Initialisation de la tache */
 int comRcvTaskInit(int socket) {
     sock = (SOCKET) socket;
-    printf("initialisation de la reception\n");
+    printf("[gCommunication] Initialisation de la tâche de réception.\n");
     return pthread_create(&comRcvT, NULL, comRcvTask, (void *) NULL);
 }
 
@@ -92,53 +92,42 @@ static void * comRcvTask(void * attr) {
     return (void *) NULL;
 }
 
+int communicationParse(char* trame) {
+    cJSON *data = cJSON_Parse(trame);
+    char* msg_type = NULL;
+    char* mac_address = NULL;
+    char * comp_type = NULL;
+    double value;
+    int interval = 0;
 
-int communicationParse(char* trame)
-{
-	cJSON *data = cJSON_Parse(trame);
-	char* msg_type=NULL;
-	char* mac_address=NULL;
-	char* action=NULL;
-	char * comp_type=NULL;
-	double value;
-	int interval=0;
+    if (data == NULL) {
+        fprintf(stderr, "Unvalid json received.\n");
+        return -1;
+    }
 
-	if(data == NULL)
-	{
-		fprintf(stderr,"Unvalid json received.\n");
-		return -1;
-	}
+    msg_type = cJSON_GetObjectItem(data, "msg_type")->valuestring;
 
-	msg_type=cJSON_GetObjectItem(data,"msg_type")->valuestring;
+    if (strncmp(msg_type, "action", 7) == 0) {
+        mac_address = cJSON_GetObjectItem(data, "mac_address")->valuestring;
+        value = cJSON_GetObjectItem(data, "action")->valuedouble;
+        ActionActuator(mac_address, value);
+    } else if (strncmp(msg_type, "last_state", 11) == 0) {
+        comp_type = cJSON_GetObjectItem(data, "comp_type")->valuestring;
+        mac_address = cJSON_GetObjectItem(data, "mac_address")->valuestring;
+        if (strncmp(comp_type, "sensor", 6) == 0)
+            getSensorValue(mac_address);
+        else
+            getActuatorValue(mac_address);
+    } else if (strncmp(msg_type, "realtime", 9) == 0) {
+        interval = cJSON_GetObjectItem(data, "interval")->valueint;
+        activateRT(interval);
+    } else {
+        fprintf(stderr, "Commande inconnue reçue du serveur.\n");
+    }
 
-	if ( strncmp(msg_type,"action",7) ==0 )
-	{	
-		mac_address=cJSON_GetObjectItem(data,"mac_address")->valuestring;
-		value=cJSON_GetObjectItem(data,"action")->valuedouble;
-		ActionActuator(mac_address,value);
-	}
-	else if ( strncmp(msg_type,"last_state",11) ==0)
-	{
-		comp_type = cJSON_GetObjectItem(data,"comp_type")->valuestring;
-		mac_address=cJSON_GetObjectItem(data,"mac_address")->valuestring;
-		if(strncmp(comp_type,"sensor",6) ==0)
-			getSensorValue(mac_address);
-		else
-			getActuatorValue(mac_address);
-	}
-	else if ( strncmp(msg_type,"realtime",9) ==0)
-	{
-		interval=cJSON_GetObjectItem(data,"interval")->valueint;
-		activateRT(interval);
-	}
-	else
-	{
-		fprintf(stderr,"Commande inconnue reçue du serveur.\n");
-	}
+    cJSON_Delete(data);
 
-	cJSON_Delete(data);
-
-	return 0;
+    return 0;
 }
 
 void getSensorValue(char * mac_address) {
@@ -168,9 +157,9 @@ void getSensorValue(char * mac_address) {
 }
 
 void getActuatorValue(char * mac_address) {
-	float value;
-	GetStatusFromActuator(mac_address,&value);
-	gCommunicationSendValue(mac_address, value);
+    float value;
+    GetStatusFromActuator(mac_address, &value);
+    gCommunicationSendValue(mac_address, value);
 }
 
 void activateRT(int interval) {

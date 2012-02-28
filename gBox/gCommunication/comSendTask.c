@@ -75,10 +75,10 @@ static void * comSendTask(void * attr) {
 
 static int dataSend(char * msg) {
     if (send(sock, msg, strlen(msg), 0) < 0) {
-        perror("send()");
+        perror("[gCommunication] Impossible d'envoyer un message.");
         return SOCKET_ERROR;
     } else {
-        printf("send to server : \n%s \n\n", msg);
+        /* printf("send to server : \n%s \n\n", msg); */
     }
     return 0;
 }

@@ -21,7 +21,6 @@
 
 int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq) {
     char message[29];
-    int i_switch;
     char valueHexa[3];
 
     printf("value : %f\n",value);
@@ -38,12 +37,12 @@ int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq) {
     strcat(message, "FF9F1E03");	/* ID du récepteur + numéro de l'actionneur */
     strcat(message, "30");		/* Status */
     strcat(message, "00\0");		/* CheckSum à 00 */
-    /*strcpy(message, "A55A6B0550000000FF9F1E053000\0");*/
+    /*strcpy(message, "A55A6B0550000000FF9F1E053000\0"); */ /* (debug) */
     p_actuator->status = value;
     if (value == (float) 0) {
-        printf("Action sur l'actionneur de courant : Mise en marche.\n");
+        printf("[Actuator] Action sur l'actionneur de courant : Mise en marche.\n");
     } else {
-        printf("Action sur l'actionneur de courant : Extinction.\n");
+        printf("[Actuator] Action sur l'actionneur de courant : Extinction.\n");
     }
     mq_send(smq, message, MAX_MQ_SIZE, 0);
     gLogsLog(p_actuator->id, p_actuator->status);
@@ -54,12 +53,14 @@ int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq) {
  * LA MISE A JOUR DU CAPTEUR
  */
 int actionTemp(float value, struct Actuator * p_actuator, mqd_t smq) {
+    
+    
+    /* NON SUPPORTE ACTUELLEMENT (uniquement en simulation) */
+    
+    /* 
     char message[29];
-    int i_switch;
     char valueHexa[3];
-
-	/* NON SUPPORTE ACTUELLEMENT */
-/*
+    
     sprintf(valueHexa,"%X",(((int)value)<<1)|0x01);
     valueHexa[1] = '0';
     valueHexa[2] = '\0';
@@ -69,7 +70,8 @@ int actionTemp(float value, struct Actuator * p_actuator, mqd_t smq) {
     strcat(message, "0000");
     strcat(message, "FF9F1E03");
     strcat(message, "30");
-    strcat(message, "00");*/
+    strcat(message, "00");
+     */
     p_actuator->status = value;
     printf("Action sur le thermostat au niveau : %f\n", value);
     /*mq_send(smq, message, MAX_MQ_SIZE, 0);*/

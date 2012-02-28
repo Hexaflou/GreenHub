@@ -92,7 +92,7 @@ int comReceptorTaskClose() {
         close(sock);
     if (message != NULL)
         gfree(message);
-    return (ret || ret2);
+    return (ret || ret2 || ret3);
 }
 
 /************************PRIVATE***************************************/

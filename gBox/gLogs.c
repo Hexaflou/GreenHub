@@ -30,7 +30,7 @@ int gLogsLog(char mac[40], double value) {
         fprintf(wLogFile, "MAC: %s ; Value: %f ; Timestamp: %d\n", mac, value, (int) time(NULL));
         pthread_mutex_unlock(&mutex);
     } else {
-        printf("Error : impossible to log, files are not initialized\n");
+        printf("[gLog] Impossible d'initialiser les logs, les fichiers sont inaccessibles.\n");
         return -1;
     }
     fclose(wLogFile);
@@ -101,29 +101,24 @@ static void * gLogFunc(void * attr) {
     char data[1024];
 
     while (1) {
-        printf("Bonjour !\n");
         pthread_mutex_lock(&mutex);
         fseek(rLogFile, 0, SEEK_CUR);
         while (!feof(rLogFile)) {
-            printf("We are at the %i nth character.\n", ftell(rLogFile));
-            printf("Youuuuuuuuouuuuh\n");
+            
             if (fgets(data, 1024, rLogFile) != NULL) {
-                printf("J'ai lu quelque chose !\n");
                 sscanf(data, "%*s %s %*c %*s %lf %*c %*s %d", mac, &value, &date);
-                printf("Lu : mac=%s, value=%lf, date=%d (from data=%s)\n", mac, value, date, data);
+                /*printf("Lu : mac=%s, value=%lf, date=%d (from data=%s)\n", mac, value, date, data);*/
                 send(mac, value, date);
                 position++;
             } else if (ferror(rLogFile)) {
-                printf("Erreur lors de la lecture.\n");
+                printf("[gLog] Erreur lors de la lecture du fichier de log.\n");
             }
-            printf("Yahahahahahaha !\n");
         }
 
         fseek(stateFile, 0, SEEK_SET);
         fprintf(stateFile, "%d\n", position);
         pthread_mutex_unlock(&mutex);
         /* wait for next time */
-        printf("Dodo...\n");
         sleep(LOG_SEND_PERIOD);
     }
 

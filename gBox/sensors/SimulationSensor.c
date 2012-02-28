@@ -26,7 +26,7 @@ static void *SimulationSensorLight(void *ptr);
 static void *SimulationSensorOccupancy(void *ptr);
 static void *SimulationSensorLightOccupancy(void *ptr);
 
-static char* CalculateCheckSum(char * message);
+/* static char* CalculateCheckSum(char * message); */
 
 static mqd_t smq;
 static SimuThreadList* p_simuThreadList;

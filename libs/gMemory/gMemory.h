@@ -12,10 +12,10 @@
 
 
 
-//Procédure d'allocation mémoire (remplace malloc)
+/* Procédure d'allocation mémoire (remplace malloc) */
 void *gmalloc (unsigned size) ;
 
-//Procédure de libération de mémoire (remplace free)
+/* Procédure de libération de mémoire (remplace free) */
 void gfree (void *ptr) ;
 
 #endif

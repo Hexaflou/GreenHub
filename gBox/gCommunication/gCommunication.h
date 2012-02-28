@@ -1,12 +1,12 @@
 #ifndef H_GCOMMUNICATION
 #define H_GCOMMUNICATION
 /***********************************************************************
- * 				Fonctions GreenHub de sauvegarde des données
+ *            Fonctions GreenHub de sauvegarde des données
  * 
  * Fourni via de simples fonctions de quoi sauvegarder de manière 
  * sécurisé les données récupérés des capteurs.
  * 
- * 														Hexanome H4212
+ *                                                      Hexanome H4212
  * ********************************************************************/
 
 #define SRV_IP "greenhub.signez.fr"

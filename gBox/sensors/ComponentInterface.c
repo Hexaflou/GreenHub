@@ -37,7 +37,7 @@ static EEP* p_EEPList;
 static int alreadyInitialized = 0;
 
 /* Pour le mode simulation */
-static mqd_t mqReceptor;
+/* static mqd_t mqReceptor; */
 
 /************************PUBLIC***************************************/
 

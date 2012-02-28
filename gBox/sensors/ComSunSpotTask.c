@@ -51,7 +51,7 @@ void *ListenSunSpot(void *message1) {
 
     /* Variable pour la trame a gerer, seront utilises bien plus tard */
     char* idCapteur;
-    char* dateTime;
+    /* char* dateTime; */ /* (inutilisée) */
     int temperature;
     char hexTemperature[5];
     int brightness;
@@ -141,7 +141,7 @@ void *ListenSunSpot(void *message1) {
         idCapteur = str_sub(strtok(NULL, ";"), 14, 18);
 
         /* date et heure de la mesure : info pas utilisée pour l'instant */
-        dateTime = strtok(NULL, ";");
+        /* dateTime = strtok(NULL, ";"); */
 
         /* luminosité */
         brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */

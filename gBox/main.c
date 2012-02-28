@@ -4,12 +4,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
+#include <sys/wait.h>
 
 #include "gCommunication/gCommunication.h"
 #include "gLogs.h"
 #include "sensors/ComponentInterface.h"
 
-int run = 1;
+static int run = 1;
+static int pid = 0;
+
+void sighandler(int signum)
+{
+	run = 0;
+	kill(pid,SIGTERM);
+}
 
 void gBox()
 {
@@ -19,7 +28,7 @@ void gBox()
 		printf("[gBox] Nouvelle tentative de connexion dans 10 secondes...\n");
 		sleep(10);
 	}
-    
+
     /* initialize random seed: */
     srand(time(NULL));
     gLogThreadInit();
@@ -31,10 +40,29 @@ void gBox()
     ComponentInterfaceClose();
     gLogThreadClose();
     gCommunicationClose();
+    kill(getppid(),SIGINT);
+    exit(0);
 }
 
 int main() {
 	
-	gBox();
+	int statut;
+    int options = 0;
+    
+    signal(SIGINT,&sighandler);
+    
+	/* une sorte de watchdog relance l'appli si elle fini inopinement */
+	while(run) {
+		pid = 0;
+		pid = fork();
+		if(pid > 0){
+			/*Code du pere*/
+			waitpid(pid, &statut, options);
+		}
+		else if(pid==0) {
+			gBox();
+		}
+	}
+
     return 0;
 }

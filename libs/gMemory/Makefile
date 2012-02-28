@@ -1,42 +1,38 @@
-ROOTDIR=../libhw
-LIBNAME=hw
-LIBFILE=$(ROOTDIR)/lib/lib$(LIBNAME).a
+# Créé par Olivier EBLE
 
-CC      = gcc
-CFLAGS  = -Wall -ansi -pedantic -g -m32
-LIBDIR  = $(ROOTDIR)/lib
-INCDIR  = -I$(ROOTDIR)/include
-LIBS    = -L$(LIBDIR) -l$(LIBNAME)
-
-###------------------------------
-### Main targets 
-###------------------------------------------------------------
-BINARIES= main
-
-all: $(BINARIES)
-
-###------------------------------
-### Main rules 
-###------------------------------------------------------------
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< $(INCDIR)
-
-%: %.o
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
-
-Makefile.depends:
-	$(CC) -MM *.c $(INCDIR) > Makefile.depends
-
-include Makefile.depends
-
-main: main.o $(LIBFILE)
+RM 	= rm
+RMFLAGS	= -f
+SH	= @bash
+ECHO	= @echo
+CC	= gcc
+CCFLAGS	= -Wall -pedantic -m32 -g
+EDL	= gcc
+LDFLAGS	= -m32 -g 
+LIBS = -lm -lrt 
+SRC	= $(wildcard *.c) 
+OBJS	= $(SRC:.c=.o)
+EXE     = test
 
 
-###------------------------------
-### Misc.
-###------------------------------------------------------------
-.PHONY: clean
+
+all: $(EXE)
+
+%.o : %.c
+	$(ECHO) compilation de $<
+	$(CC) $(CCFLAGS) -o $@ -c $<
+
+affiche :
+	$(ECHO) $(SRC)
+
+$(EXE): $(OBJS)
+	$(ECHO) Edition des liens de $(EXE)
+	$(EDL) $(LDFLAGS) -o $(EXE) $(OBJS) $(LIBS)
+
 clean:
-	$(RM) *.o $(BINARIES) Makefile.depends
+	$(ECHO) nettoyage des binaires translatables
+	$(RM) $(RMFLAGS) $(OBJS) core
+
+cleanall: clean
+	$(ECHO) nettoyage de l executable
+	$(RM) $(RMFLAGS) $(EXE)
 

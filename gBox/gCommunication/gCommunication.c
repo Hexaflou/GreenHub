@@ -15,11 +15,15 @@ static SOCKET sock;
 static struct hostent *hostinfo;
 static SOCKADDR_IN sin = {0}; /* initialise la structure avec des 0 */
 static mqd_t smq;
+static int userId;
 
 /**************************  PUBLIC FUNCTIONS  ************************/
-int gCommunicationInit(int userId) {
+int gCommunicationInit(int auserId) {
     cJSON *init = cJSON_CreateObject();
     char * msg = NULL;
+    
+    userId = auserId;
+    
     /* Creation du socket */
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == INVALID_SOCKET) {
@@ -100,14 +104,26 @@ int gCommunicationIsAlive()
 	return gCommunicationStateGet();
 }
 
-gCommunicationReco()
+void gCommunicationReco()
 {
 	int i = 0;
+	cJSON *init = cJSON_CreateObject();
+    char * msg = NULL;
 	while (connect(sock, (SOCKADDR *) & sin, sizeof (SOCKADDR)) == SOCKET_ERROR) {
 		i++;
-        printf(stderr,"[gCommunication] Tentative de reconnection au serveur n°%d échoué.\n",i);
+        fprintf(stderr,"[gCommunication] Tentative de connection au serveur n°%d échoué.\n",i);
         sleep(10);
     }
+    
+    /* renvoi des informations de login */
+    cJSON_AddStringToObject(init, "msg_type", "login");
+    cJSON_AddNumberToObject(init, "user_id", userId);
+    msg = cJSON_Print(init);
+
+    gCommunicationSend(msg);
+    
+    cJSON_Delete(init);
+    free(msg);
 }
 
 

@@ -65,8 +65,8 @@ static void * comRcvTask(void * attr) {
     while (1) {
         /*Recuperation d'un datagramme a la suite de l'ancien*/
         size = recv(sock, data + index, 2040 - index - 1, 0);
-        if (size < 0) {
-            fprintf(stderr,"[gCommunication] Erreur de socket : %s\n", strerror(errno));
+        if (size <= 0) {
+            perror("[gCommunication] Erreur de socket ");
 			if(errno==ECONNREFUSED || errno == ENOTCONN)
 			{
 				/* La connection a été perdu */
@@ -75,10 +75,10 @@ static void * comRcvTask(void * attr) {
 				gCommunicationStateVA = 1;
 			}
 			else {
-				sleep(5);
+				sleep(2);
 			}
         }
-        else if (size >0) {
+        else {
             /*Separation de ce qui reste*/
             pch = strtok(data, "}");
             index = 0;
@@ -166,7 +166,6 @@ void getSensorValue(char * hardware_id) {
     sem_t semSensorList;
 
     tempSensor = getSensorList();
-    /* TODO : Penser à passer aux mutex p_thread*/
     semSensorList = getSemSensor();
 
     sem_wait(&semSensorList);

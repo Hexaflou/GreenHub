@@ -67,7 +67,7 @@ static void * comRcvTask(void * attr) {
         size = recv(sock, data + index, 2040 - index - 1, 0);
         if (size <= 0) {
             perror("[gCommunication] Erreur de socket ");
-			if(errno==ECONNREFUSED || errno == ENOTCONN)
+			if(size == 0 || errno==ECONNREFUSED || errno == ENOTCONN)
 			{
 				/* La connection a été perdu */
 				gCommunicationStateVA = 0;

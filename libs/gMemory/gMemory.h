@@ -3,10 +3,10 @@
 /***********************************************************************
  * 				Primitives GreenHub d'allocation mémoire
  *
- * Fourni un remplacement à free et malloc via les fonctions gfree et
- * gmalloc.
+ * Fourni un remplacement à free et malloc via les fonctions gfree 
+ * et gmalloc.
  *
- * 														Hexanome H4212
+ *                                                    Hexanome H4212  *
  * ********************************************************************/
 
 

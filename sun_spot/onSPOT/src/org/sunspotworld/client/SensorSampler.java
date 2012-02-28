@@ -47,7 +47,7 @@ import java.lang.Math;
 public class SensorSampler extends MIDlet {
 
     private static final int HOST_PORT = 67;
-    private static final int SAMPLE_PERIOD = 10 * 1000; // 10 secondes, que l'on passe en millisecondes
+    private static final int SAMPLE_PERIOD = 20 * 1000; // 20 secondes, que l'on passe en millisecondes
     
     protected void startApp() throws MIDletStateChangeException {
         RadiogramConnection rCon = null;
@@ -59,7 +59,7 @@ public class SensorSampler extends MIDlet {
         ITemperatureInput tempSensor = (ITemperatureInput) Resources.lookup(ITemperatureInput.class);
         ITriColorLED led = (ITriColorLED)Resources.lookup(ITriColorLED.class, "LED7");
         
-        System.out.println("Starting new sensor sampler (brightness and temperature) application on " + ourAddress + " ...");
+        System.out.println("Démarrage de l'application sur " + ourAddress + "...");
 
 	// On écoute les éventuelles commandes qu'on pourrait recevoir par USB
         // (si on se connecte directement par câble à l'ordi)
@@ -70,7 +70,7 @@ public class SensorSampler extends MIDlet {
             rCon = (RadiogramConnection) Connector.open("radiogram://broadcast:" + HOST_PORT);
             dg = rCon.newDatagram(50);  // création du radiogramme
         } catch (Exception e) {
-            System.err.println("Caught " + e + " in connection initialization.");
+            System.err.println("Erreur lors de l'initialisation de la connexion : " + e);
             notifyDestroyed();
         }
         
@@ -99,12 +99,12 @@ public class SensorSampler extends MIDlet {
                 // et l'envoie
                 rCon.send(dg);
 
-                System.out.println("Time: " + now + " - Brightness: " + brightness +" - Temperature: " + convertedTemperature);
+                System.out.println("Time: " + now + " - brightness: " + brightness +" - temperature: " + convertedTemperature);
                 
                 // On va en veille jusqu'au prochain relevé dans 10 secondes
                 Utils.sleep(SAMPLE_PERIOD - (System.currentTimeMillis() - now));
             } catch (Exception e) {
-                System.err.println("Caught " + e + " while collecting/sending sensor sample.");
+                System.err.println("Erreur lors de la lecture des valeurs des capteurs : " + e);
             }
         }
     }

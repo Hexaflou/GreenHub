@@ -61,7 +61,7 @@ public class HostApplication {
             rCon = (RadiogramConnection) Connector.open("radiogram://:" + HOST_PORT);
             dg = rCon.newDatagram(rCon.getMaximumLength());
         } catch (Exception e) {
-             System.err.println("Error while creating SunSPOT server BaseStation: " + e.getMessage());
+             System.err.println("Erreur lors de la création du serveur BaseStation SunSPOT : " + e.getMessage());
              throw e; // Arrête le programme
         }
         
@@ -69,7 +69,7 @@ public class HostApplication {
             // Ouvre un socket Unix sur lequel on va renvoyer nos messages, port 1337
             serverSocket = new DatagramSocket();
         } catch (Exception e) {
-             System.err.println("Error while creating Unix socket: " + e.getMessage());
+             System.err.println("Erreur lors de la création du socket : " + e.getMessage());
              throw e; // Arrête le programme
         }
 

@@ -35,7 +35,7 @@ def home(request):
 @login_required
 def command(request, type=None):
     if type == "test":
-        msg = {"msg_type": "action", "mac_address": "48151623eT", "action": "yoshiii"}
+        msg = {"msg_type": "action", "hardware_id": "48151623eT", "action": "yoshiii"}
     elif type == "real-fast":
         msg = {"msg_type": "realtime", "interval": 5}
     elif type == "real-slow":
@@ -43,7 +43,7 @@ def command(request, type=None):
     elif type == "real-off":
         msg = {"msg_type": "realtime", "interval": 0}
     elif type == "get-value-test":
-        msg = {"msg_type": "last_state", "mac_address": "0001B015eC"}
+        msg = {"msg_type": "last_state", "hardware_id": "0001B015eC"}
     else:
         raise Http404
 

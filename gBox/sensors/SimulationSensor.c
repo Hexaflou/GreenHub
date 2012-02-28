@@ -40,23 +40,23 @@ int StartSimulationSensor(mqd_t arg_smq) {
 
     /*************************** SALON ***************************/
     /* Capteur de température entre 0 et 40°C : salon */
-    launchSimulationSensor("00893360", 10, &p_simuThreadList, SIMU_TEMP);
+    launchSimulationSensor("00893360", 20, &p_simuThreadList, SIMU_TEMP);
 
     /* Capteur de luminosité entre 0 et 510Lux : salon */
-    launchSimulationSensor("00054122", 3, &p_simuThreadList, SIMU_LIGHT);
+    launchSimulationSensor("00054122", 15, &p_simuThreadList, SIMU_LIGHT);
 
     /* Capteur de contact : fenêtre salon */
-    launchSimulationSensor("0001B015", 6, &p_simuThreadList, SIMU_CONTACT);
+    launchSimulationSensor("0001B015", 8, &p_simuThreadList, SIMU_CONTACT);
 
     /* Interrupteur : grande lumière salon */
-    launchSimulationSensor("0021CBE5", 2, &p_simuThreadList, SIMU_SWITCH);
+    launchSimulationSensor("0021CBE5", 20, &p_simuThreadList, SIMU_SWITCH);
 
     /*************************** SALLE DE BAIN ***************************/
     /* Capteur de température entre 0 et 40°C : salle de bain */
-    launchSimulationSensor("FFEA0321", 10, &p_simuThreadList, SIMU_TEMP);
+    launchSimulationSensor("FFEA0321", 15, &p_simuThreadList, SIMU_TEMP);
 
     /* Capteur de luminosité (entre 0 et 510Lux) et de présence : salle de bain */
-    launchSimulationSensor("00054155", 2, &p_simuThreadList, SIMU_LIGHT_OCCUPANCY);
+    launchSimulationSensor("00054155", 6, &p_simuThreadList, SIMU_LIGHT_OCCUPANCY);
 
     return 0;
 }

@@ -13,7 +13,8 @@
 #include "../gCommunication/comIncludes.h"
 
 /* Définition de constante */
-#define QUEUE_NAME  "/GH_comSendReceptorQ"
+#define QUEUE_NAME_SND_RECEPTOR  "/GH_comReceptorSendQ"
+#define QUEUE_NAME_SIMULATION  "/GH_comReceptorSimuQ"
 
 /***************************PRIVEE***********************/
 static void * comSndReceptorTask(void * attr);
@@ -52,10 +53,10 @@ SmqReturn comReceptorTaskInit(char * arg_receptorIP, int arg_receptorPort) {
     receptorPort = arg_receptorPort;
     
     /* create the message queue */
-    smqReturn.smq = mq_open(QUEUE_NAME, O_WRONLY | O_CREAT, 0644, &attr);
+    smqReturn.smq = mq_open(QUEUE_NAME_SND_RECEPTOR, O_WRONLY | O_CREAT, 0644, &attr);
     assert((mqd_t) - 1 != smqReturn.smq);
 
-    smqReturn.smqSimulation = mq_open(QUEUE_NAME, O_WRONLY | O_CREAT, 0644, &attr);
+    smqReturn.smqSimulation = mq_open(QUEUE_NAME_SIMULATION, O_WRONLY | O_CREAT, 0644, &attr);
     assert((mqd_t) - 1 != smqReturn.smqSimulation);
 
     /* lancement de la tache */
@@ -80,12 +81,13 @@ int comReceptorTaskClose() {
     if (rmq != -1)
         assert((mqd_t) - 1 != mq_close(rmq));
     if (smqSimulation != -1)
-        assert((mqd_t) - 1 != mq_close(smq));
+        assert((mqd_t) - 1 != mq_close(smqSimulation));
     if (rmqSimulation != -1)
-        assert((mqd_t) - 1 != mq_close(rmq));
-    assert((mqd_t) - 1 != mq_unlink(QUEUE_NAME));
+        assert((mqd_t) - 1 != mq_close(rmqSimulation));
+    assert((mqd_t) - 1 != mq_unlink(QUEUE_NAME_SND_RECEPTOR));
+	assert((mqd_t) - 1 != mq_unlink(QUEUE_NAME_SIMULATION));
 
-    free(receptorIP);    
+    free(receptorIP);
     
     if (sock != 0)
         close(sock);
@@ -188,11 +190,11 @@ void *ListenEnOceanSimulation(void *message2) {
     ssize_t bytes_read;
 
     /* create the message queue */
-    rmqSimulation = mq_open(QUEUE_NAME, O_RDONLY);
+    rmqSimulation = mq_open(QUEUE_NAME_SIMULATION, O_RDONLY);
 
     while (1) {
         /* receive the message */	
-        bytes_read = mq_receive(rmq, buffer, MAX_MQ_SIZE, NULL);
+        bytes_read = mq_receive(rmqSimulation, buffer, MAX_MQ_SIZE, NULL);
         assert(bytes_read >= 0);
         buffer[bytes_read] = '\0';
 
@@ -216,7 +218,7 @@ static void * comSndReceptorTask(void * attr) {
     ssize_t bytes_read;
 
     /* create the message queue */
-    rmq = mq_open(QUEUE_NAME, O_RDONLY);
+    rmq = mq_open(QUEUE_NAME_SND_RECEPTOR, O_RDONLY);
     assert((mqd_t) - 1 != rmq);
 
     while (1) {

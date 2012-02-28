@@ -282,7 +282,13 @@
 	"Name":	"Capteur de propane"
 }{
 	"EEP":	"FFFF01",
-	"Name":	"Capteur SunSPOT, de température et de luminosité"
+	"Name":	"Capteur SunSPOT, de température et de luminosité",
+  "RangeData": {
+    "scaleMin":      0, 
+    "scaleMax":      165, 
+    "rangeMin":      0, 
+    "rangeMax":      255
+  }
 }{
 	"EEP":	"EEEE00",
 	"Name":	"Actionneur courant EnOcean"

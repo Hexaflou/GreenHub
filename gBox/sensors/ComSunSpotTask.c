@@ -46,16 +46,18 @@ void *ListenSunSpot(void *message1) {
     char buffer[47];
     long n;
     struct sockaddr_in serverAddr;
+	char * fragmentString;
     socklen_t serverAddrLen = sizeof (serverAddr);
 
     /* Variable pour la trame a gerer, seront utilises bien plus tard */
     char* idCapteur;
     /* char* dateTime; */ /* (inutilisée) */
     int temperature;
-    char hexTemperature[5];
+    char hexTemperature[3];
     int brightness;
-    char hexBrightness[5];
-    char frame[22] = {'F', 'F'}; /* toutes les autres valeurs seront des 0 */
+    float f_brightness, f_temperature;
+    char hexBrightness[3];
+    char frame[23];
 
 
     /* Déclaration des infos réseau */
@@ -108,15 +110,22 @@ void *ListenSunSpot(void *message1) {
         /*strncpy(message, buffer, 30);
          *
          * printf(message);*/
-        message = buffer;
+
+	printf("MESSAGE : %s\n",buffer);
+
+	fragmentString = strtok(buffer, ";");
+	printf("fragmentString avant A55A : %s\n",fragmentString);
 
         /* on regarde l'entête, vérifie que c'est bien "A55A" */
-        if (strcmp(strtok(message, ";"), "A55A") != 0) {
+        if (strcmp(fragmentString, "A55A") != 0) {
             printf("[ListenSunSpot] Mauvais header.\n");
         }
 
+	fragmentString = strtok(NULL, ";");
+	printf("fragmentString apres A55A : %s\n",fragmentString);
+
         /* on vérifie maintenant si on est bien sur un vrai capteur SunSpot : type "03" */
-        if (strcmp(strtok(NULL, ";"), "03") != 0) {
+        if (strcmp(fragmentString, "03") != 0) {
             printf("[ListenSunSpot] Bon type de capteur.\n");
         }
 
@@ -137,35 +146,15 @@ void *ListenSunSpot(void *message1) {
          *        du coup on raccourcit sans problèmes pour ne garder que les 4 derniers
          */
 
-        idCapteur = str_sub(strtok(NULL, ";"), 14, 18);
+        idCapteur = str_sub(strtok(NULL, ";"), 15, 18);
+	printf("idCapteur : %s\n",idCapteur);
 
         /* date et heure de la mesure : info pas utilisée pour l'instant */
         /* dateTime = strtok(NULL, ";"); */
 
         /* luminosité */
         brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
-
-        if (brightness <= 0xFFFF) {
-            sprintf(&hexBrightness[0], "%04x", brightness);
-        }
-
-        /* température - même fonctionnement */
-        temperature = atoi(strtok(NULL, ";"));
-
-        /* il faut qu'on applique un coefficient (diviseur)
-         *        détail du calcul :
-         *        (scaleMax-scaleMin)/(rangeMax/rangeMin)
-         *        on remplace avec les valeurs, issues de la datasheet pour la scale et le range est celui d'un int :
-         *        (165-0)/(255-0) = 0,647058824
-         */
-        temperature = temperature * 0.647058824;
-
-        if (temperature <= 0xFFFF) {
-            sprintf(&hexTemperature[0], "%04x", temperature);
-        }
-
-        /* --- luminosité --- */
-        brightness = atoi(strtok(NULL, ";")); /* on récupère déjà la valeur dans un int */
+	printf("brightness : %i\n",brightness);
 
         /* il faut qu'on applique un coefficient de nouveau :
          *        la valeur envoyée par le capteur est entre 0 et 750 (cf datasheet)
@@ -175,11 +164,37 @@ void *ListenSunSpot(void *message1) {
          *           (750-0)/(255-0)
          */
 
-        brightness = brightness / 2.94117647;
+        f_brightness = (float)brightness / 2.94117647;
 
-        if (brightness <= 0xFFFF) {
-            sprintf(&hexBrightness[0], "%04x", brightness);
+	sprintf(hexBrightness, "%X", (int) f_brightness);
+
+        /* Si la luminosité est exprime sur un caractere en hexa il va falloir l etaler sur nos deux caracteres hexa */
+        if (f_brightness < 16) {
+            hexBrightness[1] = hexBrightness[0];
+            hexBrightness[0] = '0';
+            hexBrightness[2] = '\0';
         }
+printf("hexBrightness : %s\n",hexBrightness);
+        /* température - même fonctionnement */
+        temperature = atoi(strtok(NULL, ";"));
+
+        /* il faut qu'on applique un coefficient (diviseur)
+         *        détail du calcul :
+         *        (scaleMax-scaleMin)/(rangeMax/rangeMin)
+         *        on remplace avec les valeurs, issues de la datasheet pour la scale et le range est celui d'un int :
+         *        (165-0)/(255-0) = 0,647058824
+         */
+        f_temperature = (float)temperature * 0.647058824;
+
+	sprintf(hexTemperature, "%X", (int) f_temperature);
+
+        /* Si la luminosité est exprime sur un caractere en hexa il va falloir l etaler sur nos deux caracteres hexa */
+        if (f_temperature < 16) {
+            hexTemperature[1] = hexTemperature[0];
+            hexTemperature[0] = '0';
+            hexTemperature[2] = '\0';
+        }
+	printf("HexTemperature : %s\n",hexTemperature);
 
         /*
          *        On construit concrètement la pseudo trame maintenant :
@@ -192,15 +207,16 @@ void *ListenSunSpot(void *message1) {
          *           IDID : ID réel du SPOT
          *           0000 : "trou"
          */
-
-        memcpy(&frame[4], hexBrightness, 2); /* recopie 2 octets */
-        memcpy(&frame[6], hexTemperature, 2);
-
-        memcpy(&frame[14], idCapteur, 4); /* finalement, l'id */
+	strcpy(frame,"FF00");
+	strcat(frame,hexBrightness);
+	strcat(frame,hexTemperature);
+	strcat(frame,"000000");
+	strcat(frame,idCapteur);
+	strcat(frame,"0000");
 
         free(idCapteur);
-#if DEBUG > 0
-        printf(frame);
+#if DEBUG == 0
+        printf("frame : %s\n",frame);
 #endif
 
         ManageMessage(frame);

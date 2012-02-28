@@ -180,6 +180,9 @@ int ComponentInterfaceInit() {
 	/* Création et lancement des deux tâches permettant de communiquer avec le récepteur EnOcean */
 	smqReturn = comReceptorTaskInit(receptorIPTxt, receptorPortInt);
 
+	/* Création et lancement de la tâche permettant de dialoguer avec les capteurs SunSpot */
+	comSunSpotTaskInit();
+
 	/* Mode Hors Simulation*/    
 	StartSimulationSensor(smqReturn.smqSimulation);
 
@@ -194,7 +197,7 @@ int ComponentInterfaceInit() {
 /* Destruction des composants et des tâches */
 int ComponentInterfaceClose() {
 	comReceptorTaskClose();
-	/*comSunSpotTaskClose();*/
+	comSunSpotTaskClose();
 	/*comSimulationReceptorTaskClose();*/
 	StopSimulationSensor();
 	destroyEEPList(p_EEPList); /* Désalloue p_EEPList */

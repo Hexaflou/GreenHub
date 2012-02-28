@@ -33,20 +33,19 @@ public class MockTesteur {
         while (true) {
             try {               
                 String address = "0014.4F01.0000.1337";     // Id toujours du même capteur
-                String time = "1328693680881";              // heure aléatoire
                 int brightness = (int) (Math.random()*255); // on "génère" une luminosité
                 double temperature = Math.random()*165;      // température aléatoire, entre 0 et 165
                 
                 // on ré-arrondit la temprétaure à un seul chiffre après la virgule
                 temperature = (Math.round(temperature*10))/10;
                 
-                System.out.println("At " + time + " from: " + address + " brightness: " + brightness + " temperature: " + temperature);
+                System.out.println( "From: " + address + " brightness: " + brightness + " temperature: " + temperature);
                 
                 // On va renvoyer les données sur un socket.
                 // on commence par préparer le message
                          
                 // Données
-                String contentData = address + ";" + time + ";" + String.valueOf(brightness)+ ";" + String.valueOf(temperature) + ";";
+                String contentData = address + ";" + String.valueOf(brightness)+ ";" + String.valueOf(temperature) + ";";
                                 
                 // On construit le message, rajoute l'entête
                     // 4 premiers octets : A55A

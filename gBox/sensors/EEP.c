@@ -437,8 +437,12 @@ int AddSensorTempLightSunSpot(char* id, void ** pp_sensorList, char eep[7], floa
     p_sensor->id[9] = 'L';
     p_sensor->id[10] = '\0';
     strncpy(p_sensor->EEP, eep, 7);
-    p_sensor->value = 0;
-    p_sensor->rangeData = NULL;
+    p_sensor->rangeData=(SensorRange*)malloc(sizeof(SensorRange));
+    p_sensor->rangeData->scaleMin=scaleMin;
+    p_sensor->rangeData->scaleMax=scaleMax;
+    p_sensor->rangeData->rangeMin=rangeMin;
+    p_sensor->rangeData->rangeMax=rangeMax;
+    p_sensor->value = 0;    
     p_sensor->decodeMessage = decodeMessageLight;
 
     p_sensor->next = (Sensor*) malloc(sizeof (Sensor));
@@ -449,6 +453,11 @@ int AddSensorTempLightSunSpot(char* id, void ** pp_sensorList, char eep[7], floa
     p_sensor->id[9] = 'T';
     p_sensor->id[10] = '\0';
     strncpy(p_sensor->EEP, eep, 7);
+    p_sensor->rangeData=(SensorRange*)malloc(sizeof(SensorRange));
+    p_sensor->rangeData->scaleMin=0;
+    p_sensor->rangeData->scaleMax=165;
+    p_sensor->rangeData->rangeMin=0;
+    p_sensor->rangeData->rangeMax=255;
     p_sensor->value = 0;
     p_sensor->decodeMessage = decodeMessageTemp;
     p_sensor->next = NULL;

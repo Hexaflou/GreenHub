@@ -11,7 +11,6 @@
 #include "ComReceptorTask.h"
 #include "ComponentInterface.h"
 #include "../gCommunication/comIncludes.h"
-#include <../../libs/gMemory/gMemory.h>
 
 /* Définition de constante */
 #define QUEUE_NAME  "/GH_comSendReceptorQ"
@@ -48,7 +47,7 @@ SmqReturn comReceptorTaskInit(char * arg_receptorIP, int arg_receptorPort) {
     attr.mq_curmsgs = 0;
 
     /* Initialize the connexion's parameters */
-    receptorIP = (char*) gmalloc(sizeof(char)*strlen(arg_receptorIP));    
+    receptorIP = (char*) malloc(sizeof(char)*strlen(arg_receptorIP));    
     strcpy(receptorIP,arg_receptorIP);
     receptorPort = arg_receptorPort;
     
@@ -86,12 +85,12 @@ int comReceptorTaskClose() {
         assert((mqd_t) - 1 != mq_close(rmq));
     assert((mqd_t) - 1 != mq_unlink(QUEUE_NAME));
 
-    gfree(receptorIP);    
+    free(receptorIP);    
     
     if (sock != 0)
         close(sock);
     if (message != NULL)
-        gfree(message);
+        free(message);
     return (ret || ret2 || ret3);
 }
 
@@ -165,7 +164,7 @@ void *ListenEnOcean(void *message2) {
         tailleTrame = xtoi(buffer);
 
         /* Un octet correspond a deux caracteres */
-        message = (char*) gmalloc(tailleTrame * sizeof (char) * 2 + 1);
+        message = (char*) malloc(tailleTrame * sizeof (char) * 2 + 1);
 
         /* Reception du message sans le header */
         if ((n = recv(sock, message, tailleTrame * 2, 0)) < 0) {
@@ -174,7 +173,7 @@ void *ListenEnOcean(void *message2) {
         }
         message[tailleTrame * 2] = '\0';
         ManageMessage(message);
-        gfree(message);
+        free(message);
         message = NULL;
     }
     return 0;
@@ -200,6 +199,7 @@ void *ListenEnOceanSimulation(void *message2) {
 	/* On enlève le header */
 	msgWithoutHeader = str_sub(buffer,6,27);			
         ManageMessage(msgWithoutHeader);
+	free(msgWithoutHeader);
     }
 
     return (void *) NULL;

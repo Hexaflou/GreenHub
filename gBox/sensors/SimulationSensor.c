@@ -5,7 +5,6 @@
 #include "Actuator.h"
 #include "Utility.h"
 #include "ComReceptorTask.h"
-#include <../../libs/gMemory/gMemory.h>
 
 /* Inclusions externes */
 #include <string.h>
@@ -68,7 +67,7 @@ int StopSimulationSensor() {
     p_simuThreadDelete = p_simuThreadList;
     while (p_simuThreadCurrent != NULL) {
         p_simuThreadCurrent = p_simuThreadDelete->next;
-        gfree(p_simuThreadDelete);
+        free(p_simuThreadDelete);
         p_simuThreadDelete = p_simuThreadCurrent;
     }
     return 0;
@@ -79,7 +78,7 @@ int StopSimulationSensor() {
 int launchSimulationSensor(char * id, int sleepingTime, SimuThreadList ** pp_simuThreadList, enum SIMU_TYPE simu_type) {
     SimuThreadList* p_simuThread;
     void *(*SimulationSensorFunction)(void *ptr);
-    ArgSensor * argSensor = (ArgSensor*) gmalloc(sizeof (ArgSensor));
+    ArgSensor * argSensor = (ArgSensor*) malloc(sizeof (ArgSensor));
     strncpy(argSensor->id, id, 9);
     argSensor->sleepingTime = sleepingTime;
 
@@ -109,7 +108,7 @@ int launchSimulationSensor(char * id, int sleepingTime, SimuThreadList ** pp_sim
 
     if (*pp_simuThreadList == NULL) { /* Liste vide */
         /* Creation du premier de la liste */
-        *pp_simuThreadList = (SimuThreadList*) gmalloc(sizeof (SimuThreadList));
+        *pp_simuThreadList = (SimuThreadList*) malloc(sizeof (SimuThreadList));
         (*pp_simuThreadList)->next = NULL;
         p_simuThread = *pp_simuThreadList;
     } else {
@@ -120,7 +119,7 @@ int launchSimulationSensor(char * id, int sleepingTime, SimuThreadList ** pp_sim
             p_simuThread = p_simuThread->next;
         }
         /* Creation du capteur en fin de liste */
-        p_simuThread->next = (SimuThreadList*) gmalloc(sizeof (SimuThreadList));
+        p_simuThread->next = (SimuThreadList*) malloc(sizeof (SimuThreadList));
         p_simuThread = p_simuThread->next;
         p_simuThread->next = NULL;
     }
@@ -142,7 +141,7 @@ void * SimulationSensorTemp(void * p_argSensor) {
 
     sleepingTime = ((struct ArgSensor*) p_argSensor)->sleepingTime;
     strcpy(id, ((struct ArgSensor*) p_argSensor)->id);
-    gfree(p_argSensor);
+    free(p_argSensor);
 
     /*
      * Les valeurs de température émises par un capteur doivent être décodés en calculant un multiplicateur.
@@ -206,7 +205,7 @@ void * SimulationSensorContact(void * p_argSensor) {
 
     sleepingTime = ((struct ArgSensor*) p_argSensor)->sleepingTime;
     strcpy(id, ((struct ArgSensor*) p_argSensor)->id);
-    gfree(p_argSensor);
+    free(p_argSensor);
 
     /*AddSensor(((struct ArgSensor*)p_argSensor)->id, str_sub(((struct ArgSensor*)p_argSensor)->eep, 0, 1), str_sub(((struct ArgSensor*)p_argSensor)->eep, 2, 3), str_sub(((struct ArgSensor*)p_argSensor)->eep, 4, 5));*/
     while (1) {
@@ -253,7 +252,7 @@ void * SimulationSensorSwitch(void * p_argSensor) {
 
     sleepingTime = ((struct ArgSensor*) p_argSensor)->sleepingTime;
     strcpy(id, ((struct ArgSensor*) p_argSensor)->id);
-    gfree(p_argSensor);
+    free(p_argSensor);
 
     /*	AddSensor(((struct ArgSensor*)p_argSensor)->id, str_sub(((struct ArgSensor*)p_argSensor)->eep, 0, 1), str_sub(((struct ArgSensor*)p_argSensor)->eep, 2, 3), str_sub(((struct ArgSensor*)p_argSensor)->eep, 4, 5));*/
     while (1) {
@@ -301,7 +300,7 @@ void * SimulationSensorLight(void * p_argSensor) {
 
     sleepingTime = ((struct ArgSensor*) p_argSensor)->sleepingTime;
     strcpy(id, ((struct ArgSensor*) p_argSensor)->id);
-    gfree(p_argSensor);
+    free(p_argSensor);
 
     /*
      * Les valeurs de luminosité émises par un capteur doivent être décodés en calculant un multiplicateur.
@@ -363,7 +362,7 @@ void * SimulationSensorOccupancy(void * p_argSensor) {
 
     sleepingTime = ((struct ArgSensor*) p_argSensor)->sleepingTime;
     strcpy(id, ((struct ArgSensor*) p_argSensor)->id);
-    gfree(p_argSensor);
+    free(p_argSensor);
 
     while (1) {
         sleep(sleepingTime);
@@ -411,7 +410,7 @@ void * SimulationSensorLightOccupancy(void * p_argSensor) {
 
     sleepingTime = ((struct ArgSensor*) p_argSensor)->sleepingTime;
     strcpy(id, ((struct ArgSensor*) p_argSensor)->id);
-    gfree(p_argSensor);
+    free(p_argSensor);
 
     /*
      * Les valeurs de luminosité émises par un capteur doivent être décodés en calculant un multiplicateur.

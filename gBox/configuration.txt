@@ -1,8 +1,0 @@
-{
-	"receptorIP":	"134.214.105.28",
-	"receptorPort":	5000,
-	"eepConfig":	"eep.txt",
-	"sensorConfig":	"sensors.txt",
-	"actuatorConfig":	"actuators.txt"
-}
-

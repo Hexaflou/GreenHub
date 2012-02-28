@@ -6,7 +6,6 @@
  */
 
 #include "Utility.h"
-#include <../../libs/gMemory/gMemory.h>
 
 /*
 
@@ -73,7 +72,7 @@ char *str_sub(const char *s, unsigned int start, unsigned int end) {
     char *new_s = NULL;
 
     if (s != NULL && start < end) {
-        new_s = gmalloc(sizeof (*new_s) * (end - start + 2));
+        new_s = malloc(sizeof (*new_s) * (end - start + 2));
         if (new_s != NULL) {
             int i;
 

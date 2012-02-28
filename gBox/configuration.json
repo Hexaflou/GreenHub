@@ -1,0 +1,9 @@
+{
+	"receptorIP":	"134.214.105.28",
+	"receptorPort":	5000,
+	"receptorID":	"FF9F1E",
+	"eepConfig":	"eep.json",
+	"sensorConfig":	"sensors.json",
+	"actuatorConfig":	"actuators.json"
+}
+

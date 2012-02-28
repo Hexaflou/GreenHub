@@ -20,18 +20,18 @@
 	"EEP":	"070201",
 	"Name":	"Capteur de temperature, entre -40°C et 0°C",
   "RangeData": {
-    "scaleMin":      -40, 
+    "scaleMin":      -40,
     "scaleMax":      0, 
-    "rangeMin":      255, 
+    "rangeMin":      255,
     "rangeMax":      0
 	}
 }{
 	"EEP":	"070202",
 	"Name":	"Capteur de temperature, entre -30°C et 10°C",
   "RangeData": {
-    "scaleMin":      -30, 
-    "scaleMax":      10, 
-    "rangeMin":      255, 
+    "scaleMin":      -30,
+    "scaleMax":      10,
+    "rangeMin":      255,
     "rangeMax":      0
 	}
 }{

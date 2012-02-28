@@ -4,7 +4,6 @@
 #include "ComponentInterface.h"
 #include "EEP.h"
 #include "../lib/cJSON.h"
-#include <../../libs/gMemory/gMemory.h>
 
 /* Inclusions externes */
 #include <stdio.h>
@@ -100,9 +99,9 @@ int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, 
             /* Ajout du capteur */
             AddComponentByEEP(id, (void**) pp_sensorList, EEPList, org, funct, type);
             cJSON_Delete(root);
-            gfree(org);
-            gfree(funct);
-            gfree(type);
+            free(org);
+            free(funct);
+            free(type);
         }
         c = fgetc(f);
     } /* Fin while */
@@ -167,9 +166,9 @@ int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, 
             /* Ajout du capteur */
             AddComponentByEEP(id, (void**) pp_actuatorList, EEPList, org, funct, type);
             cJSON_Delete(root);
-            gfree(org);
-            gfree(funct);
-            gfree(type);
+            free(org);
+            free(funct);
+            free(type);
         }
         c = fgetc(f);
     } /* Fin while */
@@ -194,8 +193,8 @@ int destroyComponentList(Sensor* p_sensorList, Actuator* p_actuatorList) {
     while (p_sensorCurrent != NULL) {
         p_sensorCurrent = p_sensorDelete->next;
         if (p_sensorDelete->rangeData != NULL)
-            gfree(p_sensorDelete->rangeData);
-        gfree(p_sensorDelete);
+            free(p_sensorDelete->rangeData);
+        free(p_sensorDelete);
         p_sensorDelete = p_sensorCurrent;
     }
     sem_post(&semSensorList);
@@ -206,8 +205,8 @@ int destroyComponentList(Sensor* p_sensorList, Actuator* p_actuatorList) {
     while (p_actuatorCurrent != NULL) {
         p_actuatorCurrent = p_actuatorDelete->next;
         if (p_actuatorDelete->rangeData != NULL)
-            gfree(p_actuatorDelete->rangeData);
-        gfree(p_actuatorDelete);
+            free(p_actuatorDelete->rangeData);
+        free(p_actuatorDelete);
         p_actuatorDelete = p_actuatorCurrent;
     }
     sem_post(&semActuatorList);
@@ -216,41 +215,91 @@ int destroyComponentList(Sensor* p_sensorList, Actuator* p_actuatorList) {
 }
 
 /*
- * Enregistre la configuration du systeme : la liste des eep et la liste des capteurs
+* Enregistre dans la configuration du systeme la liste des capteurs
+*/
+void writeAllConfig(char* fileNameSensor, Sensor * p_sensorList) {
+	Sensor * pCurrent;
+	cJSON * root;
+	char * sensor, *id, *eep;
+	FILE *f;
+
+	/* Ouverture du fichier en ecriture */
+	f = fopen(fileNameSensor, "w");
+
+
+	if (p_sensorList != NULL) {
+		pCurrent = p_sensorList;
+		/* Parcours de la liste de capteurs */
+		while (pCurrent != NULL) {
+			/* Creation du json */
+			id = str_sub(pCurrent->id, 0, 7);
+			eep = str_sub(pCurrent->EEP, 0, 5);
+			root = createCSON(id, eep);
+			sensor = cJSON_Print(root);
+			/* Ecriture des donnees */
+			fprintf(f, "%s", sensor);
+
+			cJSON_Delete(root);
+			pCurrent = pCurrent->next;
+			free(id);
+			free(eep);
+		}
+
+	}
+	/* Fermeture du fichier */
+	fclose(f);
+}
+
+/*
+* Enregistre dans la configuration du systeme le capteur en paramètre.
+*/
+void writeConfigSensor(char* fileNameSensor, Sensor * p_sensor) {
+	cJSON * root;
+	char * sensor, *id, *eep;
+	FILE *f;
+
+	/* Ouverture du fichier en ecriture */
+	f = fopen(fileNameSensor, "a");
+
+	/* Creation du json */
+	id = str_sub(p_sensor->id, 0, 7);
+	eep = str_sub(p_sensor->EEP, 0, 5);
+	root = createCSON(id, eep);
+	sensor = cJSON_Print(root);
+	
+	/* Ecriture des donnees */
+	fprintf(f, "%s", sensor);
+	
+	cJSON_Delete(root);
+	free(sensor);
+	free(id);
+	free(eep);
+	
+	/* Fermeture du fichier */
+	fclose(f);
+}
+
+/*
+ * Ajoute dans le fichier de configuration un actionneur.
  */
-void writeConfig(char* fileNameSensor, char* fileNameEEP, Sensor * p_sensorList, EEP* p_EEPList) {
-    Sensor * pCurrent;
-    cJSON * root;
-    char * sensor, *id, *eep;
-    FILE *f;
+void writeConfigActuator(char* fileNameActuator, Actuator * p_actuator){
+	cJSON * root;
+	char * actuator;
+	FILE *f;
 
-    /* Ecriture du fichier eep */
-    writeEEPList(fileNameEEP, p_EEPList);
+	/* Ouverture du fichier en ecriture */
+	f = fopen(fileNameActuator, "a");
 
-
-    /* Ouverture du fichier en ecriture */
-    f = fopen(fileNameSensor, "w");
-
-
-    if (p_sensorList != NULL) {
-        pCurrent = p_sensorList;
-        /* Parcours de la liste de capteurs */
-        while (pCurrent != NULL) {
-            /* Creation du json */
-            id = str_sub(pCurrent->id, 0, 7);
-            eep = str_sub(pCurrent->EEP, 0, 5);
-            root = createCSON(id, eep);
-            sensor = cJSON_Print(root);
-            /* Ecriture des donnees */
-            fprintf(f, "%s", sensor);
-
-            cJSON_Delete(root);
-            pCurrent = pCurrent->next;
-            gfree(id);
-            gfree(eep);
-        }
-
-    }
-    /* Fermeture du fichier */
-    fclose(f);
+	/* Creation du json */
+	root = createCSON(p_actuator->id, p_actuator->EEP);
+	actuator = cJSON_Print(root);
+	
+	/* Ecriture des donnees */
+	fprintf(f, "%s", actuator);
+	
+	cJSON_Delete(root);
+	free(actuator);
+	
+	/* Fermeture du fichier */
+	fclose(f);
 }

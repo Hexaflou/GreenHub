@@ -25,3 +25,6 @@ Capteur/.svn
 
 # Don't backup a backup
 *~
+gBox/nbproject/private/
+gBox/nbproject
+libs/gMemory/nbproject

@@ -9,13 +9,13 @@
  *														Hexanome H4212
  *********************************************************************/
 
-typedef enum{RUNNING, WAITING, SLEEPING, ACTIVABLE, TOLAUNCH} gThread_state;
+typedef enum{RUNNING, WAITING, WAITINGT, SLEEPING, ACTIVABLE, TOLAUNCH} gThread_state;
 typedef void(gfct)(void *);
 
 struct ctx_ss
 {
 	int id;
-	long * esp;	
+	long * esp;
 	long * ebp;
 	gThread_state state;
 	long * stack;

@@ -11,6 +11,7 @@
 #include "ComReceptorTask.h"
 #include "ComponentInterface.h"
 #include "../gCommunication/comIncludes.h"
+#include <../../libs/gMemory/gMemory.h>
 
 /* Définition de constante */
 #define QUEUE_NAME  "/GH_comSendReceptorQ"
@@ -18,56 +19,80 @@
 /***************************PRIVEE***********************/
 static void * comSndReceptorTask(void * attr);
 static void *ListenEnOcean(void *ptr);
+static void *ListenEnOceanSimulation(void *ptr);
 static int dataSend(char * msg);
 
 static mqd_t smq = -1;
 static mqd_t rmq = -1;
+static mqd_t smqSimulation = -1;
+static mqd_t rmqSimulation = -1;
+
 static pthread_t comSndReceptorThread;
 static pthread_t comRcvReceptorThread;
+static pthread_t simulationReceptorThread;
 static SOCKET sock = 0;
 static char * message = NULL;
+static char * receptorIP;
+static int receptorPort;
 
 /************************PUBLIC***************************************/
 
 /* Initialisation de la tache, retourne un pointeur sur la boite au lettre */
-mqd_t comReceptorTaskInit() {
+SmqReturn comReceptorTaskInit(char * arg_receptorIP, int arg_receptorPort) {
     struct mq_attr attr;
+    struct SmqReturn smqReturn;
     /* initialize the queue attributes */
     attr.mq_flags = 0;
     attr.mq_maxmsg = 10;
     attr.mq_msgsize = MAX_MQ_SIZE;
     attr.mq_curmsgs = 0;
 
+    /* Initialize the connexion's parameters */
+    receptorIP = (char*) gmalloc(sizeof(char)*strlen(arg_receptorIP));    
+    strcpy(receptorIP,arg_receptorIP);
+    receptorPort = arg_receptorPort;
+    
     /* create the message queue */
-    smq = mq_open(QUEUE_NAME, O_WRONLY | O_CREAT, 0644, &attr);
-    assert((mqd_t) - 1 != smq);
+    smqReturn.smq = mq_open(QUEUE_NAME, O_WRONLY | O_CREAT, 0644, &attr);
+    assert((mqd_t) - 1 != smqReturn.smq);
+
+    smqReturn.smqSimulation = mq_open(QUEUE_NAME, O_WRONLY | O_CREAT, 0644, &attr);
+    assert((mqd_t) - 1 != smqReturn.smqSimulation);
 
     /* lancement de la tache */
     pthread_create(&comRcvReceptorThread, NULL, &ListenEnOcean, NULL);
     pthread_create(&comSndReceptorThread, NULL, &comSndReceptorTask, NULL);
+    pthread_create(&simulationReceptorThread, NULL, &ListenEnOceanSimulation, NULL);
 
-    return smq;
+    return smqReturn;
 }
 
 /* Destruction de la tache */
 int comReceptorTaskClose() {
     /* close task */
-    int ret, ret2;
+    int ret, ret2, ret3;
     ret = pthread_cancel(comSndReceptorThread);
     ret2 = pthread_cancel(comRcvReceptorThread);
+    ret3 = pthread_cancel(simulationReceptorThread);
 
     /* cleanup */
     if (smq != -1)
         assert((mqd_t) - 1 != mq_close(smq));
     if (rmq != -1)
         assert((mqd_t) - 1 != mq_close(rmq));
+    if (smqSimulation != -1)
+        assert((mqd_t) - 1 != mq_close(smq));
+    if (rmqSimulation != -1)
+        assert((mqd_t) - 1 != mq_close(rmq));
     assert((mqd_t) - 1 != mq_unlink(QUEUE_NAME));
 
+    gfree(receptorIP);    
+    
     if (sock != 0)
         close(sock);
     if (message != NULL)
-        free(message);
-    return (ret || ret2);
+        gfree(message);
+    return (ret || ret2 || ret3);
 }
 
 /************************PRIVATE***************************************/
@@ -86,9 +111,9 @@ void *ListenEnOcean(void *message2) {
 
     /* Protocole Internet */
     serverAddr.sin_family = AF_INET;
-    /*serverAddr.sin_addr.s_addr = inet_addr("134.214.105.28");*/
-    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    serverAddr.sin_port = htons(8888);
+    serverAddr.sin_addr.s_addr = inet_addr(receptorIP);
+    /*serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");*/
+    serverAddr.sin_port = htons(receptorPort);
 
     /* Creation d un socket TCP */
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == ERROR) {
@@ -140,7 +165,7 @@ void *ListenEnOcean(void *message2) {
         tailleTrame = xtoi(buffer);
 
         /* Un octet correspond a deux caracteres */
-        message = (char*) malloc(tailleTrame * sizeof (char) * 2 + 1);
+        message = (char*) gmalloc(tailleTrame * sizeof (char) * 2 + 1);
 
         /* Reception du message sans le header */
         if ((n = recv(sock, message, tailleTrame * 2, 0)) < 0) {
@@ -149,9 +174,37 @@ void *ListenEnOcean(void *message2) {
         }
         message[tailleTrame * 2] = '\0';
         ManageMessage(message);
-        free(message);
+        gfree(message);
         message = NULL;
     }
+    return 0;
+}
+
+/*
+ * Fonction permettant l'écoute de périphériques EnOcean simulés.
+ */
+void *ListenEnOceanSimulation(void *message2) {
+    char buffer[MAX_MQ_SIZE + 1];
+    char *msgWithoutHeader;
+    ssize_t bytes_read;
+
+    /* create the message queue */
+    rmqSimulation = mq_open(QUEUE_NAME, O_RDONLY);
+
+    while (1) {
+        /* receive the message */	
+        bytes_read = mq_receive(rmq, buffer, MAX_MQ_SIZE, NULL);
+        assert(bytes_read >= 0);
+        buffer[bytes_read] = '\0';
+
+	/* On enlève le header */
+	msgWithoutHeader = str_sub(buffer,6,27);			
+        ManageMessage(msgWithoutHeader);
+    }
+
+    return (void *) NULL;
+
+    
     return 0;
 }
 
@@ -167,7 +220,7 @@ static void * comSndReceptorTask(void * attr) {
     assert((mqd_t) - 1 != rmq);
 
     while (1) {
-        /* receive the message */
+        /* receive the message */	
         bytes_read = mq_receive(rmq, buffer, MAX_MQ_SIZE, NULL);
         assert(bytes_read >= 0);
 

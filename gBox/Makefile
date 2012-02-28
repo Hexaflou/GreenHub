@@ -5,11 +5,11 @@ RMFLAGS	= -f
 SH	= @bash
 ECHO	= @echo
 CC	= gcc
-CCFLAGS	= -Wall -pedantic -m32 -g
+CCFLAGS	= -Wall -pedantic -m32 -g -I ../libs/gMemory/
 EDL	= gcc
 LDFLAGS	= -m32 -g
 LIBS = -lm -lpthread -lrt
-SRC	= $(wildcard *.c) $(wildcard gCommunication/*.c) $(wildcard lib/*.c) $(wildcard sensors/*.c)
+SRC	= $(wildcard *.c) $(wildcard gCommunication/*.c) $(wildcard lib/*.c) $(wildcard sensors/*.c) $(wildcard ../libs/gMemory/gMemory.c)
 OBJS	= $(SRC:.c=.o)
 EXE     = gBox
 

@@ -3,13 +3,13 @@
 #include "gCommunication/gCommunication.h"
 #include "sensors/ComponentInterface.h"
 #include "sensors/Sensor.h"
+#include "sensors/Actuator.h"
 #include <pthread.h>
 
 /********************* LOCAL functions and variables *****************/
 
 static int lPeriod = 0;
 static pthread_t periodLog;
-static sem_t semSensorList;
 
 void * gRealTimeLog(void * attr);
 /* initialise la tache de log periodique des donnees*/
@@ -49,17 +49,24 @@ int gRTClose() {
 
 void * gRealTimeLog(void * attr) {
     Sensor* tempSensor = NULL;
-
+	sem_t semSensorList;
+	
+	Actuator* tempActuator = NULL;
+	sem_t semActuatorList;
+	
     tempSensor = getSensorList();
     semSensorList = getSemSensor();
-
+    
+    tempActuator = getActuatorList();
+    semActuatorList = getSemActuator();
 
 
     while (lPeriod != 0) {
 
 
         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-
+		
+		/* Lecture des capteurs */
         sem_wait(&semSensorList);
 
         while (tempSensor != NULL) {
@@ -70,6 +77,18 @@ void * gRealTimeLog(void * attr) {
 
 
         sem_post(&semSensorList);
+        
+        /* Lecture des actionneurs */
+        sem_wait(&semActuatorList);
+
+        while (tempActuator != NULL) {
+            tempActuator->id[11] = '\0';
+            gCommunicationSendValue(tempActuator->id, tempActuator->status);
+            tempActuator = tempActuator->next;
+        }
+
+
+        sem_post(&semActuatorList);
 
         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 

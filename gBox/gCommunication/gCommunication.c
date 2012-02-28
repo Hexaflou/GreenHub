@@ -8,15 +8,16 @@
 #include "comRcvTask.h"
 #include <time.h>
 
+#include <../../libs/gMemory/gMemory.h>
 #include "../lib/cJSON.h"
 
-/****************************PRIVATE DECLARATION***********************/
+/************************  PRIVATE DECLARATION  ***********************/
 static SOCKET sock;
 static struct hostent *hostinfo;
 static SOCKADDR_IN sin = {0}; /* initialise la structure avec des 0 */
 static mqd_t smq;
 
-/*********************************PUBLIC FUNCTIONS*********************/
+/**************************  PUBLIC FUNCTIONS  ************************/
 int gCommunicationInit(int userId) {
     cJSON *init = cJSON_CreateObject();
     char * msg = NULL;
@@ -33,7 +34,7 @@ int gCommunicationInit(int userId) {
     hostinfo = gethostbyname(SRV_IP); /* on récupère les informations de l'hôte auquel on veut se connecter */
     if (hostinfo == NULL) /* l'hôte n'existe pas */ {
         fprintf(stderr, "Unknown host \n");
-        printf("Unknown host\n");
+        printf("[gCommunication] Erreur lors de la tentative de connexion au serveur (Hôte inconnu).\n");
         return SOCKET_ERROR;
     }
 
@@ -43,7 +44,7 @@ int gCommunicationInit(int userId) {
 
     if (connect(sock, (SOCKADDR *) & sin, sizeof (SOCKADDR)) == SOCKET_ERROR) {
         perror("connect()");
-        printf("erreur\n");
+        printf("[gCommunication] Erreur lors de la tentative de connexion au serveur.\n");
         return SOCKET_ERROR;
     }
 
@@ -57,9 +58,9 @@ int gCommunicationInit(int userId) {
     msg = cJSON_Print(init);
 
     gCommunicationSend(msg);
-    free(msg);
-    cJSON_Delete(init);
 
+    cJSON_Delete(init);
+    gfree(msg);
     return 0;
 }
 

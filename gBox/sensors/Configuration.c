@@ -4,6 +4,7 @@
 #include "ComponentInterface.h"
 #include "EEP.h"
 #include "../lib/cJSON.h"
+#include <../../libs/gMemory/gMemory.h>
 
 /* Inclusions externes */
 #include <stdio.h>
@@ -99,9 +100,9 @@ int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, 
             /* Ajout du capteur */
             AddComponentByEEP(id, (void**) pp_sensorList, EEPList, org, funct, type);
             cJSON_Delete(root);
-            free(org);
-            free(funct);
-            free(type);
+            gfree(org);
+            gfree(funct);
+            gfree(type);
         }
         c = fgetc(f);
     } /* Fin while */
@@ -166,9 +167,9 @@ int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, 
             /* Ajout du capteur */
             AddComponentByEEP(id, (void**) pp_actuatorList, EEPList, org, funct, type);
             cJSON_Delete(root);
-            free(org);
-            free(funct);
-            free(type);
+            gfree(org);
+            gfree(funct);
+            gfree(type);
         }
         c = fgetc(f);
     } /* Fin while */
@@ -193,8 +194,8 @@ int destroyComponentList(Sensor* p_sensorList, Actuator* p_actuatorList) {
     while (p_sensorCurrent != NULL) {
         p_sensorCurrent = p_sensorDelete->next;
         if (p_sensorDelete->rangeData != NULL)
-            free(p_sensorDelete->rangeData);
-        free(p_sensorDelete);
+            gfree(p_sensorDelete->rangeData);
+        gfree(p_sensorDelete);
         p_sensorDelete = p_sensorCurrent;
     }
     sem_post(&semSensorList);
@@ -205,8 +206,8 @@ int destroyComponentList(Sensor* p_sensorList, Actuator* p_actuatorList) {
     while (p_actuatorCurrent != NULL) {
         p_actuatorCurrent = p_actuatorDelete->next;
         if (p_actuatorDelete->rangeData != NULL)
-            free(p_actuatorDelete->rangeData);
-        free(p_sensorDelete);
+            gfree(p_actuatorDelete->rangeData);
+        gfree(p_actuatorDelete);
         p_actuatorDelete = p_actuatorCurrent;
     }
     sem_post(&semActuatorList);
@@ -245,8 +246,8 @@ void writeConfig(char* fileNameSensor, char* fileNameEEP, Sensor * p_sensorList,
 
             cJSON_Delete(root);
             pCurrent = pCurrent->next;
-            free(id);
-            free(eep);
+            gfree(id);
+            gfree(eep);
         }
 
     }

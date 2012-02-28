@@ -71,6 +71,7 @@ static void * comRcvTask(void * attr) {
 			{
 				/* La connection a été perdu */
 				gCommunicationStateVA = 0;
+				closesocket(sock);
 				gCommunicationReco();
 				gCommunicationStateVA = 1;
 			}

@@ -13,7 +13,7 @@
 
 /***************************PRIVATE DECLARATION***********************/
 static void * gLogFunc(void *);
-static int send(char * mac, double value, int date);
+static int send(char * hwid, double value, int date);
 /* variables */
 pthread_t gLogThread;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -23,11 +23,11 @@ static FILE* stateFile = NULL;
 static int position = 0;
 
 /************************PUBLIC***************************************/
-int gLogsLog(char mac[40], double value) {
+int gLogsLog(char hwid[12], double value) {
     wLogFile = fopen(LOG_FILENAME, "a");
     if (wLogFile != NULL) {
         pthread_mutex_lock(&mutex);
-        fprintf(wLogFile, "MAC: %s ; Value: %f ; Timestamp: %d\n", mac, value, (int) time(NULL));
+        fprintf(wLogFile, "HWID: %s ; Value: %f ; Timestamp: %d\n", hwid, value, (int) time(NULL));
         pthread_mutex_unlock(&mutex);
     } else {
         printf("[gLog] Impossible d'initialiser les logs, les fichiers sont inaccessibles.\n");
@@ -73,13 +73,13 @@ int gLogThreadClose() {
 }
 
 /************************PRIVATE***************************************/
-static int send(char * mac, double value, int date) {
+static int send(char * hwid, double value, int date) {
     cJSON *data = cJSON_CreateObject();
     char * msg = NULL;
     int ret;
 
     cJSON_AddStringToObject(data, "msg_type", "new_state");
-    cJSON_AddStringToObject(data, "mac_address", mac);
+    cJSON_AddStringToObject(data, "hardware_id", hwid);
     cJSON_AddNumberToObject(data, "new_value", value);
     cJSON_AddNumberToObject(data, "date", date);
 
@@ -95,7 +95,7 @@ static int send(char * mac, double value, int date) {
 }
 
 static void * gLogFunc(void * attr) {
-    char mac[40];
+    char hwid[40];
     double value = 0.0;
     int date = 0;
     char data[1024];
@@ -106,9 +106,9 @@ static void * gLogFunc(void * attr) {
         while (!feof(rLogFile)) {
             
             if (fgets(data, 1024, rLogFile) != NULL) {
-                sscanf(data, "%*s %s %*c %*s %lf %*c %*s %d", mac, &value, &date);
-                /*printf("Lu : mac=%s, value=%lf, date=%d (from data=%s)\n", mac, value, date, data);*/
-                send(mac, value, date);
+                sscanf(data, "%*s %s %*c %*s %lf %*c %*s %d", hwid, &value, &date);
+                /*printf("Lu : hwid=%s, value=%lf, date=%d (from data=%s)\n", mac, value, date, data);*/
+                send(hwid, value, date);
                 position++;
             } else if (ferror(rLogFile)) {
                 printf("[gLog] Erreur lors de la lecture du fichier de log.\n");

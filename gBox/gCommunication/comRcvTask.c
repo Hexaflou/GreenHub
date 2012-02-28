@@ -21,8 +21,8 @@ static void * comRcvTask(void * attr);
 int communicationParse(char* trame);
 
 /* fonctions de traitement particulieres */
-static void getSensorValue(char * mac_address);
-static void getActuatorValue(char * mac_address);
+static void getSensorValue(char * hardware_id);
+static void getActuatorValue(char * hardware_id);
 static void activateRT(int interval);
 
 static SOCKET sock;
@@ -95,7 +95,7 @@ static void * comRcvTask(void * attr) {
 int communicationParse(char* trame) {
     cJSON *data = cJSON_Parse(trame);
     char* msg_type = NULL;
-    char* mac_address = NULL;
+    char* hardware_id = NULL;
     char * comp_type = NULL;
     double value;
     int interval = 0;
@@ -108,16 +108,16 @@ int communicationParse(char* trame) {
     msg_type = cJSON_GetObjectItem(data, "msg_type")->valuestring;
 
     if (strncmp(msg_type, "action", 7) == 0) {
-        mac_address = cJSON_GetObjectItem(data, "mac_address")->valuestring;
+        hardware_id = cJSON_GetObjectItem(data, "hardware_id")->valuestring;
         value = cJSON_GetObjectItem(data, "action")->valuedouble;
-        ActionActuator(mac_address, value);
+        ActionActuator(hardware_id, value);
     } else if (strncmp(msg_type, "last_state", 11) == 0) {
         comp_type = cJSON_GetObjectItem(data, "comp_type")->valuestring;
-        mac_address = cJSON_GetObjectItem(data, "mac_address")->valuestring;
+        hardware_id = cJSON_GetObjectItem(data, "hardware_id")->valuestring;
         if (strncmp(comp_type, "sensor", 6) == 0)
-            getSensorValue(mac_address);
+            getSensorValue(hardware_id);
         else
-            getActuatorValue(mac_address);
+            getActuatorValue(hardware_id);
     } else if (strncmp(msg_type, "realtime", 9) == 0) {
         interval = cJSON_GetObjectItem(data, "interval")->valueint;
         activateRT(interval);
@@ -130,7 +130,7 @@ int communicationParse(char* trame) {
     return 0;
 }
 
-void getSensorValue(char * mac_address) {
+void getSensorValue(char * hardware_id) {
 
     Sensor* tempSensor = NULL;
     sem_t semSensorList;
@@ -142,9 +142,9 @@ void getSensorValue(char * mac_address) {
     sem_wait(&semSensorList);
 
     while (tempSensor != NULL) {
-        if (strncmp(tempSensor->id, mac_address, 10) == 0) {
+        if (strncmp(tempSensor->id, hardware_id, 10) == 0) {
             gCommunicationSendValue(tempSensor->id, tempSensor->value);
-            /* We can return from here (MAC address is unique) */
+            /* We can return from here (Hardware ID is unique) */
             sem_post(&semSensorList);
             return;
         } else {
@@ -156,10 +156,10 @@ void getSensorValue(char * mac_address) {
 
 }
 
-void getActuatorValue(char * mac_address) {
+void getActuatorValue(char * hardware_id) {
     float value;
-    GetStatusFromActuator(mac_address, &value);
-    gCommunicationSendValue(mac_address, value);
+    GetStatusFromActuator(hardware_id, &value);
+    gCommunicationSendValue(hardware_id, value);
 }
 
 void activateRT(int interval) {

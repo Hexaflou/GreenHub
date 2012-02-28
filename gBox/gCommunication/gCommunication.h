@@ -22,7 +22,7 @@ int gCommunicationClose();
 int gCommunicationSend(char * msg);
 
 /* send value to the server (thread-safe) */
-int gCommunicationSendValue(char mac[40], double value);
+int gCommunicationSendValue(char hwid[12], double value);
 
 
 #endif

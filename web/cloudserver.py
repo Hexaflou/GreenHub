@@ -57,15 +57,15 @@ class GreenhubProtocol(Protocol):
 
         elif msg_type == "new_state":
             try:
-                sensor = Sensor.objects.filter(user__id = self.user_id, mac_address = message["mac_address"])[0]
+                sensor = Sensor.objects.filter(user__id = self.user_id, hardware_id = message["hardware_id"])[0]
             except IndexError:
-                debug("ERROR", u"Aucun sensor connu pour l'adresse MAC %s (user = %s, valeur = %s)." % (message["mac_address"], self.user_id, float(message["new_value"])))
+                debug("ERROR", u"Aucun sensor connu pour l'adresse MAC %s (user = %s, valeur = %s)." % (message["hardware_id"], self.user_id, float(message["new_value"])))
                 return
 
             state = State(sensor = sensor, value=float(message["new_value"]), captured_at = datetime.datetime.fromtimestamp(int(message["date"])))
 
             state.save()
-            debug("INFO", u"Sauvegarde de l'état pour le senseur à l'adresse %s (user = %s, valeur = %s)" % (message["mac_address"], self.user_id, float(message["new_value"])))
+            debug("INFO", u"Sauvegarde de l'état pour le senseur à l'adresse %s (user = %s, valeur = %s)" % (message["hardware_id"], self.user_id, float(message["new_value"])))
 
         else:
             # OMG DON'T KNOW x3333
@@ -92,7 +92,6 @@ class GreenhubProtocol(Protocol):
 
             except ValueError:
                 debug("WARN", "Impossible d'analyser les données reçue (pas encore assez ?)")
-		raise
 
             index = self.current_buffer.find('}', index + 1)
 

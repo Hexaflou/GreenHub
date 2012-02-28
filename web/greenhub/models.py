@@ -18,7 +18,7 @@ class Sensor(models.Model):
 
     description = models.CharField(max_length=200, blank=True)
 
-    mac_address = models.CharField(max_length=20, blank=True)
+    hardware_id = models.CharField(max_length=20, blank=True)
 
     user = models.ForeignKey(User)
 

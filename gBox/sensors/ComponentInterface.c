@@ -51,7 +51,7 @@ int ComponentInterfaceInit() {
 	/* Objet cJSON permettant de récupérer les informations du fichier de configuration CONFIG_FILE */
 	cJSON * root, * receptorIP, * receptorPort, * receptorID, *eepConfig, *sensorConfig, *actuatorConfig;
 	char c;
-	char txt[CONFIG_CJSON_LENGTH];	
+	char txt[CONFIG_CJSON_LENGTH];
 	int nbOpenedAccolade, receptorPortInt;
 	FILE *f;
 
@@ -181,8 +181,8 @@ int ComponentInterfaceInit() {
 	 *	{
 	 *	mqReceptor = comSimulationReceptorTaskInit();
 	 *	StartSimulationSensor(mqReceptor);
-	 }
-	 */
+}
+*/
 
 	/* Création et lancement des deux tâches permettant de communiquer avec le récepteur EnOcean */
 	smqReturn = comReceptorTaskInit(receptorIPTxt, receptorPortInt);
@@ -252,17 +252,17 @@ void ManageMessage(char* message) {
 		if (strcmp(sensorRealId, messageId) == 0) /* Détecteur présent dans la liste */ {
 			/*printf("Détecteur présent dans la liste ! ID : %s \n", sensorRealId);*/
 			currentSensor->decodeMessage(message, currentSensor);
+		}
+		free(sensorRealId);
+		currentSensor = currentSensor->next;
+		sensorRealId = str_sub(currentSensor->id, 0, 7);
 	}
-	free(sensorRealId);
-	currentSensor = currentSensor->next;
-	sensorRealId = str_sub(currentSensor->id, 0, 7);
-}
-if (sensorRealId != NULL)
-	free(sensorRealId);
-sem_post(&mutex_sensorList);
+	if (sensorRealId != NULL)
+		free(sensorRealId);
+	sem_post(&mutex_sensorList);
 
-free(messageId);
-/* If the sensor isn't in the sensors' list */
+	free(messageId);
+	/* If the sensor isn't in the sensors' list */
 
 }
 
@@ -361,13 +361,13 @@ int RemoveComponent(char * id){
 	if (strlen(id) < ID_ACTUATOR_LENGTH) {	/* Si le composant est un capteur */
 		Sensor* currentSensor, *precedentSensor;
 		sem_wait(&mutex_sensorList);
-		precedentSensor = p_sensorList;		
+		precedentSensor = p_sensorList;
 		if (precedentSensor != NULL)
-			currentSensor = precedentSensor->next;			
+			currentSensor = precedentSensor->next;
 		else	/* S'il n'y a qu'un seul capteur dans la liste */
 			currentSensor = precedentSensor;
 		hardware_id = str_sub(currentSensor->id,0,7);
-		
+
 		/* On recherche si le capteur n'existe pas déjà */
 		while (precedentSensor != NULL && currentSensor != NULL) {
 			if (strcmp(hardware_id, id) == 0) {
@@ -380,7 +380,7 @@ int RemoveComponent(char * id){
 					free(currentSensor);
 					free(hardware_id);
 					break;
-				}				
+				}
 			}else{
 				precedentSensor = currentSensor;
 			}

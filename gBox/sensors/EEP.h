@@ -19,15 +19,15 @@
 #define NOT_FOUND -2
 
 typedef struct EEP {
-    char eep[7];
-    int (*AddComponent)(char* id, void ** pp_ComponentList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax);
-    char name[70];
-    struct EEP* next;
-    /* Arguments optionnels pour spécifier la portée de la mesure */
-    int scaleMin;
-    int scaleMax;
-    int rangeMin;
-    int rangeMax;
+	char eep[7];
+	int (*AddComponent)(char* id, void ** pp_ComponentList, char eep[7], float scaleMin, float scaleMax, float rangeMin, float rangeMax);
+	char name[70];
+	struct EEP* next;
+	/* Arguments optionnels pour spécifier la portée de la mesure */
+	int scaleMin;
+	int scaleMax;
+	int rangeMin;
+	int rangeMax;
 } EEP;
 
 /*

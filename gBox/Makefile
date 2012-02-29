@@ -20,7 +20,7 @@ all: $(EXE)
 %.o : %.c
 	$(ECHO) compilation de $<
 	$(CC) $(CCFLAGS) -o $@ -c $<
-	
+
 affiche :
 	$(ECHO) $(SRC)
 
@@ -35,4 +35,4 @@ clean:
 cleanall: clean
 	$(ECHO) nettoyage de l executable
 	$(RM) $(RMFLAGS) $(EXE)
-	
+

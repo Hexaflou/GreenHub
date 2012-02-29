@@ -13,22 +13,22 @@
 #include <mqueue.h>
 
 enum SIMU_TYPE {
-    SIMU_TEMP,
-    SIMU_SWITCH,
-    SIMU_CONTACT,
-    SIMU_LIGHT,
-    SIMU_OCCUPANCY,
-    SIMU_LIGHT_OCCUPANCY
+	SIMU_TEMP,
+	SIMU_SWITCH,
+	SIMU_CONTACT,
+	SIMU_LIGHT,
+	SIMU_OCCUPANCY,
+	SIMU_LIGHT_OCCUPANCY
 };
 
 typedef struct ArgSensor {
-    char id[9];
-    int sleepingTime;
+	char id[9];
+	int sleepingTime;
 } ArgSensor;
 
 typedef struct SimuThreadList {
-    pthread_t thread;
-    struct SimuThreadList * next;
+	pthread_t thread;
+	struct SimuThreadList * next;
 } SimuThreadList;
 
 /* Lance la simulation de capteurs */

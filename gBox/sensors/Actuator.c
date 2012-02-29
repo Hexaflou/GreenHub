@@ -29,50 +29,50 @@ int ActuatorInterfaceInit(char *arg_idReceptorEnOcean){
  * Le courant est coupé si value = 7, et est en marche quand value = 5
  */
 int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq) {
-    char message[29];
-    char valueHexa[3];
-    char *actuatorRealID;
+	char message[29];
+	char valueHexa[3];
+	char *actuatorRealID;
 
-    printf("value : %f\n",value);
+	printf("value : %f\n",value);
 
-    sprintf(valueHexa,"%X",(int)value);
-    valueHexa[1] = '0';
-    valueHexa[2] = '\0';
+	sprintf(valueHexa,"%X",(int)value);
+	valueHexa[1] = '0';
+	valueHexa[2] = '\0';
 
-    printf("ValueHexa : %s\n",valueHexa);
+	printf("ValueHexa : %s\n",valueHexa);
 
-    actuatorRealID = str_sub(p_actuator->id, strlen(p_actuator->id)-2, strlen(p_actuator->id)-1);
+	actuatorRealID = str_sub(p_actuator->id, strlen(p_actuator->id)-2, strlen(p_actuator->id)-1);
 
-    /******* HEADER *******/
-    strcpy(message, "A55A"); /* Début d'un message */
-    strcat(message, "6B"); /* SYNC_BYTE */
-    strcat(message, "05"); /* LENGTH_BYTE */
-    /***** FIN HEADER *****/
+	/******* HEADER *******/
+	strcpy(message, "A55A"); /* Début d'un message */
+	strcat(message, "6B"); /* SYNC_BYTE */
+	strcat(message, "05"); /* LENGTH_BYTE */
+	/***** FIN HEADER *****/
 
-    /******* DATA BYTE *******/
-    strcat(message, valueHexa); /* BYTE 3 */
-    strcat(message, "000000"); /* BYTE 2 à 0 */
-    /***** FIN DATA BYTE *****/
+	/******* DATA BYTE *******/
+	strcat(message, valueHexa); /* BYTE 3 */
+	strcat(message, "000000"); /* BYTE 2 à 0 */
+	/***** FIN DATA BYTE *****/
 
-    /******* ID *******/
-    strcat(message, idReceptorEnOcean); /* 3 octets */
-    strcat(message, actuatorRealID); /* 1 octet */
-    /***** FIN ID *****/
+	/******* ID *******/
+	strcat(message, idReceptorEnOcean); /* 3 octets */
+	strcat(message, actuatorRealID); /* 1 octet */
+	/***** FIN ID *****/
 
-    strcat(message, "30"); /* STATUS BYTE */
-    strcat(message, "00\0"); /* CHECKSUM */
+	strcat(message, "30"); /* STATUS BYTE */
+	strcat(message, "00\0"); /* CHECKSUM */
 
-    /*strcpy(message, "A55A6B0550000000FF9F1E053000\0"); */ /* (debug) */
-    p_actuator->status = value;
-    if (value == (float) 5) {
-	    printf("[Actuator] Action sur l'actionneur de courant : Mise en marche.\n");
-    } else {
-	    printf("[Actuator] Action sur l'actionneur de courant : Extinction.\n");
-    }
-    mq_send(smq, message, MAX_MQ_SIZE, 0);
-    gLogsLog(p_actuator->id, p_actuator->status);
-    free(actuatorRealID);
-    return 0;
+	/*strcpy(message, "A55A6B0550000000FF9F1E053000\0"); */ /* (debug) */
+	p_actuator->status = value;
+	if (value == (float) 5) {
+		printf("[Actuator] Action sur l'actionneur de courant : Mise en marche.\n");
+	} else {
+		printf("[Actuator] Action sur l'actionneur de courant : Extinction.\n");
+	}
+	mq_send(smq, message, MAX_MQ_SIZE, 0);
+	gLogsLog(p_actuator->id, p_actuator->status);
+	free(actuatorRealID);
+	return 0;
 }
 
 /* ACTUELLEMENT SIMULE, PAR MANQUE DE MATERIEL NOUS NE PRENDRONS EN CHARGE QUE

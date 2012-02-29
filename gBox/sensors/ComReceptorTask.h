@@ -3,17 +3,17 @@
 
 /***********************************************************************
  * Tache GreenHub dédié à l'échange des données vers le récepteur EnOcean
- * 
+ *
  * Permet la création d'une tache et d'une boite au lettre, tous les
  * messages placés dans la boite au lettre sont envoyée au récepteur
  * EnOcean.
  * Utilisation réservée à sensors
- * 
+ *
  * 							Hexanome H4212
  * ********************************************************************/
 
 /* Inclusions externes */
-#include <mqueue.h> 
+#include <mqueue.h>
 
 typedef struct SmqReturn{
 	mqd_t smq;

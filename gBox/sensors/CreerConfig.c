@@ -15,11 +15,11 @@
  *
  */
 cJSON* createCSONFirst(char* id, char* EEP) {
-    cJSON *root;
-    root = cJSON_CreateObject();
-    cJSON_AddStringToObject(root, "id", id);
-    cJSON_AddStringToObject(root, "EEP", EEP);
-    return root;
+	cJSON *root;
+	root = cJSON_CreateObject();
+	cJSON_AddStringToObject(root, "id", id);
+	cJSON_AddStringToObject(root, "EEP", EEP);
+	return root;
 }
 
 /*
@@ -27,33 +27,33 @@ cJSON* createCSONFirst(char* id, char* EEP) {
  *
  */
 void createConfigSensors() {
-    char* sensor;
-    cJSON* jsonSensor;
+	char* sensor;
+	cJSON* jsonSensor;
 
-    /* Ouverture du fichier en écriture */
-    FILE *f = fopen("sensors.txt", "w");
+	/* Ouverture du fichier en écriture */
+	FILE *f = fopen("sensors.txt", "w");
 
-    /* Création et écriture des cJSON */
-    jsonSensor = createCSONFirst("00893378", "070205");
-    sensor = cJSON_Print(jsonSensor);
-    cJSON_Delete(jsonSensor);
-    fprintf(f, "%s", sensor);
+	/* Création et écriture des cJSON */
+	jsonSensor = createCSONFirst("00893378", "070205");
+	sensor = cJSON_Print(jsonSensor);
+	cJSON_Delete(jsonSensor);
+	fprintf(f, "%s", sensor);
 
-    jsonSensor = createCSONFirst("0021CBE5", "050201");
-    sensor = cJSON_Print(jsonSensor);
-    cJSON_Delete(jsonSensor);
-    fprintf(f, "%s", sensor);
+	jsonSensor = createCSONFirst("0021CBE5", "050201");
+	sensor = cJSON_Print(jsonSensor);
+	cJSON_Delete(jsonSensor);
+	fprintf(f, "%s", sensor);
 
-    jsonSensor = createCSONFirst("0001B015", "060001");
-    sensor = cJSON_Print(jsonSensor);
-    cJSON_Delete(jsonSensor);
-    fprintf(f, "%s", sensor);
+	jsonSensor = createCSONFirst("0001B015", "060001");
+	sensor = cJSON_Print(jsonSensor);
+	cJSON_Delete(jsonSensor);
+	fprintf(f, "%s", sensor);
 
-    jsonSensor = createCSONFirst("0001B016", "060001");
-    sensor = cJSON_Print(jsonSensor);
-    cJSON_Delete(jsonSensor);
-    fprintf(f, "%s", sensor);
+	jsonSensor = createCSONFirst("0001B016", "060001");
+	sensor = cJSON_Print(jsonSensor);
+	cJSON_Delete(jsonSensor);
+	fprintf(f, "%s", sensor);
 
-    /* Fermeture du fichier */
-    fclose(f);
+	/* Fermeture du fichier */
+	fclose(f);
 }

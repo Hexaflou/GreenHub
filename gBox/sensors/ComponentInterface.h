@@ -3,7 +3,7 @@
 
 /***********************************************************************
  *			InterfaceComposant.h
- * 
+ *
  * Interface utilisateur permettant d'utiliser les capteurs/actionneurs
  * EnOcean, ainsi que les capteurs SunSpot.
  *

@@ -57,13 +57,18 @@ void ManageMessage(char* message);
 int GetInfoFromSensor(char id[10], float * p_value);
 
 /*
- * Fonction permettant d’ajouter un capteur. Un capteur est identifié par son ID (en 8 caractères),
+ * Fonction permettant d’ajouter un capteur ou un actionneur. Un capteur est identifié par son ID (en 8 caractères),
  * et son type caractérisé par son EEP.
  * Exemple : 07-01-01 : Org = 7; Function = 01; Type = 01, correspondant à un capteur de présence.
  * Renvoie 0 si tout s’est bien déroulé, ou -1 s’il y a eu une erreur car l’EEP n’est pas supporté,
  * -2 si l’EEP est introuvable et -3 si l’ID est déjà présent dans la liste.
  */
 int AddComponent(char * id, char org[2], char funct[2], char type[2]);
+
+/*
+ * Fonction permettant d’ajouter un composant.
+ */
+int RemoveComponent(char * id);
 
 /*
  * Consulte l'état de l'actionneur dont l'ID est donné en paramètre.

@@ -25,9 +25,14 @@ cJSON* createCSON(char* id, char* EEP);
 int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, Sensor ** pp_sensorList, Actuator ** pp_actuatorList, EEP* EEPList);
 
 /*
- * Edite les fichiers de configuration en fonction de la liste de composants.
+ * Edite les fichiers de configuration en fonction de la liste de capteurs.
  */
-void writeAllConfig(char* fileNameSensor, Sensor * p_sensorList);
+void writeAllSensorConfig(char* fileNameSensor, Sensor * p_sensorList);
+
+/*
+ * Edite les fichiers de configuration en fonction de la liste d'actionneurs.
+ */
+void writeAllActuatorConfig(char* fileNameActuator, Actuator * p_actuatorList);
 
 /*
  * Ajoute dans le fichier de configuration un capteur.

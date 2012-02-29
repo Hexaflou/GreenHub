@@ -49,7 +49,6 @@ int decodeMessageLight(char * message, struct Sensor* p_sensor) {
 int decodeMessageOccupancy(char* message, struct Sensor* p_sensor) {
     int occupancy;
     occupancy = getOccupancy(message);
-    printf("Mesure de presence : %i \n", occupancy);
     if (occupancy == 1) {
         printf("Aucune presence detectee. \n");
     } else {

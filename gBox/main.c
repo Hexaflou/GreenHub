@@ -14,7 +14,20 @@
 static int run = 1;
 static int pid = 0;
 
-void sighandler(int signum)
+void sighandlerint(int signum)
+{
+	if(pid==0)
+	{
+		printf("[gBox] Fermeture de l'application\n");
+		ComponentInterfaceClose();
+		gLogThreadClose();
+		gCommunicationClose();
+		kill(getppid(),SIGUSR1);
+		exit(0);
+	}
+}
+
+void sighandlerend(int signum)
 {
 	run = 0;
 	kill(pid,SIGTERM);
@@ -40,7 +53,7 @@ void gBox()
     ComponentInterfaceClose();
     gLogThreadClose();
     gCommunicationClose();
-    kill(getppid(),SIGINT);
+    kill(getppid(),SIGUSR1);
     exit(0);
 }
 
@@ -49,7 +62,8 @@ int main() {
 	int statut;
     int options = 0;
     
-    signal(SIGINT,&sighandler);
+    signal(SIGUSR1,&sighandlerend);
+    signal(SIGINT,&sighandlerint);
     
 	/* une sorte de watchdog relance l'appli si elle fini inopinement */
 	while(run) {

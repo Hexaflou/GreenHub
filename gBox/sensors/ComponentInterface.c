@@ -237,12 +237,17 @@ int ComponentInterfaceClose() {
 void ManageMessage(char* message) {
 	Sensor* currentSensor;
 	char * sensorRealId, * messageId;
+	char *byte_0;
 	messageId = str_sub(message, 10, 17);
 	#if DEBUG > 0
 	printf("Message : %s \n", message);
 	#endif
 
 
+	byte_0 = str_sub(message,8,9);
+
+	if (!(xtoi(byte_0) & 8))	/* Si le message n'est en mode teach-in */
+	{
 	sem_wait(&mutex_sensorList);
 	currentSensor = p_sensorList;
 	sensorRealId = str_sub(currentSensor->id, 0, 7);
@@ -260,7 +265,20 @@ void ManageMessage(char* message) {
 	if (sensorRealId != NULL)
 		free(sensorRealId);
 	sem_post(&mutex_sensorList);
-
+	}else{
+		printf("Message en mode Teach-In.\n");
+		if (xtoi(byte_0) & 128) /* Si les valeurs ORG-FUNCT-TYPE sont récupérables */{
+			char org[3], funct[3], type[3];
+			char * byte_3, byte_2, byte_1;
+			byte_3 = str_sub(message, 2,3);
+			byte_2 = str_sub(message, 4,5);
+			byte_1 = str_sub(message, 6,7);
+			sprintf(org,"%X",(xtoi(byte_3) & 252));
+			sprintf(funct,"%X",( (xtoi(byte_3) & 3) << 4) + (xtoi(byte_2) & 248));
+			sprintf(type,"%X",( (xtoi(byte_2) & 7) << 5) + (xtoi(byte_1) & 248));
+			printf("org : %s; funct : %s; type %s\n",org,funct,type);
+		}
+	}
 	free(messageId);
 	/* If the sensor isn't in the sensors' list */
 

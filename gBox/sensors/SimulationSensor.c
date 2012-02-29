@@ -49,7 +49,7 @@ int StartSimulationSensor(mqd_t arg_smq) {
 	launchSimulationSensor("0001B015", 8, &p_simuThreadList, SIMU_CONTACT);
 
 	/* Interrupteur : grande lumière salon */
-	launchSimulationSensor("0021CBE5", 20, &p_simuThreadList, SIMU_SWITCH);
+	launchSimulationSensor("0021CBE5", 12, &p_simuThreadList, SIMU_SWITCH);
 
 	/*************************** SALLE DE BAIN ***************************/
 	/* Capteur de température entre 0 et 40°C : salle de bain */
@@ -214,29 +214,29 @@ void * SimulationSensorContact(void * p_argSensor) {
 		sprintf(contactHexa, "%X", contact);
 		contactHexa[1] = contactHexa[0];
 		contactHexa[0] = '0';
-			contactHexa[2] = '\0';
+		contactHexa[2] = '\0';
 
-			/******* HEADER *******/
-			strcpy(message, "A55A"); /* Début d'un message */
-			strcat(message, "0B"); /* SYNC_BYTE */
-			strcat(message, "07"); /* LENGTH_BYTE */
-			/***** FIN HEADER *****/
+		/******* HEADER *******/
+		strcpy(message, "A55A"); /* Début d'un message */
+		strcat(message, "0B"); /* SYNC_BYTE */
+		strcat(message, "07"); /* LENGTH_BYTE */
+		/***** FIN HEADER *****/
 
-			/******* DATA BYTE *******/
-			strcat(message, "000000"); /* BYTE 3 à 1 */
-			strcat(message, contactHexa); /* BYTE 0 */
-			/***** FIN DATA BYTE *****/
+		/******* DATA BYTE *******/
+		strcat(message, "000000"); /* BYTE 3 à 1 */
+		strcat(message, contactHexa); /* BYTE 0 */
+		/***** FIN DATA BYTE *****/
 
-			/******* ID *******/
-			strcat(message, id); /* 4 octets */
-			/***** FIN ID *****/
+		/******* ID *******/
+		strcat(message, id); /* 4 octets */
+		/***** FIN ID *****/
 
-			strcat(message, "00"); /* STATUS BYTE */
-			strcat(message, "00"); /* CHECKSUM */
+		strcat(message, "00"); /* STATUS BYTE */
+		strcat(message, "00"); /* CHECKSUM */
 
-			/*printf("Message du capteur de contact : %s\n",message);*/
+		/*printf("Message du capteur de contact : %s\n",message);*/
 
-			mq_send(smq, message, MAX_MQ_SIZE, 0);
+		mq_send(smq, message, MAX_MQ_SIZE, 0);
 	}
 	return (void*) NULL;
 }
@@ -260,29 +260,29 @@ void * SimulationSensorSwitch(void * p_argSensor) {
 		i_switch = (rand() % 4) << 1;
 		sprintf(switchHexa, "%X", i_switch);
 		switchHexa[1] = '0';
-			       switchHexa[2] = '\0';
+		switchHexa[2] = '\0';
 
-			       /******* HEADER *******/
-			       strcpy(message, "A55A"); /* Début d'un message */
-			       strcat(message, "0B"); /* SYNC_BYTE */
-			       strcat(message, "07"); /* LENGTH_BYTE */
-			       /***** FIN HEADER *****/
+		/******* HEADER *******/
+		strcpy(message, "A55A"); /* Début d'un message */
+		strcat(message, "0B"); /* SYNC_BYTE */
+		strcat(message, "07"); /* LENGTH_BYTE */
+		/***** FIN HEADER *****/
 
-			       /******* DATA BYTE *******/
-			       strcat(message, switchHexa); /* BYTE 3 */
-			       strcat(message, "000000"); /* BYTE 2 à 0 */
-			       /***** FIN DATA BYTE *****/
+		/******* DATA BYTE *******/
+		strcat(message, switchHexa); /* BYTE 3 */
+		strcat(message, "000000"); /* BYTE 2 à 0 */
+		/***** FIN DATA BYTE *****/
 
-			       /******* ID *******/
-			       strcat(message, id); /* 4 octets */
-			       /***** FIN ID *****/
+		/******* ID *******/
+		strcat(message, id); /* 4 octets */
+		/***** FIN ID *****/
 
-			       strcat(message, "30"); /* STATUS BYTE */
-			       strcat(message, "00"); /* CHECKSUM */
+		strcat(message, "30"); /* STATUS BYTE */
+		strcat(message, "00"); /* CHECKSUM */
 
-			       /*	printf("Message du capteur d'interrupteur : %s\n",message);*/
+		/*	printf("Message du capteur d'interrupteur : %s\n",message);*/
 
-			       mq_send(smq, message, MAX_MQ_SIZE, 0);
+		mq_send(smq, message, MAX_MQ_SIZE, 0);
 	}
 	return (void*) NULL;
 }

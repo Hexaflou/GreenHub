@@ -164,16 +164,9 @@ void *ListenSunSpot(void *message1) {
 					 *           (750-0)/(255-0)
 					 */
 
-					f_brightness = (float)brightness / 2.94117647;
-
-					sprintf(hexBrightness, "%X", (int) f_brightness);
-
-					/* Si la luminosité est exprime sur un caractere en hexa il va falloir l etaler sur nos deux caracteres hexa */
-					if (f_brightness < 16) {
-						hexBrightness[1] = hexBrightness[0];
-						hexBrightness[0] = '0';
-					hexBrightness[2] = '\0';
-					}
+					f_brightness = (float)brightness / 2.94117647;				
+					sprintf(hexBrightness, "%02X", (int) f_brightness);
+					
 					printf("hexBrightness : %s\n",hexBrightness);
 					/* température - même fonctionnement */
 					temperature = atoi(strtok(NULL, ";"));
@@ -185,16 +178,7 @@ void *ListenSunSpot(void *message1) {
 					 *        (165-0)/(255-0) = 0,647058824
 					 */
 					f_temperature = (float)temperature * 0.647058824;
-
-					sprintf(hexTemperature, "%X", (int) f_temperature);
-
-					/* Si la luminosité est exprime sur un caractere en hexa il va falloir l etaler sur nos deux caracteres hexa */
-					if (f_temperature < 16) {
-						hexTemperature[1] = hexTemperature[0];
-						hexTemperature[0] = '0';
-					hexTemperature[2] = '\0';
-					}
-					printf("HexTemperature : %s\n",hexTemperature);
+					sprintf(hexTemperature, "%02X", (int) f_temperature);
 
 					/*
 					 *        On construit concrètement la pseudo trame maintenant :

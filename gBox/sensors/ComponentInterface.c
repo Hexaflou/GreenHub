@@ -29,6 +29,7 @@
 /***************************PRIVEE***********************/
 /* Déclaration de variables */
 static struct SmqReturn smqReturn;
+static mqd_t smqCom;
 static sem_t mutex_sensorList;
 static sem_t mutex_actuatorList;
 static Sensor* p_sensorList;
@@ -181,8 +182,7 @@ int ComponentInterfaceInit() {
 	 *	{
 	 *	mqReceptor = comSimulationReceptorTaskInit();
 	 *	StartSimulationSensor(mqReceptor);
-}
-*/
+		}*/
 
 	/* Création et lancement des deux tâches permettant de communiquer avec le récepteur EnOcean */
 	smqReturn = comReceptorTaskInit(receptorIPTxt, receptorPortInt);
@@ -237,21 +237,58 @@ int ComponentInterfaceClose() {
 void ManageMessage(char* message) {
 	Sensor* currentSensor;
 	char * sensorRealId, * messageId;
+	char *org;
 	char *byte_0;
+	byte_0 = str_sub(message,8,9);
 	messageId = str_sub(message, 10, 17);
 	#if DEBUG > 0
 	printf("Message : %s \n", message);
 	#endif
 
+	org = str_sub(message,0,1);
 
-	byte_0 = str_sub(message,8,9);
+	if ( (strcmp(org,"07") == 0) && (!(xtoi(byte_0) & 8)) ){	/* Si le capteur est de type 4BS et le message est en mode Teach-In */		
+		if (xtoi(byte_0) & 128) /* Si les valeurs ORG-FUNCT-TYPE sont récupérables */{
+			#if DEBUG > 0
+			printf("Message en mode Teach-In.\n");
+			#endif
+			char funct[3], type[3];
+			char * byte_3, *byte_2;
+			int functInt, typeInt;
+			byte_3 = str_sub(message, 2,3);
+			byte_2 = str_sub(message, 4,5);
+			functInt = (xtoi(byte_3) & 252)>>2;
+			typeInt = ( ((xtoi(byte_3) & 3) << 5) + ((xtoi(byte_2) & 248)>>3));
+			sprintf(funct,"%02X", functInt);
+			sprintf(type,"%02X", typeInt);
+			free(byte_3);
+			free(byte_2);
+			if (AddComponent(messageId, org, funct, type) == OK){
+				printf("[ManageMessage] Ajout d'un composant par Learn.\n");
+				/* Construction d'un message JSON à envoyer au serveur Web */
+				char * msgJSON_Parse, eep[7];
+				cJSON * data = cJSON_CreateObject();
+				
+				strcpy(eep,org);
+				strcat(eep,funct);
+				strcat(eep,type);
 
-	if (!(xtoi(byte_0) & 8))	/* Si le message n'est en mode teach-in */
-	{
+				cJSON_AddStringToObject(data, "msg_type", "new_sensor");
+				cJSON_AddStringToObject(data, "hardware_id", messageId);
+				cJSON_AddStringToObject(data, "eep", eep);
+    				msgJSON_Parse = cJSON_Print(data);
+
+    				gCommunicationSend(msgJSON_Parse);
+				free(msgJSON_Parse);
+				cJSON_Delete(data);
+			}				
+			free(messageId);
+			exit(0);
+		}
+	}
 	sem_wait(&mutex_sensorList);
 	currentSensor = p_sensorList;
 	sensorRealId = str_sub(currentSensor->id, 0, 7);
-
 	/* Recherche du capteur dans la liste de capteurs */
 	while (currentSensor != NULL) {
 		if (strcmp(sensorRealId, messageId) == 0) /* Détecteur présent dans la liste */ {
@@ -265,20 +302,6 @@ void ManageMessage(char* message) {
 	if (sensorRealId != NULL)
 		free(sensorRealId);
 	sem_post(&mutex_sensorList);
-	}else{
-		printf("Message en mode Teach-In.\n");
-		if (xtoi(byte_0) & 128) /* Si les valeurs ORG-FUNCT-TYPE sont récupérables */{
-			char org[3], funct[3], type[3];
-			char * byte_3, byte_2, byte_1;
-			byte_3 = str_sub(message, 2,3);
-			byte_2 = str_sub(message, 4,5);
-			byte_1 = str_sub(message, 6,7);
-			sprintf(org,"%X",(xtoi(byte_3) & 252));
-			sprintf(funct,"%X",( (xtoi(byte_3) & 3) << 4) + (xtoi(byte_2) & 248));
-			sprintf(type,"%X",( (xtoi(byte_2) & 7) << 5) + (xtoi(byte_1) & 248));
-			printf("org : %s; funct : %s; type %s\n",org,funct,type);
-		}
-	}
 	free(messageId);
 	/* If the sensor isn't in the sensors' list */
 

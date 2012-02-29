@@ -33,13 +33,7 @@ int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq) {
 	char valueHexa[3];
 	char *actuatorRealID;
 
-	printf("value : %f\n",value);
-
-	sprintf(valueHexa,"%X",(int)value);
-	valueHexa[1] = '0';
-	valueHexa[2] = '\0';
-
-	printf("ValueHexa : %s\n",valueHexa);
+	sprintf(valueHexa,"%02X",(int)value);
 
 	actuatorRealID = str_sub(p_actuator->id, strlen(p_actuator->id)-2, strlen(p_actuator->id)-1);
 

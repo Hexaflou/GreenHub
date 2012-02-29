@@ -10,6 +10,7 @@
 #include "../gLogs.h"
 #include "ComponentInterface.h"
 #include <mqueue.h>
+#include <../../libs/gMemory/gMemory.h>
 
 static char idReceptorEnOcean[7];
 
@@ -65,7 +66,7 @@ int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq) {
 	}
 	mq_send(smq, message, MAX_MQ_SIZE, 0);
 	gLogsLog(p_actuator->id, p_actuator->status);
-	free(actuatorRealID);
+	gfree(actuatorRealID);
 	return 0;
 }
 

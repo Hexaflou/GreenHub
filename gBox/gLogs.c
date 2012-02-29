@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../libs/gMemory/gMemory.h"
 #include "lib/cJSON.h"
 #include "gCommunication/gCommunication.h"
 #include "gLogs.h"
@@ -88,7 +89,7 @@ static int send(char * hwid, double value, int date) {
 	ret = gCommunicationSend(msg);
 
 	/* Clean data */
-	free(msg);
+	gfree(msg);
 	cJSON_Delete(data);
 	return ret;
 }

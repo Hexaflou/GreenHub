@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2009 Dave Gamble
 
-  Permission is hereby granted, free of charge, to any person obtaining a copy
+  Permission is hereby granted, gfree of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
@@ -44,8 +44,8 @@ static int cJSON_strcasecmp(const char *s1,const char *s2)
 	return tolower(*(const unsigned char *)s1) - tolower(*(const unsigned char *)s2);
 }
 
-static void *(*cJSON_malloc)(size_t sz) = malloc;
-static void (*cJSON_free)(void *ptr) = free;
+static void *(*cJSON_malloc)(size_t sz) = gmalloc;
+static void (*cJSON_free)(void *ptr) = gfree;
 
 static char* cJSON_strdup(const char* str)
 {
@@ -61,13 +61,13 @@ static char* cJSON_strdup(const char* str)
 void cJSON_InitHooks(cJSON_Hooks* hooks)
 {
     if (!hooks) { /* Reset hooks */
-        cJSON_malloc = malloc;
-        cJSON_free = free;
+        cJSON_malloc = gmalloc;
+        cJSON_free = gfree;
         return;
     }
 
-	cJSON_malloc = (hooks->malloc_fn)?hooks->malloc_fn:malloc;
-	cJSON_free	 = (hooks->free_fn)?hooks->free_fn:free;
+	cJSON_malloc = (hooks->malloc_fn)?hooks->malloc_fn:gmalloc;
+	cJSON_free	 = (hooks->free_fn)?hooks->free_fn:gfree;
 }
 
 /* Internal constructor. */
@@ -349,7 +349,7 @@ static char *print_array(cJSON *item,int depth,int fmt)
 		child=child->next;
 	}
 	
-	/* If we didn't fail, try to malloc the output string */
+	/* If we didn't fail, try to gmalloc the output string */
 	if (!fail) out=(char*)cJSON_malloc(len);
 	/* If that fails, we fail. */
 	if (!out) fail=1;

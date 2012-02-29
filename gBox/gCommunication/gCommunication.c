@@ -9,6 +9,7 @@
 #include <time.h>
 
 #include "../lib/cJSON.h"
+#include <../../libs/gMemory/gMemory.h>
 
 /************************  PRIVATE DECLARATION  ***********************/
 static SOCKET sock;
@@ -62,7 +63,7 @@ int gCommunicationInit(int auserId) {
     gCommunicationSend(msg);
 
     cJSON_Delete(init);
-    free(msg);
+    gfree(msg);
     return 0;
 }
 
@@ -86,7 +87,7 @@ int gCommunicationSendValue(char hwid[12], double value) {
     ret = gCommunicationSend(msg);
 
     /* Clean data */
-    free(msg);
+    gfree(msg);
     cJSON_Delete(data);
     return ret;
 }
@@ -128,7 +129,7 @@ void gCommunicationReco()
     }
     
     cJSON_Delete(init);
-    free(msg);
+    gfree(msg);
 }
 
 

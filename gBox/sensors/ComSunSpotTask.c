@@ -6,7 +6,7 @@
 #include "ComSunSpotTask.h"
 #include "ComponentInterface.h"
 #include "../gCommunication/comIncludes.h"
-
+#include <../../libs/gMemory/gMemory.h>
 
 /***************************PRIVATE DECLARATION***********************/
 static void *ListenSunSpot(void *ptr);
@@ -31,7 +31,7 @@ int comSunSpotTaskClose() {
 	if (sock != 0)
 		close(sock);
 	if (message != NULL)
-		free(message);
+		gfree(message);
 	return (ret);
 }
 
@@ -198,7 +198,7 @@ void *ListenSunSpot(void *message1) {
 					strcat(frame,idCapteur);
 					strcat(frame,"0000");
 
-					free(idCapteur);
+					gfree(idCapteur);
 					#if DEBUG == 0
 					printf("frame : %s\n",frame);
 					#endif

@@ -13,6 +13,7 @@
 #include "../sensors/ComponentInterface.h"
 #include "../sensors/Sensor.h"
 #include "../sensors/Actuator.h"
+#include <../../libs/gMemory/gMemory.h>
 
 /****************************PRIVATE DECLARATION***********************/
 static void * comRcvTask(void * attr);
@@ -248,6 +249,6 @@ void addComponent(cJSON * data)
 	gCommunicationSend(msg);
 	
 	/* Clean data */
-    free(msg);
+    gfree(msg);
     cJSON_Delete(tosend);
 }

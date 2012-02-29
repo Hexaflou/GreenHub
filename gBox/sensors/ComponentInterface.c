@@ -10,6 +10,7 @@
 #include "Configuration.h"
 #include "ComSunSpotTask.h"
 #include "../lib/cJSON.h"
+#include "../../libs/gMemory/gMemory.h"
 
 /* Inclusions externes */
 #include <sys/socket.h>
@@ -29,7 +30,6 @@
 /***************************PRIVEE***********************/
 /* Déclaration de variables */
 static struct SmqReturn smqReturn;
-static mqd_t smqCom;
 static sem_t mutex_sensorList;
 static sem_t mutex_actuatorList;
 static Sensor* p_sensorList;
@@ -104,7 +104,7 @@ int ComponentInterfaceInit() {
 				printf("[ComponentInterfaceInit] IP du récepteur invalide dans le fichier configuration.txt\n");
 				return ERROR;
 			}
-			receptorIPTxt = (char*)malloc(sizeof(char)*strlen(receptorIP->valuestring)+1);
+			receptorIPTxt = (char*)gmalloc(sizeof(char)*strlen(receptorIP->valuestring)+1);
 			strcpy(receptorIPTxt,receptorIP->valuestring);
 
 			/* Receptor Port */
@@ -121,7 +121,7 @@ int ComponentInterfaceInit() {
 				printf("[ComponentInterfaceInit] ID du récepteur invalide dans le fichier configuration.txt\n");
 				return ERROR;
 			}
-			receptorIDTxt  = (char*)malloc(sizeof(char)*strlen(receptorID->valuestring)+1);
+			receptorIDTxt  = (char*)gmalloc(sizeof(char)*strlen(receptorID->valuestring)+1);
 			strcpy(receptorIDTxt ,receptorID->valuestring);
 
 			/* Fichier de config. EEP */
@@ -130,7 +130,7 @@ int ComponentInterfaceInit() {
 				printf("[ComponentInterfaceInit] Fichier de configuration EEP incorrect dans le fichier configuration.txt\n");
 				return ERROR;
 			}
-			eepConfigTxt  = (char*)malloc(sizeof(char)*strlen(eepConfig->valuestring)+1);
+			eepConfigTxt  = (char*)gmalloc(sizeof(char)*strlen(eepConfig->valuestring)+1);
 			strcpy(eepConfigTxt,eepConfig->valuestring);
 
 			/* Fichier de config. Capteur */
@@ -139,7 +139,7 @@ int ComponentInterfaceInit() {
 				printf("[ComponentInterfaceInit] Fichier de configuration Sensor incorrect dans le fichier configuration.txt\n");
 				return ERROR;
 			}
-			sensorConfigTxt = (char*)malloc(sizeof(char)*strlen(sensorConfig->valuestring)+1);
+			sensorConfigTxt = (char*)gmalloc(sizeof(char)*strlen(sensorConfig->valuestring)+1);
 			strcpy(sensorConfigTxt,sensorConfig->valuestring);
 
 			/* Fichier de config. Actionneur */
@@ -148,7 +148,7 @@ int ComponentInterfaceInit() {
 				printf("[ComponentInterfaceInit] Fichier de configuration Actuator incorrect dans le fichier configuration.txt\n");
 				return ERROR;
 			}
-			actuatorConfigTxt = (char*)malloc(sizeof(char)*strlen(actuatorConfig->valuestring)+1);
+			actuatorConfigTxt = (char*)gmalloc(sizeof(char)*strlen(actuatorConfig->valuestring)+1);
 			strcpy(actuatorConfigTxt,actuatorConfig->valuestring);
 		}
 	}
@@ -169,7 +169,7 @@ int ComponentInterfaceInit() {
 	sem_wait(&mutex_sensorList);
 	p_sensorList = NULL;
 	p_actuatorList = NULL;
-	p_EEPList = (EEP*) malloc(sizeof (EEP));
+	p_EEPList = (EEP*) gmalloc(sizeof (EEP));
 	p_EEPList->next = NULL;
 
 	/* Chargement des capteurs et EEP */
@@ -210,19 +210,19 @@ int ComponentInterfaceClose() {
 	destroyEEPList(p_EEPList); /* Désalloue p_EEPList */
 	destroyComponentList(p_sensorList, p_actuatorList); /* Désalloue p_EEPList */
 	if (sensorConfigTxt != NULL){
-		free(sensorConfigTxt);
+		gfree(sensorConfigTxt);
 	}
 	if (actuatorConfigTxt != NULL){
-		free(actuatorConfigTxt);
+		gfree(actuatorConfigTxt);
 	}
 	if (eepConfigTxt != NULL){
-		free(eepConfigTxt);
+		gfree(eepConfigTxt);
 	}
 	if (receptorIPTxt != NULL){
-		free(receptorIPTxt);
+		gfree(receptorIPTxt);
 	}
 	if (receptorIDTxt != NULL){
-		free(receptorIDTxt);
+		gfree(receptorIDTxt);
 	}
 	return 0;
 }
@@ -241,7 +241,7 @@ void ManageMessage(char* message) {
 	char *byte_0;
 	byte_0 = str_sub(message,8,9);
 	messageId = str_sub(message, 10, 17);
-	#if DEBUG > 0
+	#if DEBUG == 0
 	printf("Message : %s \n", message);
 	#endif
 
@@ -261,14 +261,14 @@ void ManageMessage(char* message) {
 			typeInt = ( ((xtoi(byte_3) & 3) << 5) + ((xtoi(byte_2) & 248)>>3));
 			sprintf(funct,"%02X", functInt);
 			sprintf(type,"%02X", typeInt);
-			free(byte_3);
-			free(byte_2);
+			gfree(byte_3);
+			gfree(byte_2);
 			if (AddComponent(messageId, org, funct, type) == OK){
-				printf("[ManageMessage] Ajout d'un composant par Learn.\n");
 				/* Construction d'un message JSON à envoyer au serveur Web */
 				char * msgJSON_Parse, eep[7];
 				cJSON * data = cJSON_CreateObject();
-				
+
+				printf("[ManageMessage] Ajout d'un composant par Learn.\n");
 				strcpy(eep,org);
 				strcat(eep,funct);
 				strcat(eep,type);
@@ -279,10 +279,10 @@ void ManageMessage(char* message) {
     				msgJSON_Parse = cJSON_Print(data);
 
     				gCommunicationSend(msgJSON_Parse);
-				free(msgJSON_Parse);
+				gfree(msgJSON_Parse);
 				cJSON_Delete(data);
 			}				
-			free(messageId);
+			gfree(messageId);
 			exit(0);
 		}
 	}
@@ -295,14 +295,14 @@ void ManageMessage(char* message) {
 			/*printf("Détecteur présent dans la liste ! ID : %s \n", sensorRealId);*/
 			currentSensor->decodeMessage(message, currentSensor);
 		}
-		free(sensorRealId);
+		gfree(sensorRealId);
 		currentSensor = currentSensor->next;
 		sensorRealId = str_sub(currentSensor->id, 0, 7);
 	}
 	if (sensorRealId != NULL)
-		free(sensorRealId);
+		gfree(sensorRealId);
 	sem_post(&mutex_sensorList);
-	free(messageId);
+	gfree(messageId);
 	/* If the sensor isn't in the sensors' list */
 
 }
@@ -330,11 +330,11 @@ int AddComponent(char* id, char org[2], char funct[2], char type[2]) {
 		while (currentSensor != NULL && currentSensor->next != NULL) {
 			if (strcmp(hardware_id, id) == 0) {
 				sem_post(&mutex_sensorList);
-				free(hardware_id);
+				gfree(hardware_id);
 				return COMPONENT_ALREADY_EXIST;
 			}
 			currentSensor = currentSensor->next;
-			free(hardware_id);
+			gfree(hardware_id);
 			hardware_id = str_sub(currentSensor->id,0,7);
 		}
 		result = AddComponentByEEP(id, (void**) & p_sensorList, p_EEPList, org, funct, type);
@@ -343,11 +343,11 @@ int AddComponent(char* id, char org[2], char funct[2], char type[2]) {
 		while (currentSensor != NULL) {
 			if (strcmp(hardware_id, id) == 0) {
 				writeConfigSensor(sensorConfigTxt, currentSensor);	/* Ajout dans le fichier de configuration du capteur */
-				free(hardware_id);
+				gfree(hardware_id);
 				break;
 			}
 			currentSensor = currentSensor->next;
-			free(hardware_id);
+			gfree(hardware_id);
 			if (currentSensor != NULL)
 				hardware_id = str_sub(currentSensor->id,0,7);
 		}
@@ -366,12 +366,12 @@ int AddComponent(char* id, char org[2], char funct[2], char type[2]) {
 		while (currentActuator != NULL && currentActuator->next != NULL) {
 			if (strcmp(hardware_id, arg_hardware_id) == 0) {
 				sem_post(&mutex_actuatorList);
-				free(hardware_id);
-				free(arg_hardware_id);
+				gfree(hardware_id);
+				gfree(arg_hardware_id);
 				return COMPONENT_ALREADY_EXIST;
 			}
 			currentActuator = currentActuator->next;
-			free(hardware_id);
+			gfree(hardware_id);
 			hardware_id = str_sub(currentActuator->id,strlen(currentActuator->id)-2, strlen(currentActuator->id)-1);
 		}
 		result = AddComponentByEEP(id, (void**) & p_actuatorList, p_EEPList, org, funct, type);
@@ -380,15 +380,15 @@ int AddComponent(char* id, char org[2], char funct[2], char type[2]) {
 		while (currentActuator != NULL) {
 			if (strcmp(hardware_id, arg_hardware_id) == 0) {
 				writeConfigActuator(actuatorConfigTxt, currentActuator);	/* Ajout dans le fichier de configuration du capteur */
-				free(hardware_id);
+				gfree(hardware_id);
 				break;
 			}
 			currentActuator = currentActuator->next;
-			free(hardware_id);
+			gfree(hardware_id);
 			if (currentActuator != NULL)
 				hardware_id = str_sub(currentActuator->id,strlen(currentActuator->id)-2, strlen(currentActuator->id)-1);
 		}
-		free(arg_hardware_id);
+		gfree(arg_hardware_id);
 		sem_post(&mutex_actuatorList);
 	}
 	return result;
@@ -415,18 +415,18 @@ int RemoveComponent(char * id){
 				precedentSensor->next = currentSensor->next;
 
 				if (currentSensor->rangeData != NULL)
-					free(currentSensor->rangeData);
+					gfree(currentSensor->rangeData);
 				if (currentSensor == precedentSensor) /* S'il ne reste qu'un seul capteur dans la liste */
 				{
-					free(currentSensor);
-					free(hardware_id);
+					gfree(currentSensor);
+					gfree(hardware_id);
 					break;
 				}
 			}else{
 				precedentSensor = currentSensor;
 			}
 			currentSensor = precedentSensor->next;
-			free(hardware_id);
+			gfree(hardware_id);
 			hardware_id = str_sub(currentSensor->id,0,7);
 		}
 		printf("Fichier sensor : %s\n",sensorConfigTxt);
@@ -447,10 +447,10 @@ int RemoveComponent(char * id){
 				precedentActuator->next = currentActuator->next;
 
 				if (currentActuator->rangeData != NULL)
-					free(currentActuator->rangeData);
+					gfree(currentActuator->rangeData);
 				if (currentActuator == precedentActuator) /* S'il ne reste qu'un seul capteur dans la liste */
 				{
-					free(currentActuator);
+					gfree(currentActuator);
 					break;
 				}
 			}else{
@@ -507,7 +507,7 @@ int GetInfoFromSensor(char id[10], float * p_value) {
 		}
 	}
 	sem_post(&mutex_sensorList);
-	free(realId);
+	gfree(realId);
 	return ERROR;
 }
 

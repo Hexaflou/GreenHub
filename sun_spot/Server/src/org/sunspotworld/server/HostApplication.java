@@ -90,7 +90,7 @@ public class HostApplication {
                 // On commence par construire le message
                          
                 // Données
-                String contentData = address + ";" + String.valueOf(time)+ ";" + String.valueOf(brightness)+ ";" + String.valueOf(temperature);
+                String contentData = address + ";" + String.valueOf(brightness)+ ";" + String.valueOf(temperature);
                                 
                 // On construit le message, rajoute l'entête
                     // 4 premiers octets : A55A

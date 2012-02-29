@@ -198,7 +198,6 @@ int ComponentInterfaceInit() {
 
 	cJSON_Delete(root);
 	alreadyInitialized = 1;
-	/*RemoveComponent("00235687");*/
 	return OK;
 }
 

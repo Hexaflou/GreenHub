@@ -33,16 +33,16 @@ int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, 
 	char actuator[TAILLE_ID_ACTUATOR + TAILLE_EEP + 40];
 	cJSON *root, *eep;
 	char* org, *funct, *type;
-	int c;
+	int c, compteur;
 	char * id;
 	char * eepstr = NULL;
 	int nbOpenedAccolade;
 
-
-
 	/* Ouverture du fichier en lecture */
 	FILE *f = fopen(fileNameSensor, "r");
 
+	compteur = 0;
+	
 	if (f == NULL) {
 		printf("[readConfig] Erreur dans l'ouverture du fichier de capteurs %s.\n", fileNameSensor);
 		return ERROR;
@@ -99,6 +99,8 @@ int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, 
 				return ERROR;
 			}
 			/* Ajout du capteur */
+			compteur = compteur +1;
+			printf("Compteur : %i; Add %s\n",compteur,id);			
 			AddComponentByEEP(id, (void**) pp_sensorList, EEPList, org, funct, type);
 			cJSON_Delete(root);
 			free(org);
@@ -165,7 +167,7 @@ int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, 
 					printf("[readConfig] ID invalide dans le fichier %s\n", fileNameActuator);
 					return ERROR;
 				}
-				/* Ajout du capteur */
+				/* Ajout de l'actionneur */
 				AddComponentByEEP(id, (void**) pp_actuatorList, EEPList, org, funct, type);
 				cJSON_Delete(root);
 				free(org);
@@ -223,31 +225,45 @@ int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, 
 			Sensor * pCurrent;
 			cJSON * root;
 			char * sensor, *id, *eep;
+
+			/*
+			 * Contiendra le dernier ID de capteur a avoir été écrit dans le fichier
+			 * pour ne pas rajouter deux capteurs qui sont physiquement un même capteur.
+			 */
+			char lastIDWritten[9] = "00000000";
 			FILE *f;
 
-			remove (fileNameSensor);
 			/* Ouverture du fichier en ecriture */
 			f = fopen(fileNameSensor, "w");
 
-
 			if (p_sensorList != NULL) {
 				pCurrent = p_sensorList;
-				/* Parcours de la liste de capteurs */
+				/* Parcours de la liste d'actionneurs */
 				while (pCurrent != NULL) {
 					/* Creation du json */
 					id = str_sub(pCurrent->id, 0, 7);
 					eep = str_sub(pCurrent->EEP, 0, 5);
 					root = createCSON(id, eep);
 					sensor = cJSON_Print(root);
-					/* Ecriture des donnees */
-					fprintf(f, "%s", sensor);
+
+					pCurrent = pCurrent->next;
+
+					printf("[Ecriture] ID : %s; LastIDWritten : %s\n",id,lastIDWritten);
+					
+					/* Si le capteur courant et le suivant ne correspondent pas physiquement au même capteur */
+					if (strcmp(id,lastIDWritten) != 0)
+					{
+						/* Ecriture des donnees */
+						fprintf(f, "%s", sensor);
+						strncpy(lastIDWritten,id,9);
+					}
 
 					cJSON_Delete(root);
-					pCurrent = pCurrent->next;
 					free(id);
 					free(eep);
 				}
-
+			}else{
+				printf("[writeAllSensorConfig] Liste de capteurs vide.\n");
 			}
 			/* Fermeture du fichier */
 			fclose(f);
@@ -260,13 +276,13 @@ int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, 
 			Actuator * pCurrent;
 			cJSON * root;
 			char * actuator, *id, *eep;
+
 			FILE *f;
 
 			remove (fileNameActuator);
 			/* Ouverture du fichier en ecriture */
-			f = fopen(fileNameActuator, "w");
-
-
+			f = fopen(fileNameActuator, "w");			
+			
 			if (p_actuatorList != NULL) {
 				pCurrent = p_actuatorList;
 				/* Parcours de la liste d'actionneurs */
@@ -275,16 +291,19 @@ int readConfig(char* fileNameSensor, char* fileNameEEP, char* fileNameActuator, 
 					id = str_sub(pCurrent->id, 0, 7);
 					eep = str_sub(pCurrent->EEP, 0, 5);
 					root = createCSON(id, eep);
-					actuator = cJSON_Print(root);
+					actuator = cJSON_Print(root);					
+
+					pCurrent = pCurrent->next;
+
 					/* Ecriture des donnees */
 					fprintf(f, "%s", actuator);
 
 					cJSON_Delete(root);
-					pCurrent = pCurrent->next;
 					free(id);
 					free(eep);
 				}
-
+			}else{
+				printf("[writeAllActuatorConfig] Liste d'actionneurs vide.\n");
 			}
 			/* Fermeture du fichier */
 			fclose(f);

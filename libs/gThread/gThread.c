@@ -20,7 +20,6 @@ void gThread_start()
 {
 	start_hw();
 	setup_irq(TIMER_IRQ, yield);
-	yield();
 }
 
 GThread gThread_create(int stack_size, gfct* func, void * attr)
@@ -39,14 +38,17 @@ GThread gThread_create(int stack_size, gfct* func, void * attr)
 	athread->attr=attr;
 	
 	/* insertion en tête */
+	athread->last = NULL;
 	if (first_thread == NULL)
 	{
 		first_thread = athread;
 		athread->next = NULL;
+		
 	}
 	else
 	{
 		athread->next = first_thread;
+		first_thread->last = athread;
 		first_thread = athread;
 	}
 	return (GThread) athread;
@@ -68,7 +70,7 @@ int gThread_cancel(GThread athread)
 
 void yield()
 {
-	ctx_s * old = current_thread;
+	ctx_s * old;
 	irq_disable();
 	/* Si le thread courant est null -> c'est le principal,
 	 *  il faut le creer */
@@ -79,10 +81,13 @@ void yield()
 		current_thread->stack = NULL;
 		current_thread->wake_up_date = 0;
 		current_thread->next=first_thread;
+		/* insertion en tete */
+		current_thread->last=NULL;
+		first_thread->last = current_thread;
 		first_thread=current_thread;
-		old = current_thread;
+		current_thread->state = ACTIVABLE;
 	}
-	
+	old = current_thread;
 	/* si il n'y a qu'un thread c'est que c'est le courant...il n'y a 
 	 * rien a faire, on y est */
 	if(first_thread->next == NULL)
@@ -91,7 +96,10 @@ void yield()
 		return;
 	}
 	
-	current_thread->state = ACTIVABLE;
+	/* si le thread courant n'a pas été mis en pause, il est activable */
+	if(current_thread->state == RUNNING)
+		current_thread->state = ACTIVABLE;
+	
 	
 	/* On cherche le thread activable suivant */
 	do {
@@ -141,6 +149,17 @@ void gSleep(int sec)
 void suspend(GThread thread)
 {
 	irq_disable();
+	if(thread == first_thread)
+	{
+		first_thread = first_thread->next;
+	}
+	else if(thread->last != NULL)
+	{
+		thread->last->next = thread->next;
+	}
+	thread->last = NULL;
+	thread->next = NULL;
+	
 	if(thread->state == TOLAUNCH)
 	{
 		thread->state = WAITINGT;
@@ -155,6 +174,9 @@ void suspend(GThread thread)
 void active(GThread thread)
 {
 	irq_disable();
+	thread->next = (ctx_s *) first_thread;
+	thread->last = NULL;
+	first_thread->next = (ctx_s *) thread;
 	if(thread->state == WAITINGT)
 	{
 		thread->state = TOLAUNCH;
@@ -166,22 +188,65 @@ void active(GThread thread)
 	irq_enable();
 }
 
+GThread gGetpid()
+{
+	return current_thread;
+}
+
+int delete_thread(GThread todelete)
+{
+	if(todelete == NULL)
+		return -1;
+		
+	irq_disable();
+	
+	if(current_thread == todelete)
+	{
+		current_thread = first_thread;
+	}
+	
+	/* On l'enleve de la liste */
+	if(todelete == first_thread)
+	{
+		first_thread = first_thread->next;
+		first_thread->last = NULL;
+	}
+	else if(todelete->last != NULL)
+	{
+		todelete->last->next = todelete->next;
+	}
+	free(todelete->stack);
+	free(todelete);
+	
+	irq_enable();
+	return 0;
+}
+
 /*****************************PRIVATE FUNCTIONS******************************/
 
 void delete_current_thread()
 {
-	ctx_s * todelete = current_thread;
+	ctx_s * todelete;
 	irq_disable();
+	todelete = current_thread;
 	if(current_thread == NULL)
 		return;
-	
+	/* On l'enleve de la liste */
 	if(current_thread == first_thread)
 	{
 		first_thread = first_thread->next;
+		first_thread->last = NULL;
 	}
+	else if(current_thread->last != NULL)
+	{
+		current_thread->last->next = current_thread->next;
+	}
+	/* et on le remplace par le premier */
+	current_thread = first_thread;
+
 	free(todelete->stack);
 	free(todelete);
-	if(first_thread != NULL)
+	if(current_thread != NULL)
 		yield();
 	else
 		irq_enable();
@@ -193,6 +258,7 @@ void first_launch(ctx_s* to_save)
 	    "movl %%ebp, %1"
        :"=r"(to_save->esp),
         "=r"(to_save->ebp) );
+        
 	asm("movl %0, %%esp" "\n"
 	    "movl %1, %%ebp"
 		:
@@ -210,11 +276,18 @@ void first_launch(ctx_s* to_save)
 
 void switch_ctx(ctx_s* to_save)
 {
-	asm("mov %%ebp, %0" :"=r"(to_save->ebp));
-	asm("mov %%esp, %0" :"=r"(to_save->esp));
-	asm("mov %0, %%esp" ::"r"(current_thread->esp));
-	asm("mov %0, %%ebp" ::"r"(current_thread->ebp));
-	/* on reactive avant de retourner a la tache */
+	asm("movl %%esp, %0" "\n" 
+	    "movl %%ebp, %1"
+       :"=r"(to_save->esp),
+        "=r"(to_save->ebp) );
+	asm("movl %0, %%esp" "\n"
+	    "movl %1, %%ebp"
+		:
+		:"r"(current_thread->esp),
+		 "r"(current_thread->ebp ));
+		 
+	/* absolument inutile si ce n'est que sans une operation autre 
+	 * que l'assembleur le compilateur va nous ch*** la fonction */	 
 	irq_enable();
 	return;
 }

@@ -25,6 +25,8 @@ struct ctx_ss
 
 	/* Pointer to the next task */
 	struct ctx_ss * next;
+	/* Pointer to the last task */
+	struct ctx_ss * last;
 	
 };
 

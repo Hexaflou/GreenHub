@@ -23,6 +23,7 @@ typedef struct {
  
  void gsem_take(int sem)
  {
+	 irq_disable();
 	 while(((GSem *) sem )->value==0)
 	 {
 		yield();

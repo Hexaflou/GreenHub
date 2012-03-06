@@ -11,6 +11,8 @@
 #include "gLogs.h"
 #include "sensors/ComponentInterface.h"
 
+#define configFile "configuration.json"
+
 static int run = 1;
 static int pid = 0;
 
@@ -35,36 +37,35 @@ void sighandlerend(int signum)
 
 void gBox()
 {
-	/* TODO : ce chiffre 2 doit venir d'un fichier de config */
-	while(gCommunicationInit(2)!=0)
+	while(gCommunicationInit(configFile)!=0)
 	{
 		printf("[gBox] Nouvelle tentative de connexion dans 10 secondes...\n");
 		sleep(10);
 	}
 
-    /* initialize random seed: */
-    srand(time(NULL));
-    gLogThreadInit();
-    ComponentInterfaceInit();
-    printf("[gBox] Application lancée, un appui sur ENTREE quittera l'application\n");
-    getchar();
-    run = 0;
-    printf("[gBox] Fermeture normale de l'application\n");
-    ComponentInterfaceClose();
-    gLogThreadClose();
-    gCommunicationClose();
-    kill(getppid(),SIGUSR1);
-    exit(0);
+	/* initialize random seed: */
+	srand(time(NULL));
+	gLogThreadInit();
+	ComponentInterfaceInit();
+	printf("[gBox] Application lancée, un appui sur ENTREE quittera l'application\n");
+	getchar();
+	run = 0;
+	printf("[gBox] Fermeture normale de l'application\n");
+	ComponentInterfaceClose();
+	gLogThreadClose();
+	gCommunicationClose();
+	kill(getppid(),SIGUSR1);
+	exit(0);
 }
 
 int main() {
-	
+
 	int statut;
-    int options = 0;
-    
-    signal(SIGUSR1,&sighandlerend);
-    signal(SIGINT,&sighandlerint);
-    
+	int options = 0;
+
+	signal(SIGUSR1,&sighandlerend);
+	signal(SIGINT,&sighandlerint);
+
 	/* une sorte de watchdog relance l'appli si elle fini inopinement */
 	while(run) {
 		pid = 0;
@@ -78,5 +79,5 @@ int main() {
 		}
 	}
 
-    return 0;
+	return 0;
 }

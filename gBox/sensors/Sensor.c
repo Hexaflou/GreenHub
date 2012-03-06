@@ -35,7 +35,7 @@ int decodeMessageLight(char * message, struct Sensor* p_sensor) {
 	if (p_sensor->value != light) {
 		p_sensor->value = light;
 		gLogsLog(p_sensor->id, p_sensor->value);
-		printf("Valeur du capteur de luminosite : %f \n", p_sensor->value);
+		printf("[ComponentInterface] Nouvelle valeur pour le capteur de luminosité, ID : %s; valeur : %f \n", p_sensor->id, p_sensor->value);
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -49,15 +49,18 @@ int decodeMessageLight(char * message, struct Sensor* p_sensor) {
 int decodeMessageOccupancy(char* message, struct Sensor* p_sensor) {
 	int occupancy;
 	occupancy = getOccupancy(message);
+	#if DEBUG > 0
 	if (occupancy == 1) {
 		printf("Aucune presence detectee. \n");
 	} else {
 		printf("Presence detectee. \n");
 	}
+	#endif
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (occupancy != p_sensor->value) {
 		p_sensor->value = occupancy;
-		gLogsLog(p_sensor->id, p_sensor->value);
+		printf("[ComponentInterface] Nouvelle valeur pour le capteur de présence, ID : %s; valeur : %f \n", p_sensor->id, p_sensor->value);
+		gLogsLog(p_sensor->id, p_sensor->value);		
 		return VALUE_CHANGE;
 	}
 	return NO_CHANGE;
@@ -75,16 +78,19 @@ int decodeMessageTemp(char* message, struct Sensor* p_sensor) {
 	/* Calcul du multiplicateur pour determiner la vraie valeur mesuree par le capteur */
 	multiplier = ((((SensorRange*) p_sensor->rangeData)->scaleMax - ((SensorRange*) p_sensor->rangeData)->scaleMin)
 	/ (((SensorRange*) p_sensor->rangeData)->rangeMax - ((SensorRange*) p_sensor->rangeData)->rangeMin));
+
+	#if DEBUG > 0
 	if (multiplier < 0) {
 		temp = temp * multiplier + ((SensorRange*) p_sensor->rangeData)->scaleMax;
 	} else {
 		temp = temp * multiplier + ((SensorRange*) p_sensor->rangeData)->scaleMin;
 	}
-	printf("Valeur du capteur de temperature : %f \n", temp);
+	#endif
 
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (p_sensor->value != temp) {
 		p_sensor->value = temp;
+		printf("[ComponentInterface] Nouvelle valeur pour le capteur de température, ID : %s; valeur : %f \n", p_sensor->id, p_sensor->value);
 		gLogsLog(p_sensor->id, p_sensor->value);
 		return VALUE_CHANGE;
 	}
@@ -101,16 +107,18 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor) {
 	closed = getContact(message);
 
 
+#if DEBUG > 0
 	if (closed == 1) {
-		printf("Contact ferme. \n");
-		/*ActionActuator("0021CBE5a03\0", 5);*/ /*TEST*/
+		printf("Contact ferme. \n");		
 	} else {
-		printf("Contact ouvert. \n");
-		/*ActionActuator("0021CBE5a03\0", 7);*/
+		printf("Contact ouvert. \n");		
 	}
+#endif
+	
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (closed != p_sensor->value) {
 		p_sensor->value = closed;
+		printf("[ComponentInterface] Nouvelle valeur pour le capteur de contact, ID : %s; valeur : %f \n", p_sensor->id, p_sensor->value);
 		gLogsLog(p_sensor->id, p_sensor->value);
 		return VALUE_CHANGE;
 	}
@@ -124,17 +132,11 @@ int decodeMessageContact(char* message, struct Sensor * p_sensor) {
  */
 int decodeMessageSwitch(char* message, struct Sensor * p_sensor) {
 	int switch_button = getSwitch(message);
-	if (switch_button == A0){
-		ActionActuator("0021CBE5aC00\0", 0);
-	}
-	if (switch_button == A1){
-		ActionActuator("0021CBE5aC00\0", 1);
-	}
-	if (switch_button != NO_BUTTON) {
-		printf("Valeur de l interrupteur : %i \n", switch_button);
+	if (switch_button != NO_BUTTON) {		
 		/* Si la nouvelle valeur est differente de l ancienne */
 		if (switch_button != p_sensor->value) {
 			p_sensor->value = switch_button;
+			printf("[ComponentInterface] Nouvelle valeur pour l'interrupteur, ID : %s; valeur : %f \n", p_sensor->id, p_sensor->value);
 			gLogsLog(p_sensor->id, p_sensor->value);
 			return VALUE_CHANGE;
 		} else {

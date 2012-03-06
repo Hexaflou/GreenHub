@@ -56,10 +56,9 @@ int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq) {
 
 	strcat(message, "30"); /* STATUS BYTE */
 	strcat(message, "00\0"); /* CHECKSUM */
-
-	/*strcpy(message, "A55A6B0550000000FF9F1E053000\0"); */ /* (debug) */
+	
 	p_actuator->status = value;
-	if (value == (float) 5) {
+	if (value == (float) CURRENT_TURN_ON) {
 		printf("[Actuator] Action sur l'actionneur de courant : Mise en marche.\n");
 	} else {
 		printf("[Actuator] Action sur l'actionneur de courant : Extinction.\n");
@@ -76,8 +75,8 @@ int actionCurrent(float value, struct Actuator * p_actuator, mqd_t smq) {
 int actionTemp(float value, struct Actuator * p_actuator, mqd_t smq) {
 	/* NON SUPPORTE ACTUELLEMENT (uniquement en simulation) */
 
-	p_actuator->status = value;
-	printf("Action sur le thermostat au niveau : %f\n", value);
+	p_actuator->status = value;	
+	printf("[ComponentInterface] Action sur le thermostat, ID : %s; valeur : %f \n", p_actuator->id, p_actuator->status);
 	gLogsLog(p_actuator->id, p_actuator->status);
 	return 0;
 }

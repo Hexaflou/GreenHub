@@ -13,6 +13,9 @@
 /* Inclusions externes */
 #include <mqueue.h>
 
+/* Déclaration de constantes */
+#define CURRENT_TURN_ON 5
+
 /* Initialise les composants importants pour l'utilisation des actionneurs */
 int ActuatorInterfaceInit(char *arg_idReceptorEnOcean);
 

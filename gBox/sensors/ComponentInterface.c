@@ -24,7 +24,7 @@
 #include <mqueue.h>
 
 /* Déclaration de constantes */
-#define CONFIG_CJSON_LENGTH 250
+#define CONFIG_CJSON_LENGTH 400
 #define ID_ACTUATOR_LENGTH 11
 
 /***************************PRIVEE***********************/
@@ -101,7 +101,7 @@ int ComponentInterfaceInit() {
 			/* Receptor IP */
 			receptorIP = cJSON_GetObjectItem(root, "receptorIP");
 			if (receptorIP == NULL) {
-				printf("[ComponentInterfaceInit] IP du récepteur invalide dans le fichier configuration.txt\n");
+				printf("[ComponentInterface] IP du récepteur invalide dans le fichier configuration.txt\n");
 				return ERROR;
 			}
 			receptorIPTxt = (char*)gmalloc(sizeof(char)*strlen(receptorIP->valuestring)+1);
@@ -110,7 +110,7 @@ int ComponentInterfaceInit() {
 			/* Receptor Port */
 			receptorPort = cJSON_GetObjectItem(root, "receptorPort");
 			if (receptorPort == NULL) {
-				printf("[ComponentInterfaceInit] Port du récepteur incorrect dans le fichier configuration.txt\n");
+				printf("[ComponentInterface] Port du récepteur incorrect dans le fichier configuration.txt\n");
 				return ERROR;
 			}
 			receptorPortInt = receptorPort->valueint;
@@ -118,7 +118,7 @@ int ComponentInterfaceInit() {
 			/* Receptor ID */
 			receptorID = cJSON_GetObjectItem(root, "receptorID");
 			if (receptorID == NULL) {
-				printf("[ComponentInterfaceInit] ID du récepteur invalide dans le fichier configuration.txt\n");
+				printf("[ComponentInterface] ID du récepteur invalide dans le fichier configuration.txt\n");
 				return ERROR;
 			}
 			receptorIDTxt  = (char*)gmalloc(sizeof(char)*strlen(receptorID->valuestring)+1);
@@ -127,7 +127,7 @@ int ComponentInterfaceInit() {
 			/* Fichier de config. EEP */
 			eepConfig = cJSON_GetObjectItem(root, "eepConfig");
 			if (eepConfig == NULL) {
-				printf("[ComponentInterfaceInit] Fichier de configuration EEP incorrect dans le fichier configuration.txt\n");
+				printf("[ComponentInterface] Fichier de configuration EEP incorrect dans le fichier configuration.txt\n");
 				return ERROR;
 			}
 			eepConfigTxt  = (char*)gmalloc(sizeof(char)*strlen(eepConfig->valuestring)+1);
@@ -136,7 +136,7 @@ int ComponentInterfaceInit() {
 			/* Fichier de config. Capteur */
 			sensorConfig = cJSON_GetObjectItem(root, "sensorConfig");
 			if (sensorConfig == NULL) {
-				printf("[ComponentInterfaceInit] Fichier de configuration Sensor incorrect dans le fichier configuration.txt\n");
+				printf("[ComponentInterface] Fichier de configuration Sensor incorrect dans le fichier configuration.txt\n");
 				return ERROR;
 			}
 			sensorConfigTxt = (char*)gmalloc(sizeof(char)*strlen(sensorConfig->valuestring)+1);
@@ -145,7 +145,7 @@ int ComponentInterfaceInit() {
 			/* Fichier de config. Actionneur */
 			actuatorConfig = cJSON_GetObjectItem(root, "actuatorConfig");
 			if (actuatorConfig == NULL) {
-				printf("[ComponentInterfaceInit] Fichier de configuration Actuator incorrect dans le fichier configuration.txt\n");
+				printf("[ComponentInterface] Fichier de configuration Actuator incorrect dans le fichier configuration.txt\n");
 				return ERROR;
 			}
 			actuatorConfigTxt = (char*)gmalloc(sizeof(char)*strlen(actuatorConfig->valuestring)+1);
@@ -241,8 +241,8 @@ void ManageMessage(char* message) {
 	char *byte_0;
 	byte_0 = str_sub(message,8,9);
 	messageId = str_sub(message, 10, 17);
-	#if DEBUG == 0
-	printf("Message : %s \n", message);
+	#if DEBUG > 0
+	printf("[ComponentInterface] Message : %s \n", message);
 	#endif
 
 	org = str_sub(message,0,1);
@@ -250,7 +250,7 @@ void ManageMessage(char* message) {
 	if ( (strcmp(org,"07") == 0) && (!(xtoi(byte_0) & 8)) ){	/* Si le capteur est de type 4BS et le message est en mode Teach-In */		
 		if (xtoi(byte_0) & 128) /* Si les valeurs ORG-FUNCT-TYPE sont récupérables */{
 			#if DEBUG > 0
-			printf("Message en mode Teach-In.\n");
+			printf("[ComponentInterface] Message en mode Teach-In.\n");
 			#endif
 			char funct[3], type[3];
 			char * byte_3, *byte_2;
@@ -267,12 +267,13 @@ void ManageMessage(char* message) {
 				/* Construction d'un message JSON à envoyer au serveur Web */
 				char * msgJSON_Parse, eep[7];
 				cJSON * data = cJSON_CreateObject();
-
-				printf("[ManageMessage] Ajout d'un composant par Learn.\n");
+				
 				strcpy(eep,org);
 				strcat(eep,funct);
 				strcat(eep,type);
 
+				printf("[ComponentInterface] Ajout d'un composant par Learn. ID : %s; EEP : %s\n",messageId, eep);
+				
 				cJSON_AddStringToObject(data, "msg_type", "new_sensor");
 				cJSON_AddStringToObject(data, "hardware_id", messageId);
 				cJSON_AddStringToObject(data, "eep", eep);
@@ -429,7 +430,6 @@ int RemoveComponent(char * id){
 			gfree(hardware_id);
 			hardware_id = str_sub(currentSensor->id,0,7);
 		}
-		printf("Fichier sensor : %s\n",sensorConfigTxt);
 		writeAllSensorConfig(sensorConfigTxt, p_sensorList);
 		sem_post(&mutex_sensorList);
 	} else {

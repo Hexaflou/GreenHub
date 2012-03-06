@@ -4,6 +4,9 @@
 	"receptorID":	"FF9F1E",
 	"eepConfig":	"eep.json",
 	"sensorConfig":	"sensors.json",
-	"actuatorConfig":	"actuators.json"
+	"actuatorConfig":	"actuators.json",
+	"userID": 2,
+	"serverIP": "greenhub.signez.fr",
+	"serverPort": 1863
 }
 

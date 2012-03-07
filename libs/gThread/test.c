@@ -3,36 +3,27 @@
 #include <unistd.h>
 
 #include "gThread.h"
+#include "gSemaphores.h"
 
 static int go = 1;
+static int sem;
 
-void f1(void *args)
+void ping(void *args)
 {
 	while(go)
 	{
-		puts("A");
-		puts("B");
-		puts("C");
-		puts("D");
-		puts("E");
-		puts("F");
-		puts("G");
+		gsem_give(sem);
+		puts("ping");
+		gSleep(5);
 	}
 }
 
-void f2(void *args)
+void pong(void *args)
 {
 	while(go)
 	{
-		puts("1");
-		puts("2");
-		puts("3");
-		puts("4");
-		puts("5");
-		puts("6");
-		puts("7");
-		puts("8");
-		puts("9");
+		gsem_take(sem);
+		puts("pong");
 	}
 }
 
@@ -42,6 +33,7 @@ void f3(void *args)
 	while(go)
 	{
 		puts("#");
+		gSleep(2);
 	}
 }
 
@@ -49,9 +41,11 @@ int main()
 {
 	printf("Début de l'applicatiton de test\n");
 	
-	gThread_create(10000, f1, NULL);
-	gThread_create(10000, f2, NULL);
+	gThread_create(10000, ping, NULL);
+	gThread_create(10000, pong, NULL);
 	gThread_create(10000, f3, NULL);
+	
+	sem = gsem_create(0);
 	
 	gThread_start();
 	

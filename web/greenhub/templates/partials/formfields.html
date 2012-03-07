@@ -1,0 +1,9 @@
+{% for field in form %}
+    <dl class="field{% if field.errors %} with-errors{% endif %}" id="f-sensor-name">
+        {{ field.errors }}
+        <dt>{{ field.label_tag }} :</dt>
+        <dd>{{ field }}</dd>
+        <dd class="errors">{{ field.errors }}</dd>
+        <dd class="help">{{ field.help_text }}</dd>
+    </dl>
+{% endfor %}

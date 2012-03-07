@@ -4,27 +4,93 @@
 {% block bodyname %}page-home{% endblock %}
 {% block breadcrumbs %}
     <li class="home"><a href="/">Accueil</a></li>
+    <li>Votre score</li>
+{% endblock %}
+{% block hello_topright %}
+    {% if last_score != None %}
+        <section id="score-shower">
+            <p>Votre score :</p>
+            <p><strong>{{ last_score|floatformat }}</strong> points</p>
+        </section>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-    <aside class="sidebar">
-        <section id="score-shower">
-            <p>Votre score : <strong>{{ last_score|floatformat }}</strong> points</p>
-        </section>
+    <div id="left-column">
+        <section id="graph-score">
+            <h3>Historique de votre score</h3>
+            <div id="chart1" style="height: 250px;"></div>
+            <script type="text/javascript">
+            $(document).ready(function () {
+                Highcharts.setOptions({
+                    global: {
+                        useUTC: false
+                    }
+                });
 
-        <section>
-            <h3>Informations</h3>
-            <dl>
-                {% for sensor in sensors %}
-                    <dt>{{ sensor.description }}</dt>
-                    <dd>{{ sensor.last_state.value|format_state:sensor.type }}</dd>
-                {% endfor %}
-            </dl>
-            <p>(Debug) Passer en mode <a href="/send-command/real-fast">realtime</a> - <a href="/send-command/real-off">log</a></p>
+                var chart;
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'chart1',
+                        defaultSeriesType: 'line',
+                        marginRight: 10
+                    },
+                    title: {
+                        text: 'Votre score GreenHub'
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                        tickPixelInterval: 150
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Score'
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#3B7348'
+                        }]
+                    },
+                    tooltip: {
+                        formatter: function() {
+                            return 'Score :<b>'+Highcharts.numberFormat(this.y, 0)+'</b><br/><small>'+
+                                    Highcharts.dateFormat('%d %m à %H:%M', this.x) +'</small><br/>';
+                        }
+                    },
+                    plotOptions: {
+                        line: {
+                            dataLabels: {
+                                enabled: true
+                            },
+                            enableMouseTracking: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Votre score',
+                        data: [
+                            {% for score in scores %}
+                                [
+                                    new Date({{ score.calculated_at|date:"U"|multiply_by_1000|floatformat }}).getTime(),
+                                    {{ score.value|floatformat }}
+                                ]{% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                        ]
+                    }]
+                });
+            });
+            </script>
         </section>
-
+    </div>
+    <div id="right-column">
         <section>
-            <h3>Messages</h3>
+            <h3>Nos conseils et messages</h3>
             <ul class="messages">
                 {% for message in messages %}
                     <li class="{{ message.code }}">
@@ -34,46 +100,5 @@
                 {% endfor %}
             </ul>
         </section>
-    </aside>
-    <section id="graph-score">
-        <!-- <img src="/public/images/graph/score-{{ user.username }}.png" alt="Graphique du score" /> -->
-        <div id="chart1"></div>
-<script type="text/javascript">
-$(document).ready(function () {
-    $.jqplot._noToImageButton = true;
-    var scores = [
-        {% for score in scores %}
-          [ {{ score.calculated_at|date:"U" }} * 1000, {{ score.value|floatformat }} ],
-        {% endfor %}
-    ];
- 
-  var plot1 = $.jqplot('chart1', [scores], {
-      seriesColors: ["rgb(59, 115, 72)"],
-      title:'Votre score GreenHub',
-      gridPadding:{right:35},
-      axes:{
-        xaxis:{
-          renderer:$.jqplot.DateAxisRenderer,
-          tickOptions:{formatString:'%b %#d, %y'},
-          min: {{ seven_days_ago|date:"U" }} * 1000,
-          max: {% now "U" %} * 1000 + 24*60*6000,
-          tickInterval:'1 day'
-        }
-      },
-      series:[{lineWidth:4, markerOptions:{style:'diamond'}}]
-  });
-});
-</script>
-    </section>
-    <section id="graph-states">
-        <!--<ul>
-            <li><a href="#temperature">Température</a></li>
-            <li><a href="#lumonisity">Luminosité</a></li>
-            <li><a href="#lights">Allumage des lampes</a></li>
-        </ul>-->
-
-        <div class="temp-sensors">
-            <!--<img src="/public/images/graph-temp.png" alt="Graphique des températures" />-->
-        </div>
-    </section>
+    </div>
 {% endblock %}

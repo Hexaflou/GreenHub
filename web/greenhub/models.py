@@ -10,17 +10,21 @@ from django.db.models.aggregates import Avg
 
 
 class Sensor(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField("nom du capteur", max_length=200)
 
-    type = models.CharField(max_length=20, choices=((u'temp', u'Température'),
+    type = models.CharField("type du capteur", max_length=20, choices=((u'temp', u'Température'),
                                                     (u'heating', u'Chauffage'),
                                                     (u'lux', u'Luminosité'),
                                                     (u'lamp', u'Lampe'),
                                                     (u'window', u'Fenêtre')), default='temp')
 
-    description = models.CharField(max_length=200, blank=True)
+    description = models.CharField("description", max_length=200, blank=True,
+                                   help_text="Cette description sera utilisée dans le reste de l'interface de GreenHub pour " \
+                                             "vous permettre d'identifier précisément ce capteur par rapport à un autre.")
 
-    hardware_id = models.CharField(max_length=20, blank=True)
+    hardware_id = models.CharField("identifiant matériel", max_length=20, blank=True,
+                                   help_text="Cet identifiant est indiqué sur une étiquette au dos du capteur, ou sur l'emballage " \
+                                             "qui le contient ; il est formé de huit caractères hexadécimaux.")
 
     user = models.ForeignKey(User)
 
@@ -32,6 +36,10 @@ class Sensor(models.Model):
 
     def last_hour_state(self):
         return self.state_set.filter(captured_at__gte = datetime.datetime.now() - datetime.timedelta(hours=1)).aggregate(Avg('value'))['value__avg']
+
+    @property
+    def last_day_states(self):
+        return self.state_set.filter(captured_at__gte = datetime.datetime.now() - datetime.timedelta(days=1)).all()
 
     def __unicode__(self):
         return u"%s - %s" % (self.name, self.description)

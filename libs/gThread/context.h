@@ -9,7 +9,7 @@
  *														Hexanome H4212
  *********************************************************************/
 
-typedef enum{RUNNING, WAITING, WAITINGT, SLEEPING, ACTIVABLE, TOLAUNCH} gThread_state;
+typedef enum{RUNNING, WAITING, WAITINGT, SLEEPING, ACTIVABLE, TOLAUNCH,TODELETE} gThread_state;
 typedef void(gfct)(void *);
 
 struct ctx_ss
@@ -25,6 +25,8 @@ struct ctx_ss
 
 	/* Pointer to the next task */
 	struct ctx_ss * next;
+	/* Pointer to the last task */
+	struct ctx_ss * last;
 	
 };
 

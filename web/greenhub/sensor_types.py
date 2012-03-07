@@ -5,6 +5,9 @@ class sensor_type:
 class light_sensor(sensor_type):
     title = "Capteur de luminescence"
 
+    min = 0
+    max = 1024
+
     def format_value(value):
         return "%s°C" % value
 

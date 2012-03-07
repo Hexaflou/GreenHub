@@ -279,7 +279,7 @@ void ManageMessage(char* message) {
 				cJSON_AddStringToObject(data, "eep", eep);
     				msgJSON_Parse = cJSON_Print(data);
 
-    				/*gCommunicationSend(msgJSON_Parse);*/
+    				gCommunicationSend(msgJSON_Parse);
 				gfree(msgJSON_Parse);
 				cJSON_Delete(data);
 			}				

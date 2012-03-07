@@ -12,6 +12,7 @@ static GThread current_thread = 0;
 static ctx_s * first_thread = 0;
 static int next_id = 0;
 void delete_current_thread();
+int delete_thread(GThread todelete);
 void switch_ctx(ctx_s* to_save);
 void first_launch(ctx_s* to_save);
 
@@ -70,7 +71,8 @@ int gThread_cancel(GThread athread)
 
 void yield()
 {
-	ctx_s * old;
+	ctx_s * old=NULL;
+	ctx_s * athread=NULL;
 	irq_disable();
 	/* Si le thread courant est null -> c'est le principal,
 	 *  il faut le creer */
@@ -119,6 +121,18 @@ void yield()
 			current_thread->wake_up_date=0;
 			current_thread->state=ACTIVABLE;
 		}
+		
+		/* Verification pour les suppressions */
+		if(current_thread->state == TODELETE)
+		{
+			athread = current_thread;
+			if(current_thread->next == NULL)
+				current_thread = first_thread;
+			else
+				current_thread = current_thread->next;
+			delete_thread(athread);
+		}
+		
 	} while(   current_thread->state != ACTIVABLE 
 			&& current_thread->state != TOLAUNCH  );
 	
@@ -193,16 +207,19 @@ GThread gGetpid()
 	return current_thread;
 }
 
+
+
+/*****************************PRIVATE FUNCTIONS******************************/
+
 int delete_thread(GThread todelete)
 {
 	if(todelete == NULL)
 		return -1;
-		
-	irq_disable();
 	
 	if(current_thread == todelete)
 	{
-		current_thread = first_thread;
+		current_thread->state = TODELETE;
+		return 0;
 	}
 	
 	/* On l'enleve de la liste */
@@ -218,11 +235,8 @@ int delete_thread(GThread todelete)
 	free(todelete->stack);
 	free(todelete);
 	
-	irq_enable();
 	return 0;
 }
-
-/*****************************PRIVATE FUNCTIONS******************************/
 
 void delete_current_thread()
 {
@@ -231,25 +245,9 @@ void delete_current_thread()
 	todelete = current_thread;
 	if(current_thread == NULL)
 		return;
-	/* On l'enleve de la liste */
-	if(current_thread == first_thread)
-	{
-		first_thread = first_thread->next;
-		first_thread->last = NULL;
-	}
-	else if(current_thread->last != NULL)
-	{
-		current_thread->last->next = current_thread->next;
-	}
-	/* et on le remplace par le premier */
-	current_thread = first_thread;
 
-	free(todelete->stack);
-	free(todelete);
-	if(current_thread != NULL)
-		yield();
-	else
-		irq_enable();
+	current_thread->state = TODELETE;
+	yield();
 }
 
 void first_launch(ctx_s* to_save)

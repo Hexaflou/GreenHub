@@ -61,8 +61,10 @@ def logout(request):
 
 @login_required
 def command(request, type=None):
-    if type == "test":
-        msg = {"msg_type": "action", "hardware_id": "48151623eT", "action": "yoshiii"}
+    if type == "lamp-on":
+        msg = {"msg_type": "action", "hardware_id": "0021CBE5a03", "value": 5}
+    elif type == "lamp-off":
+        msg = {"msg_type": "action", "hardware_id": "0021CBE5a03", "value": 7}
     elif type == "real-fast":
         msg = {"msg_type": "realtime", "interval": 5}
     elif type == "real-slow":

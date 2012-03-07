@@ -1,0 +1,18 @@
+{% extends "layouts/main.html" %}
+{% load greenhub_formatting %}
+
+{% block bodyname %}page-home{% endblock %}
+{% block breadcrumbs %}
+    <li class="home"><a href="/">Accueil</a></li>
+    <li>Vos paramètres</li>
+{% endblock %}
+
+{% block content %}
+    <h3>Associer un nouveau capteur ou actionneur</h3>
+    <form action="{% url greenhub.views.sensors %}?add">
+        {% include "partials/formfields.html" with form=add_sensors_form %}
+        <p><input value="Ajouter" type="submit" /></p>
+    </form>
+    <p>Vous êtes actuellement en mode "realtime".</p>
+    <p>(Debug) Passer en mode <a href="/send-command/real-fast">realtime</a> - <a href="/send-command/real-off">log</a></p>
+{% endblock %}

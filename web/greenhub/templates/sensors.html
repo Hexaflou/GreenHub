@@ -1,0 +1,100 @@
+{% extends "layouts/main.html" %}
+{% load greenhub_formatting %}
+
+{% block bodyname %}page-home{% endblock %}
+{% block breadcrumbs %}
+    <li class="home"><a href="/">Accueil</a></li>
+    <li>Votre maison</li>
+{% endblock %}
+
+{% block content %}
+        <section id="sensors-list">
+            <h3>Informations obtenues sur votre maison</h3>
+            <p>
+               Cette liste contient tous les capteurs et actionneurs qui sont actuellement suivis par GreenHub.
+               Vous pouvez obtenir des détails sur chacun d'entre eux en cliquant dessus, ou avoir une vue globale
+               sur le tableau de bord.
+            </p>
+            {% for sensor in sensors %}
+                <div class="sensor">
+                    <h4>{{ sensor.description }}</h4>
+                    <p>Dernière valeur : {{ sensor.last_state.value|format_state:sensor.type }}</p>
+                    <div id="chart-{{ sensor.hardware_id|lower }}" style="height: 250px;"></div>
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                            Highcharts.setOptions({
+                                global: {
+                                    useUTC: false
+                                }
+                            });
+
+                            var chart;
+                            chart = new Highcharts.Chart({
+                                chart: {
+                                    renderTo: 'chart-{{ sensor.hardware_id|lower }}',
+                                    defaultSeriesType: 'line',
+                                    marginRight: 10
+                                },
+                                title: {
+                                    text: ''
+                                },
+                                xAxis: {
+                                    type: 'datetime',
+                                    tickPixelInterval: 150
+                                },
+                                yAxis: {
+                                    plotLines: [{
+                                        value: 0,
+                                        width: 1,
+                                        color: '#3B7348'
+                                    }],
+
+                                {% if sensor.type == "temp" %}
+                                    min: 0,
+                                    max: 45,
+                                {% else %}
+                                    {% if sensor.type == "lux" %}
+                                        min: 0,
+                                        max: 600,
+                                    {% else %}
+                                        min: -0.25,
+                                        max: 1.25,
+                                    {% endif %}
+                                {% endif %}
+
+                                    title: {
+                                        text: 'Valeur'
+                                    }
+                                },
+                                tooltip: {
+                                    formatter: function() {
+                                        return 'Valeur :<b>'+Highcharts.numberFormat(this.y, 0)+'</b><br/><small>'+
+                                                Highcharts.dateFormat('%d/%m à %H:%M', this.x) +'</small><br/>';
+                                    }
+                                },
+                                legend: {
+                                    enabled: false
+                                },
+                                exporting: {
+                                    enabled: false
+                                },
+                                series: [{
+                                    name: 'Votre score',
+                                    data: [
+                                        {% for state in sensor.last_day_states %}
+                                            [
+                                                new Date({{ state.captured_at|date:"U"|multiply_by_1000|floatformat }}).getTime(),
+                                                {{ state.value|floatformat }}
+                                            ]{% if not forloop.last %},{% endif %}
+                                        {% endfor %}
+                                    ]
+                                }]
+                            });
+                        });
+                    </script>
+                </div>
+            {% empty %}
+                <p class="no-captors">Aucun capteur n'est encore associé à votre compte.</p>
+            {% endfor %}
+        </section>
+{% endblock %}

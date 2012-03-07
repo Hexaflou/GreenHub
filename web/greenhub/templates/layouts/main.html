@@ -7,22 +7,26 @@
     <link href="/public/main.css" rel="stylesheet" media="screen" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}jquery.jqplot.min.css" />
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.jqplot.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jqplot.dateAxisRenderer.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jqplot.logAxisRenderer.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jqplot.canvasTextRenderer.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/plugins/jqplot.highlighter.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/highcharts.js"></script>
     <title>GreenHub - Bienvenue</title>
 </head>
     <body id="{% block bodyname %}generic{% endblock %}">
         <header>
-            <h1>
-                <a href="{% if user.is_authenticated %}/home{% else %}/{% endif %}">
-                    <span class="main-title">GreenHub</span>
-                    <span class="tag-line">Greening the world, one house at a time</span>
-                </a>
-            </h1>
+            <div>
+                <h1>
+                    <a href="{% if user.is_authenticated %}/home{% else %}/{% endif %}">
+                        <span class="main-title">GreenHub</span>
+                        <span class="tag-line">Greening the world, one house at a time</span>
+                    </a>
+                </h1>
+                {% if user.is_authenticated %}
+                <div class="at-right">
+                    <div class="loggedin-box">
+                        <strong>{{ user.first_name }}</strong> ⋅ <a href="{% url greenhub.views.logout %}">Se déconnecter</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </header>
         <section id="main-content">
             <nav class="breadcrumbs">
@@ -32,6 +36,10 @@
                     {% endblock %}
                 </ul>
             </nav>
+            {% if user.is_authenticated %}
+                {% include "partials/hello.html" %}
+                {% include "partials/toptabs.html" %}
+            {% endif %}
             {% block content %}{% endblock %}
         </section>
     </body>

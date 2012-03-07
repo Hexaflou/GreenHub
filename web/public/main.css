@@ -31,11 +31,13 @@ header {
     position: relative;
 }
 
-h1 {
+header > div {
     width: 960px;
     margin: auto;
     position: relative;
+    overflow: hidden;
 }
+h1 { margin: 0; padding: 0; float: left; width: 480px; }
 h1 a {
     display: inline-block;
     vertical-align: bottom;
@@ -59,6 +61,23 @@ h1 a .tag-line {
     font-size: 8pt;
 }
 
+.at-right {
+    float: right;
+    color: white;
+    width: 480px;
+    text-align: right;
+}
+
+.loggedin-box {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-weight: normal;
+    font-size: 10pt;
+    background-color: rgba(10,10,10,0.3);
+    box-shadow: inset 0 4px 4px rgba(0,0,0,0.3);
+}
 
 #main-content {
     display: block;
@@ -83,11 +102,19 @@ nav.breadcrumbs {
 nav.breadcrumbs ul {
     padding:0; margin: 0;
 }
+nav.breadcrumbs li {
+    display: inline-block;
+    list-style: none;
+}
 nav.breadcrumbs li a {
-    float: left;
     padding-left: 20px;
     line-height: 30px;
     display: block;
+}
+nav.breadcrumbs li + li:before {
+    content: "-";
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 nav.breadcrumbs .home a {
@@ -122,26 +149,33 @@ section dl {
     overflow: hidden;
 }
 
-section dt {
+section .login-form  dt {
     clear: left;
     float: left;
     font-weight: bold;
     margin-left: 10px;
     margin-bottom: 3px;
 }
-section dd {
+section .login-form dd {
     float: right;
 }
 
 section h3 {
     font-size: 16pt;
     margin: 10px 0 0;
+    background-color: #e3e3e3;
+    padding: 5px 10px;
 }
 
 #graph-states {
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px solid #078048;
+}
+
+dd.help {
+    color: #575757;
+    font-size: 9pt;
+    text-align: left;
 }
 
 .messages { padding: 0; }
@@ -271,5 +305,64 @@ section h3 {
 
 /* =========================== HOME ========================== */
 #main-content > section {
-    margin-right: 320px;
+    /*margin-right: 320px;*/
+}
+
+#main-content section#hello {
+    margin-right: 0;
+    margin-bottom: 15px;
+}
+#hello h2 {
+    color: #444;
+    font-size: 26pt;
+    line-height: 1em;
+    margin-bottom: 0.2em;
+}
+#hello p.bigmessage {
+    color: #666;
+    font-size: 18pt;
+    line-height: 1em;
+    margin-top: 0.2em;
+}
+
+#left-column {
+    width: 49%;
+    float: left;
+}
+#right-column {
+    width: 49%;
+    float: right;
+}
+
+
+.no-captors {
+    text-align: center;
+    padding: 20px;
+    border: 2px solid #CCC;
+    font-style: italic;
+    color: #444;
+}
+
+
+/* ======================= TOPTABS ============================ */
+
+nav#toptabs {
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+nav#toptabs p {
+    padding: 0; margin: 0;
+}
+
+nav#toptabs a {
+    display: inline-block;
+    width: 300px;
+}
+nav#toptabs strong {
+    display: block;
+    font-weight: normal;
+    font-size: 16pt;
+}
+nav#toptabs em {
+    font-weight: normal;
 }

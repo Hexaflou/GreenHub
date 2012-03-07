@@ -7,6 +7,10 @@ import json
 register = template.Library()
 
 @register.filter
+def multiply_by_1000(value):
+    return str(float(value) * 1000)
+
+@register.filter
 def format_state(value, sensor_type):
     if sensor_type in ('lamp', 'heating'):
         if value:

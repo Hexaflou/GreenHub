@@ -35,4 +35,7 @@ void suspend(GThread thread);
 /* Reactive le thread */
 void active(GThread thread);
 
+/* Retourne le thread courant */
+GThread gGetpid();
+
 #endif

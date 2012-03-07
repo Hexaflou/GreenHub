@@ -79,13 +79,11 @@ int decodeMessageTemp(char* message, struct Sensor* p_sensor) {
 	multiplier = ((((SensorRange*) p_sensor->rangeData)->scaleMax - ((SensorRange*) p_sensor->rangeData)->scaleMin)
 	/ (((SensorRange*) p_sensor->rangeData)->rangeMax - ((SensorRange*) p_sensor->rangeData)->rangeMin));
 
-	#if DEBUG > 0
 	if (multiplier < 0) {
 		temp = temp * multiplier + ((SensorRange*) p_sensor->rangeData)->scaleMax;
 	} else {
 		temp = temp * multiplier + ((SensorRange*) p_sensor->rangeData)->scaleMin;
 	}
-	#endif
 
 	/* Si la nouvelle valeur est differente de l ancienne */
 	if (p_sensor->value != temp) {
